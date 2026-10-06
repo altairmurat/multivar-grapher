@@ -1,0 +1,6 @@
+# Optional: Only needed if you want to use the Python-native SymPy/Plotly mode (`python main.py --plot`).
+# For running the web application locally (`python main.py`), NO EXTERNAL PACKAGES ARE REQUIRED!
+
+numpy>=1.24.0
+sympy>=1.12
+plotly>=5.15.0

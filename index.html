@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultivarGrapher 3D | Interactive Multivariable Function Visualizer</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <!-- Math.js for robust formula parsing and symbolic differentiation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+  <!-- KaTeX for beautiful math equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    /* Smooth slider styling */
+    input[type=range] {
+      accent-color: #6366f1;
+    }
+    .plot-container {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none overflow-x-hidden">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <i data-lucide="box" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="font-bold text-lg text-white tracking-tight">MultivarGrapher <span class="text-indigo-400 font-mono text-sm px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">3D</span></h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Static / GitHub Pages Ready</span>
+        </div>
+        <p class="text-xs text-slate-400 hidden sm:block">Interactive Multivariable Calculus, Real-Time Sliders & Tangent Planes</p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <!-- Preset Dropdown -->
+      <div class="relative">
+        <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer">
+          <option value="" disabled selected>✨ Load Preset...</option>
+          <option value="saddle">Hyperbolic Paraboloid (Saddle)</option>
+          <option value="paraboloid">Elliptic Paraboloid (Bowl)</option>
+          <option value="monkey_saddle">Monkey Saddle (3 Dips)</option>
+          <option value="ripple">Water Droplet Ripple (Sinc)</option>
+          <option value="gaussian">Gaussian Bell Wave Packet</option>
+          <option value="egg_carton">Egg Carton Grid</option>
+          <option value="rosenbrock">Rosenbrock Valley</option>
+          <option value="sombrero">Animated Sombrero Wave</option>
+          <option value="chladni">Chladni Nodal Surface</option>
+          <option value="cliff">Sigmoid Transition Step</option>
+        </select>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <button id="resetCamBtn" title="Reset Camera View" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
+        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+      </button>
+      <button id="shareBtn" title="Copy Shareable Link" class="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-indigo-600/30 transition">
+        <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">Share</span>
+      </button>
+      <button id="exportPngBtn" title="Export High-Res PNG" class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700 transition">
+        <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">Screenshot</span>
+      </button>
+      <a href="https://github.com" target="_blank" id="repoLink" title="View on GitHub" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
+        <i data-lucide="github" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+    <!-- Left Controls Panel -->
+    <aside id="controlsPanel" class="w-full lg:w-96 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-[calc(100vh-61px)] p-4 space-y-4">
+      
+      <!-- Primary Function Input -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label for="functionInput" class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1">
+            <span>Primary Surface</span>
+            <span class="text-indigo-400 font-mono">z = f(x, y)</span>
+          </label>
+          <span id="formulaStatus" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Valid</span>
+        </div>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="functionInput" 
+            value="sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)" 
+            class="w-full bg-slate-950 font-mono text-sm text-indigo-100 px-3.5 py-2.5 rounded-xl border border-indigo-900/60 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none tracking-wide shadow-inner transition"
+            placeholder="e.g. sin(x * a) * cos(y * b)"
+            spellcheck="false"
+          >
+        </div>
+        <!-- Math shortcuts -->
+        <div class="flex flex-wrap gap-1 text-[11px] pt-1">
+          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x)</button>
+          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">cos(y)</button>
+          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sqrt(x^2+y^2)</button>
+          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x^2-y^2)</button>
+          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x^2 - y^2</button>
+        </div>
+      </div>
+
+      <!-- Secondary Function Toggle & Input -->
+      <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
+        <div class="flex items-center justify-between">
+          <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-300">
+            <input type="checkbox" id="showSecondSurface" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+            <span>Second Surface <span class="text-cyan-400 font-mono text-xs">z₂ = g(x, y)</span></span>
+          </label>
+          <span class="text-[10px] text-slate-500">Intersect/Compare</span>
+        </div>
+        <div id="secondSurfaceContainer" class="hidden">
+          <input 
+            type="text" 
+            id="secondFunctionInput" 
+            value="0.5 * (x + y)" 
+            class="w-full bg-slate-950 font-mono text-sm text-cyan-200 px-3.5 py-2 rounded-xl border border-cyan-900/60 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none tracking-wide shadow-inner transition"
+            placeholder="e.g. 0.5 * (x + y)"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+
+      <!-- Live Parameters & Sliders -->
+      <div class="border-t border-slate-800/80 pt-3 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+            <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span>Parameters & Variables</span>
+          </h2>
+          <button id="addParamBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center space-x-0.5">
+            <i data-lucide="plus" class="w-3 h-3"></i>
+            <span>Add Var</span>
+          </button>
+        </div>
+
+        <div id="parametersList" class="space-y-2.5">
+          <!-- Parameter cards will be rendered dynamically here -->
+        </div>
+
+        <!-- Animated Time Parameter 't' -->
+        <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">t</span>
+              <span class="text-xs font-medium text-slate-300">Time variable (4D)</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button id="timePlayBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition">
+                <i data-lucide="play" class="w-3 h-3" id="timePlayIcon"></i>
+                <span id="timePlayText">Animate</span>
+              </button>
+              <button id="timeResetBtn" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition" title="Reset t to 0">
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="range" id="param_t_slider" min="0" max="20" step="0.05" value="0" class="flex-1">
+            <span id="param_t_val" class="font-mono text-xs text-indigo-400 w-10 text-right">0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Bounds & Resolution -->
+      <div class="border-t border-slate-800/80 pt-3 space-y-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+          <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Domain & Grid Bounds</span>
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+            <label class="text-[10px] text-slate-400 font-mono block">X Domain [min, max]</label>
+            <div class="flex items-center space-x-1 mt-1">
+              <input type="number" id="xMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+              <span class="text-slate-500">to</span>
+              <input type="number" id="xMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+            <label class="text-[10px] text-slate-400 font-mono block">Y Domain [min, max]</label>
+            <div class="flex items-center space-x-1 mt-1">
+              <input type="number" id="yMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+              <span class="text-slate-500">to</span>
+              <input type="number" id="yMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Resolution -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400">Mesh Resolution</span>
+            <span id="gridResVal" class="font-mono text-indigo-400 text-[11px]">50 × 50 (2,500 pts)</span>
+          </div>
+          <input type="range" id="gridResSlider" min="20" max="100" step="5" value="50" class="w-full">
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>Fast (20)</span>
+            <span>Balanced (50)</span>
+            <span>Ultra (100)</span>
+          </div>
+        </div>
+
+        <!-- Z Clamping -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" id="clampZToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+              <span>Clamp Z Axis (Prevents Infinite Spikes)</span>
+            </label>
+          </div>
+          <div id="zClampInputs" class="flex items-center space-x-2 text-xs pt-1 hidden">
+            <input type="number" id="zMin" value="-10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
+            <span class="text-slate-500">to</span>
+            <input type="number" id="zMax" value="10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculus & Analysis Features -->
+      <div class="border-t border-slate-800/80 pt-3 space-y-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Calculus & Analysis Tools</span>
+        </h2>
+
+        <!-- Tangent Plane at Probe Point -->
+        <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center space-x-2 text-xs font-medium text-slate-200 cursor-pointer">
+              <input type="checkbox" id="showTangentPlane" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+              <span>Show Tangent Plane</span>
+            </label>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-300 font-mono">At (x₀, y₀)</span>
+          </div>
+
+          <div id="tangentPointControls" class="space-y-2 pt-1 hidden">
+            <div class="flex items-center space-x-2 text-xs">
+              <span class="font-mono text-slate-400 w-5">x₀:</span>
+              <input type="range" id="x0Slider" min="-5" max="5" step="0.1" value="1" class="flex-1">
+              <span id="x0Val" class="font-mono text-indigo-400 w-8 text-right">1.0</span>
+            </div>
+            <div class="flex items-center space-x-2 text-xs">
+              <span class="font-mono text-slate-400 w-5">y₀:</span>
+              <input type="range" id="y0Slider" min="-5" max="5" step="0.1" value="1" class="flex-1">
+              <span id="y0Val" class="font-mono text-indigo-400 w-8 text-right">1.0</span>
+            </div>
+            <!-- Live Derivative info -->
+            <div id="derivativesDisplay" class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Cross-Sections / Slices -->
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
+              <input type="checkbox" id="showCrossSections" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+              <span>Show Slice Curves (x = x₀ & y = y₀)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Styling & Rendering Options -->
+      <div class="border-t border-slate-800/80 pt-3 space-y-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Visual Styling</span>
+        </h2>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Color Palette</label>
+            <select id="colorScaleSelect" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="Viridis">Viridis</option>
+              <option value="Plasma">Plasma</option>
+              <option value="Turbo" selected>Turbo</option>
+              <option value="Magma">Magma</option>
+              <option value="Jet">Jet</option>
+              <option value="Electric">Electric</option>
+              <option value="Spectral">Spectral</option>
+              <option value="Rainbow">Rainbow</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Surface Opacity</label>
+            <input type="range" id="opacitySlider" min="0.2" max="1.0" step="0.05" value="0.95" class="w-full mt-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
+            <input type="checkbox" id="wireframeToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+            <span>Show Mesh Grid</span>
+          </label>
+          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
+            <input type="checkbox" id="contoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+            <span>Surface Contours</span>
+          </label>
+          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer col-span-2">
+            <input type="checkbox" id="floorContoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+            <span>Floor Projection (XY Contours)</span>
+          </label>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Right 3D Visualization Area -->
+    <main class="flex-1 flex flex-col relative bg-slate-950 min-h-[55vh] lg:min-h-0">
+      
+      <!-- Top Overlay: Current Equation & Performance Badge -->
+      <div class="absolute top-3 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        <!-- Rendered Equation Card -->
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-3 max-w-xl">
+          <span class="text-xs font-semibold text-indigo-400">Equation:</span>
+          <div id="katexEquation" class="text-sm text-white overflow-x-auto"></div>
+        </div>
+
+        <!-- View Controls Floating Toolbar -->
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-2 text-xs">
+          <button id="viewTopBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Top-down XY view">XY (Top)</button>
+          <button id="viewSideBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Side XZ view">XZ (Side)</button>
+          <button id="viewIsoBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-indigo-300 font-medium transition" title="Isometric 3D view">3D Iso</button>
+          <div class="h-4 w-px bg-slate-800"></div>
+          <button id="fullscreenBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Toggle Fullscreen">
+            <i data-lucide="maximize" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Plot Container -->
+      <div id="plotContainer" class="flex-1 w-full h-full"></div>
+
+      <!-- Bottom Status Bar -->
+      <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-400 z-10">
+        <div class="flex items-center space-x-3">
+          <span id="coordReadout" class="font-mono text-slate-300">Hover over surface for coordinates</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span id="calcTimeBadge" class="text-[11px] text-slate-500 font-mono">Render: ~10ms</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-indigo-400 font-medium">Free Static Hosting on GitHub Pages</span>
+        </div>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- Share Modal -->
+  <div id="shareModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="share-2" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="font-bold text-white text-base">Share This 3D Graph</h3>
+        </div>
+        <button id="closeShareModal" class="p-1 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300">
+        This link encodes your exact mathematical expression, parameter values, ranges, and viewing preferences in the URL. Anyone opening it will see your exact graph!
+      </p>
+      <div class="flex items-center space-x-2">
+        <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-950 text-indigo-200 font-mono text-xs px-3 py-2.5 rounded-xl border border-slate-700 select-all">
+        <button id="copyShareUrlBtn" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shrink-0 transition flex items-center space-x-1.5">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copy</span>
+        </button>
+      </div>
+      <div id="copySuccessMsg" class="text-xs text-emerald-400 font-medium hidden">
+        ✓ Link copied to clipboard!
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Script -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // -------------------------------------------------------------------------
+    // Application State
+    // -------------------------------------------------------------------------
+    const state = {
+      f1_expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
+      f2_expr: "0.5 * (x + y)",
+      show_f2: false,
+      params: {
+        a: { val: 2.0, min: 0.1, max: 10.0, step: 0.1 },
+        b: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
+        c: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
+        d: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 }
+      },
+      t: 0.0,
+      animating_t: false,
+      animation_id: null,
+      x_range: [-5, 5],
+      y_range: [-5, 5],
+      z_clamp: false,
+      z_range: [-10, 10],
+      grid_res: 50,
+      color_scale: "Turbo",
+      opacity: 0.95,
+      show_wireframe: false,
+      show_contours: true,
+      show_floor_contours: true,
+      show_tangent: false,
+      x0: 1.0,
+      y0: 1.0,
+      show_cross_sections: false
+    };
+
+    // Preset configurations
+    const presets = {
+      saddle: {
+        expr: "a * (x^2 - y^2) / 4",
+        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
+        x: [-4, 4], y: [-4, 4], scale: "Turbo"
+      },
+      paraboloid: {
+        expr: "a * (x^2 + y^2) / 4",
+        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
+        x: [-4, 4], y: [-4, 4], scale: "Viridis"
+      },
+      monkey_saddle: {
+        expr: "a * (x^3 - 3*x*y^2) / 10",
+        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
+        x: [-3, 3], y: [-3, 3], scale: "Plasma"
+      },
+      ripple: {
+        expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
+        params: { a: 2.5, b: 1.5, c: 1.0, d: 1.0 },
+        x: [-6, 6], y: [-6, 6], scale: "Jet"
+      },
+      gaussian: {
+        expr: "a * exp(-(x^2 + y^2) / (2 * b^2)) * cos(c * x)",
+        params: { a: 3.0, b: 2.0, c: 3.0, d: 1.0 },
+        x: [-5, 5], y: [-5, 5], scale: "Electric"
+      },
+      egg_carton: {
+        expr: "a * sin(b * x) * cos(c * y)",
+        params: { a: 1.5, b: 1.5, c: 1.5, d: 1.0 },
+        x: [-5, 5], y: [-5, 5], scale: "Rainbow"
+      },
+      rosenbrock: {
+        expr: "(1 - x)^2 + 10 * (y - x^2)^2",
+        params: { a: 1.0, b: 10.0, c: 1.0, d: 1.0 },
+        x: [-2, 2], y: [-1, 3], scale: "Magma",
+        z_clamp: true, z: [0, 50]
+      },
+      sombrero: {
+        expr: "a * cos(b * sqrt(x^2 + y^2) - t) / (sqrt(x^2 + y^2) + 0.5)",
+        params: { a: 3.0, b: 2.0, c: 1.0, d: 1.0 },
+        x: [-6, 6], y: [-6, 6], scale: "Turbo",
+        auto_animate: true
+      },
+      chladni: {
+        expr: "cos(a * x) * cos(b * y) - cos(b * x) * cos(a * y)",
+        params: { a: 2.0, b: 3.0, c: 1.0, d: 1.0 },
+        x: [-4, 4], y: [-4, 4], scale: "Spectral"
+      },
+      cliff: {
+        expr: "a / (1 + exp(-b * (x + y)))",
+        params: { a: 4.0, b: 1.5, c: 1.0, d: 1.0 },
+        x: [-4, 4], y: [-4, 4], scale: "Viridis"
+      }
+    };
+
+    // Compiled math expression cache
+    let compiledF1 = null;
+    let compiledF2 = null;
+
+    // -------------------------------------------------------------------------
+    // Math Compilation & Evaluation
+    // -------------------------------------------------------------------------
+    function compileExpressions() {
+      const formulaStatus = document.getElementById("formulaStatus");
+      try {
+        compiledF1 = math.compile(state.f1_expr);
+        formulaStatus.textContent = "Valid";
+        formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium";
+      } catch (err) {
+        formulaStatus.textContent = "Syntax Error";
+        formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium";
+        console.warn("Formula 1 compile error:", err);
+      }
+
+      if (state.show_f2) {
+        try {
+          compiledF2 = math.compile(state.f2_expr);
+        } catch (err) {
+          console.warn("Formula 2 compile error:", err);
+        }
+      }
+      
+      updateKatexHeader();
+      updateCalculusInfo();
+    }
+
+    function updateKatexHeader() {
+      const container = document.getElementById("katexEquation");
+      try {
+        const parsed = math.parse(state.f1_expr);
+        const tex = parsed.toTex({ parenthesis: 'auto' });
+        katex.render(`z = ${tex}`, container, { throwOnError: false });
+      } catch (e) {
+        container.textContent = `z = ${state.f1_expr}`;
+      }
+    }
+
+    function updateCalculusInfo() {
+      if (!state.show_tangent && !state.show_cross_sections) return;
+      const display = document.getElementById("derivativesDisplay");
+      try {
+        const parsed = math.parse(state.f1_expr);
+        const df_dx = math.derivative(parsed, 'x');
+        const df_dy = math.derivative(parsed, 'y');
+
+        const scope = getEvalScope();
+        scope.x = state.x0;
+        scope.y = state.y0;
+
+        const z0 = compiledF1.evaluate(scope);
+        const fx_val = df_dx.evaluate(scope);
+        const fy_val = df_dy.evaluate(scope);
+
+        display.innerHTML = `
+          <div class="flex justify-between border-b border-slate-800 pb-1">
+            <span class="text-slate-400">Point P₀:</span>
+            <span class="text-indigo-300">(${state.x0.toFixed(2)}, ${state.y0.toFixed(2)}, ${z0.toFixed(2)})</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">∂z/∂x:</span>
+            <span class="text-emerald-300">${fx_val.toFixed(3)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">∂z/∂y:</span>
+            <span class="text-emerald-300">${fy_val.toFixed(3)}</span>
+          </div>
+          <div class="pt-1 text-[10px] text-slate-400">
+            Tangent plane: z ≈ ${z0.toFixed(2)} + ${fx_val.toFixed(2)}(x - ${state.x0.toFixed(1)}) + ${fy_val.toFixed(2)}(y - ${state.y0.toFixed(1)})
+          </div>
+        `;
+      } catch (e) {
+        display.innerHTML = `<span class="text-slate-500">Derivative preview unavailable for this expression</span>`;
+      }
+    }
+
+    function getEvalScope() {
+      const scope = {
+        t: state.t
+      };
+      for (const [k, v] of Object.entries(state.params)) {
+        scope[k] = v.val;
+      }
+      return scope;
+    }
+
+    // -------------------------------------------------------------------------
+    // Grid Generation & Plotting
+    // -------------------------------------------------------------------------
+    function computeSurfaces() {
+      const t0 = performance.now();
+      const n = parseInt(state.grid_res);
+      const [xMin, xMax] = state.x_range;
+      const [yMin, yMax] = state.y_range;
+
+      const xArr = new Float64Array(n);
+      const yArr = new Float64Array(n);
+      const dx = (xMax - xMin) / (n - 1);
+      const dy = (yMax - yMin) / (n - 1);
+
+      for (let i = 0; i < n; i++) xArr[i] = xMin + i * dx;
+      for (let j = 0; j < n; j++) yArr[j] = yMin + j * dy;
+
+      const zArr1 = [];
+      const zArr2 = state.show_f2 ? [] : null;
+
+      const scope = getEvalScope();
+
+      for (let j = 0; j < n; j++) {
+        const row1 = new Float64Array(n);
+        const row2 = state.show_f2 ? new Float64Array(n) : null;
+        scope.y = yArr[j];
+
+        for (let i = 0; i < n; i++) {
+          scope.x = xArr[i];
+          let val1 = 0;
+          try {
+            val1 = compiledF1 ? compiledF1.evaluate(scope) : 0;
+            if (typeof val1 !== 'number' || isNaN(val1) || !isFinite(val1)) {
+              val1 = null;
+            } else if (state.z_clamp) {
+              val1 = Math.max(state.z_range[0], Math.min(state.z_range[1], val1));
+            }
+          } catch {
+            val1 = null;
+          }
+          row1[i] = val1;
+
+          if (state.show_f2 && compiledF2) {
+            let val2 = 0;
+            try {
+              val2 = compiledF2.evaluate(scope);
+              if (typeof val2 !== 'number' || isNaN(val2) || !isFinite(val2)) {
+                val2 = null;
+              } else if (state.z_clamp) {
+                val2 = Math.max(state.z_range[0], Math.min(state.z_range[1], val2));
+              }
+            } catch {
+              val2 = null;
+            }
+            row2[i] = val2;
+          }
+        }
+        zArr1.push(Array.from(row1));
+        if (state.show_f2) zArr2.push(Array.from(row2));
+      }
+
+      const t1 = performance.now();
+      document.getElementById("calcTimeBadge").textContent = `Render: ${(t1 - t0).toFixed(1)}ms (${n}x${n})`;
+
+      return {
+        x: Array.from(xArr),
+        y: Array.from(yArr),
+        z1: zArr1,
+        z2: zArr2
+      };
+    }
+
+    function buildPlotData(mesh) {
+      const traces = [];
+
+      // Primary surface trace
+      const surface1 = {
+        type: 'surface',
+        x: mesh.x,
+        y: mesh.y,
+        z: mesh.z1,
+        name: 'f(x, y)',
+        colorscale: state.color_scale,
+        opacity: state.opacity,
+        showscale: true,
+        colorbar: {
+          len: 0.7,
+          thickness: 14,
+          tickfont: { color: '#94a3b8', size: 10 },
+          title: { text: 'z', font: { color: '#cbd5e1', size: 12 } }
+        },
+        contours: {
+          z: {
+            show: state.show_contours,
+            usecolormap: true,
+            highlightcolor: "#ffffff",
+            project: { z: state.show_floor_contours }
+          }
+        },
+        hidesurface: !state.opacity || state.opacity <= 0
+      };
+
+      if (state.show_wireframe) {
+        surface1.contours.x = { show: true, color: 'rgba(255,255,255,0.25)', width: 1 };
+        surface1.contours.y = { show: true, color: 'rgba(255,255,255,0.25)', width: 1 };
+      }
+
+      traces.push(surface1);
+
+      // Secondary surface trace
+      if (state.show_f2 && mesh.z2) {
+        traces.push({
+          type: 'surface',
+          x: mesh.x,
+          y: mesh.y,
+          z: mesh.z2,
+          name: 'g(x, y)',
+          colorscale: 'Blues',
+          opacity: 0.65,
+          showscale: false,
+          contours: {
+            z: { show: true, usecolormap: true }
+          }
+        });
+      }
+
+      // Tangent Plane visualization
+      if (state.show_tangent && compiledF1) {
+        try {
+          const parsed = math.parse(state.f1_expr);
+          const df_dx = math.derivative(parsed, 'x');
+          const df_dy = math.derivative(parsed, 'y');
+
+          const scope = getEvalScope();
+          scope.x = state.x0;
+          scope.y = state.y0;
+
+          const z0 = compiledF1.evaluate(scope);
+          const fx = df_dx.evaluate(scope);
+          const fy = df_dy.evaluate(scope);
+
+          // Build small patch around (x0, y0)
+          const span = 1.5;
+          const tx = [state.x0 - span, state.x0 + span];
+          const ty = [state.y0 - span, state.y0 + span];
+          const tz = [
+            [
+              z0 + fx * (tx[0] - state.x0) + fy * (ty[0] - state.y0),
+              z0 + fx * (tx[1] - state.x0) + fy * (ty[0] - state.y0)
+            ],
+            [
+              z0 + fx * (tx[0] - state.x0) + fy * (ty[1] - state.y0),
+              z0 + fx * (tx[1] - state.x0) + fy * (ty[1] - state.y0)
+            ]
+          ];
+
+          traces.push({
+            type: 'surface',
+            x: tx,
+            y: ty,
+            z: tz,
+            name: 'Tangent Plane',
+            showscale: false,
+            opacity: 0.6,
+            colorscale: [[0, '#ec4899'], [1, '#ec4899']]
+          });
+
+          // Probe point marker
+          traces.push({
+            type: 'scatter3d',
+            mode: 'markers',
+            x: [state.x0],
+            y: [state.y0],
+            z: [z0],
+            name: 'Point P₀',
+            marker: {
+              size: 6,
+              color: '#f43f5e',
+              symbol: 'circle'
+            }
+          });
+        } catch (e) {
+          console.warn("Tangent plane render skipped:", e);
+        }
+      }
+
+      // Cross-sections (Slices at x = x0 and y = y0)
+      if (state.show_cross_sections && compiledF1) {
+        try {
+          const scope = getEvalScope();
+          const n = mesh.x.length;
+
+          // x = x0 curve (y varies)
+          scope.x = state.x0;
+          const sliceY_x = [];
+          const sliceY_y = [];
+          const sliceY_z = [];
+          for (let j = 0; j < n; j++) {
+            scope.y = mesh.y[j];
+            sliceY_x.push(state.x0);
+            sliceY_y.push(mesh.y[j]);
+            sliceY_z.push(compiledF1.evaluate(scope));
+          }
+
+          traces.push({
+            type: 'scatter3d',
+            mode: 'lines',
+            x: sliceY_x,
+            y: sliceY_y,
+            z: sliceY_z,
+            name: `x = ${state.x0.toFixed(1)} slice`,
+            line: { color: '#f59e0b', width: 6 }
+          });
+
+          // y = y0 curve (x varies)
+          scope.y = state.y0;
+          const sliceX_x = [];
+          const sliceX_y = [];
+          const sliceX_z = [];
+          for (let i = 0; i < n; i++) {
+            scope.x = mesh.x[i];
+            sliceX_x.push(mesh.x[i]);
+            sliceX_y.push(state.y0);
+            sliceX_z.push(compiledF1.evaluate(scope));
+          }
+
+          traces.push({
+            type: 'scatter3d',
+            mode: 'lines',
+            x: sliceX_x,
+            y: sliceX_y,
+            z: sliceX_z,
+            name: `y = ${state.y0.toFixed(1)} slice`,
+            line: { color: '#10b981', width: 6 }
+          });
+        } catch (e) {
+          console.warn("Slice curves render skipped:", e);
+        }
+      }
+
+      return traces;
+    }
+
+    function getPlotLayout() {
+      return {
+        autosize: true,
+        margin: { l: 0, r: 0, b: 0, t: 0 },
+        paper_bgcolor: '#020617',
+        plot_bgcolor: '#020617',
+        scene: {
+          xaxis: {
+            title: 'X',
+            gridcolor: '#1e293b',
+            zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' },
+            titlefont: { color: '#cbd5e1' }
+          },
+          yaxis: {
+            title: 'Y',
+            gridcolor: '#1e293b',
+            zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' },
+            titlefont: { color: '#cbd5e1' }
+          },
+          zaxis: {
+            title: 'Z',
+            gridcolor: '#1e293b',
+            zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' },
+            titlefont: { color: '#cbd5e1' },
+            range: state.z_clamp ? state.z_range : undefined
+          },
+          camera: {
+            eye: { x: 1.5, y: 1.5, z: 1.2 }
+          },
+          aspectmode: 'cube'
+        },
+        showlegend: state.show_f2 || state.show_tangent || state.show_cross_sections,
+        legend: {
+          x: 0.02,
+          y: 0.98,
+          bgcolor: 'rgba(15, 23, 42, 0.8)',
+          bordercolor: '#334155',
+          borderwidth: 1,
+          font: { color: '#e2e8f0', size: 11 }
+        }
+      };
+    }
+
+    let isInitialPlot = true;
+    function renderPlot(preserveCamera = true) {
+      if (!compiledF1) compileExpressions();
+      if (!compiledF1) return;
+
+      const mesh = computeSurfaces();
+      const traces = buildPlotData(mesh);
+      const plotDiv = document.getElementById('plotContainer');
+
+      if (isInitialPlot) {
+        const layout = getPlotLayout();
+        Plotly.newPlot(plotDiv, traces, layout, {
+          responsive: true,
+          displayModeBar: false
+        }).then(() => {
+          attachPlotEvents();
+        });
+        isInitialPlot = false;
+      } else {
+        // Fast update
+        if (preserveCamera && plotDiv._fullLayout && plotDiv._fullLayout.scene) {
+          const currentCamera = plotDiv._fullLayout.scene._scene.getCamera();
+          const layout = getPlotLayout();
+          if (currentCamera) {
+            layout.scene.camera = {
+              eye: currentCamera.eye,
+              center: currentCamera.center,
+              up: currentCamera.up
+            };
+          }
+          Plotly.react(plotDiv, traces, layout);
+        } else {
+          Plotly.react(plotDiv, traces, getPlotLayout());
+        }
+      }
+    }
+
+    function attachPlotEvents() {
+      const plotDiv = document.getElementById('plotContainer');
+      plotDiv.on('plotly_hover', function(data) {
+        if (data.points && data.points.length > 0) {
+          const pt = data.points[0];
+          document.getElementById('coordReadout').textContent = 
+            `X: ${pt.x !== undefined ? pt.x.toFixed(3) : '-'} | Y: ${pt.y !== undefined ? pt.y.toFixed(3) : '-'} | Z: ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
+        }
+      });
+      plotDiv.on('plotly_unhover', function() {
+        document.getElementById('coordReadout').textContent = 'Hover over surface for coordinates';
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Dynamic Parameter Cards Rendering
+    // -------------------------------------------------------------------------
+    function renderParameterCards() {
+      const container = document.getElementById("parametersList");
+      container.innerHTML = "";
+
+      for (const [key, p] of Object.entries(state.params)) {
+        const card = document.createElement("div");
+        card.className = "bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1.5 transition hover:border-slate-700";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-5 h-5 rounded bg-indigo-600/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">${key}</span>
+              <span class="font-mono text-xs text-indigo-300 font-semibold param-val-label" id="val_label_${key}">${p.val.toFixed(2)}</span>
+            </div>
+            <div class="flex items-center space-x-1 text-[10px] text-slate-500 font-mono">
+              <span>[${p.min}, ${p.max}]</span>
+              ${['a','b','c','d'].includes(key) ? '' : `
+                <button class="delete-param text-rose-400 hover:text-rose-300 ml-1 p-0.5" data-param="${key}" title="Delete variable">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                </button>
+              `}
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input 
+              type="range" 
+              class="flex-1 param-slider" 
+              data-param="${key}" 
+              min="${p.min}" 
+              max="${p.max}" 
+              step="${p.step}" 
+              value="${p.val}"
+            >
+          </div>
+        `;
+        container.appendChild(card);
+      }
+
+      // Re-initialize icons for newly added elements
+      lucide.createIcons();
+
+      // Bind input events for sliders
+      container.querySelectorAll('.param-slider').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+          const k = e.target.getAttribute('data-param');
+          const val = parseFloat(e.target.value);
+          state.params[k].val = val;
+          document.getElementById(`val_label_${k}`).textContent = val.toFixed(2);
+          renderPlot(true);
+          updateCalculusInfo();
+        });
+      });
+
+      // Bind delete buttons
+      container.querySelectorAll('.delete-param').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const k = btn.getAttribute('data-param');
+          delete state.params[k];
+          renderParameterCards();
+          renderPlot(true);
+        });
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Animation Loop for 't'
+    // -------------------------------------------------------------------------
+    function toggleTimeAnimation() {
+      state.animating_t = !state.animating_t;
+      const btn = document.getElementById("timePlayBtn");
+      const icon = document.getElementById("timePlayIcon");
+      const txt = document.getElementById("timePlayText");
+
+      if (state.animating_t) {
+        btn.className = "px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-[11px] flex items-center space-x-1 transition";
+        txt.textContent = "Pause";
+        icon.setAttribute("data-lucide", "pause");
+        lucide.createIcons();
+        runTimeLoop();
+      } else {
+        btn.className = "px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition";
+        txt.textContent = "Animate";
+        icon.setAttribute("data-lucide", "play");
+        lucide.createIcons();
+        if (state.animation_id) cancelAnimationFrame(state.animation_id);
+      }
+    }
+
+    let lastTime = 0;
+    function runTimeLoop(timestamp = 0) {
+      if (!state.animating_t) return;
+      if (!lastTime) lastTime = timestamp;
+      const delta = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      state.t = (state.t + 0.05) % 20;
+      document.getElementById("param_t_slider").value = state.t;
+      document.getElementById("param_t_val").textContent = state.t.toFixed(2);
+
+      renderPlot(true);
+      state.animation_id = requestAnimationFrame(runTimeLoop);
+    }
+
+    // -------------------------------------------------------------------------
+    // URL Hash State Serialization (Shareable Graphs)
+    // -------------------------------------------------------------------------
+    function serializeStateToHash() {
+      const data = {
+        f1: state.f1_expr,
+        f2: state.show_f2 ? state.f2_expr : undefined,
+        p: Object.fromEntries(Object.entries(state.params).map(([k, v]) => [k, v.val])),
+        xr: state.x_range,
+        yr: state.y_range,
+        res: state.grid_res,
+        col: state.color_scale,
+        tan: state.show_tangent ? [state.x0, state.y0] : undefined
+      };
+      return encodeURIComponent(JSON.stringify(data));
+    }
+
+    function deserializeStateFromHash() {
+      try {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return false;
+        const data = JSON.parse(decodeURIComponent(hash));
+
+        if (data.f1) {
+          state.f1_expr = data.f1;
+          document.getElementById("functionInput").value = data.f1;
+        }
+        if (data.f2) {
+          state.f2_expr = data.f2;
+          state.show_f2 = true;
+          document.getElementById("showSecondSurface").checked = true;
+          document.getElementById("secondSurfaceContainer").classList.remove("hidden");
+          document.getElementById("secondFunctionInput").value = data.f2;
+        }
+        if (data.p) {
+          for (const [k, v] of Object.entries(data.p)) {
+            if (state.params[k]) {
+              state.params[k].val = v;
+            } else {
+              state.params[k] = { val: v, min: -10, max: 10, step: 0.1 };
+            }
+          }
+        }
+        if (data.xr) {
+          state.x_range = data.xr;
+          document.getElementById("xMin").value = data.xr[0];
+          document.getElementById("xMax").value = data.xr[1];
+        }
+        if (data.yr) {
+          state.y_range = data.yr;
+          document.getElementById("yMin").value = data.yr[0];
+          document.getElementById("yMax").value = data.yr[1];
+        }
+        if (data.res) {
+          state.grid_res = data.res;
+          document.getElementById("gridResSlider").value = data.res;
+          document.getElementById("gridResVal").textContent = `${data.res} × ${data.res}`;
+        }
+        if (data.col) {
+          state.color_scale = data.col;
+          document.getElementById("colorScaleSelect").value = data.col;
+        }
+        if (data.tan) {
+          state.show_tangent = true;
+          state.x0 = data.tan[0];
+          state.y0 = data.tan[1];
+          document.getElementById("showTangentPlane").checked = true;
+          document.getElementById("tangentPointControls").classList.remove("hidden");
+          document.getElementById("x0Slider").value = data.tan[0];
+          document.getElementById("y0Slider").value = data.tan[1];
+          document.getElementById("x0Val").textContent = data.tan[0].toFixed(1);
+          document.getElementById("y0Val").textContent = data.tan[1].toFixed(1);
+        }
+        return true;
+      } catch (e) {
+        console.warn("Failed to load state from URL hash:", e);
+        return false;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Event Listeners & UI Binding
+    // -------------------------------------------------------------------------
+    function initEvents() {
+      // Primary function input
+      let debounceTimeout = null;
+      document.getElementById("functionInput").addEventListener("input", (e) => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          state.f1_expr = e.target.value;
+          compileExpressions();
+          renderPlot(true);
+        }, 200);
+      });
+
+      // Quick math snippet insertion
+      document.querySelectorAll(".math-insert").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const input = document.getElementById("functionInput");
+          input.value = btn.textContent;
+          state.f1_expr = input.value;
+          compileExpressions();
+          renderPlot(true);
+        });
+      });
+
+      // Secondary function
+      document.getElementById("showSecondSurface").addEventListener("change", (e) => {
+        state.show_f2 = e.target.checked;
+        document.getElementById("secondSurfaceContainer").classList.toggle("hidden", !state.show_f2);
+        compileExpressions();
+        renderPlot(true);
+      });
+
+      document.getElementById("secondFunctionInput").addEventListener("input", (e) => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          state.f2_expr = e.target.value;
+          compileExpressions();
+          renderPlot(true);
+        }, 200);
+      });
+
+      // Time parameter controls
+      document.getElementById("timePlayBtn").addEventListener("click", toggleTimeAnimation);
+      document.getElementById("timeResetBtn").addEventListener("click", () => {
+        state.t = 0;
+        document.getElementById("param_t_slider").value = 0;
+        document.getElementById("param_t_val").textContent = "0.00";
+        renderPlot(true);
+      });
+      document.getElementById("param_t_slider").addEventListener("input", (e) => {
+        state.t = parseFloat(e.target.value);
+        document.getElementById("param_t_val").textContent = state.t.toFixed(2);
+        renderPlot(true);
+      });
+
+      // Add custom parameter
+      document.getElementById("addParamBtn").addEventListener("click", () => {
+        const name = prompt("Enter parameter variable name (e.g. k, m, w):", "k");
+        if (name && /^[a-zA-Z][a-zA-Z0-9]*$/.test(name.trim())) {
+          const cleanName = name.trim();
+          if (!state.params[cleanName]) {
+            state.params[cleanName] = { val: 1.0, min: -10.0, max: 10.0, step: 0.1 };
+            renderParameterCards();
+            renderPlot(true);
+          } else {
+            alert(`Parameter '${cleanName}' already exists!`);
+          }
+        }
+      });
+
+      // Domain inputs
+      const updateDomain = () => {
+        const xMin = parseFloat(document.getElementById("xMin").value) || -5;
+        const xMax = parseFloat(document.getElementById("xMax").value) || 5;
+        const yMin = parseFloat(document.getElementById("yMin").value) || -5;
+        const yMax = parseFloat(document.getElementById("yMax").value) || 5;
+        state.x_range = [Math.min(xMin, xMax - 0.5), Math.max(xMax, xMin + 0.5)];
+        state.y_range = [Math.min(yMin, yMax - 0.5), Math.max(yMax, yMin + 0.5)];
+
+        // Update tangent slider bounds
+        document.getElementById("x0Slider").min = state.x_range[0];
+        document.getElementById("x0Slider").max = state.x_range[1];
+        document.getElementById("y0Slider").min = state.y_range[0];
+        document.getElementById("y0Slider").max = state.y_range[1];
+
+        renderPlot(true);
+      };
+      ["xMin", "xMax", "yMin", "yMax"].forEach(id => {
+        document.getElementById(id).addEventListener("change", updateDomain);
+      });
+
+      // Grid resolution slider
+      document.getElementById("gridResSlider").addEventListener("input", (e) => {
+        state.grid_res = parseInt(e.target.value);
+        document.getElementById("gridResVal").textContent = `${state.grid_res} × ${state.grid_res} (${state.grid_res * state.grid_res} pts)`;
+        renderPlot(true);
+      });
+
+      // Z Clamping
+      document.getElementById("clampZToggle").addEventListener("change", (e) => {
+        state.z_clamp = e.target.checked;
+        document.getElementById("zClampInputs").classList.toggle("hidden", !state.z_clamp);
+        renderPlot(true);
+      });
+      const updateZClamp = () => {
+        const zMin = parseFloat(document.getElementById("zMin").value) || -10;
+        const zMax = parseFloat(document.getElementById("zMax").value) || 10;
+        state.z_range = [zMin, zMax];
+        renderPlot(true);
+      };
+      ["zMin", "zMax"].forEach(id => document.getElementById(id).addEventListener("change", updateZClamp));
+
+      // Visual styling
+      document.getElementById("colorScaleSelect").addEventListener("change", (e) => {
+        state.color_scale = e.target.value;
+        renderPlot(true);
+      });
+      document.getElementById("opacitySlider").addEventListener("input", (e) => {
+        state.opacity = parseFloat(e.target.value);
+        renderPlot(true);
+      });
+      document.getElementById("wireframeToggle").addEventListener("change", (e) => {
+        state.show_wireframe = e.target.checked;
+        renderPlot(true);
+      });
+      document.getElementById("contoursToggle").addEventListener("change", (e) => {
+        state.show_contours = e.target.checked;
+        renderPlot(true);
+      });
+      document.getElementById("floorContoursToggle").addEventListener("change", (e) => {
+        state.show_floor_contours = e.target.checked;
+        renderPlot(true);
+      });
+
+      // Calculus features
+      document.getElementById("showTangentPlane").addEventListener("change", (e) => {
+        state.show_tangent = e.target.checked;
+        document.getElementById("tangentPointControls").classList.toggle("hidden", !state.show_tangent);
+        updateCalculusInfo();
+        renderPlot(true);
+      });
+      document.getElementById("x0Slider").addEventListener("input", (e) => {
+        state.x0 = parseFloat(e.target.value);
+        document.getElementById("x0Val").textContent = state.x0.toFixed(1);
+        updateCalculusInfo();
+        renderPlot(true);
+      });
+      document.getElementById("y0Slider").addEventListener("input", (e) => {
+        state.y0 = parseFloat(e.target.value);
+        document.getElementById("y0Val").textContent = state.y0.toFixed(1);
+        updateCalculusInfo();
+        renderPlot(true);
+      });
+      document.getElementById("showCrossSections").addEventListener("change", (e) => {
+        state.show_cross_sections = e.target.checked;
+        renderPlot(true);
+      });
+
+      // Presets
+      document.getElementById("presetSelect").addEventListener("change", (e) => {
+        const pKey = e.target.value;
+        const preset = presets[pKey];
+        if (!preset) return;
+
+        state.f1_expr = preset.expr;
+        document.getElementById("functionInput").value = preset.expr;
+
+        if (preset.params) {
+          for (const [k, v] of Object.entries(preset.params)) {
+            if (state.params[k]) state.params[k].val = v;
+          }
+        }
+        if (preset.x) {
+          state.x_range = preset.x;
+          document.getElementById("xMin").value = preset.x[0];
+          document.getElementById("xMax").value = preset.x[1];
+        }
+        if (preset.y) {
+          state.y_range = preset.y;
+          document.getElementById("yMin").value = preset.y[0];
+          document.getElementById("yMax").value = preset.y[1];
+        }
+        if (preset.scale) {
+          state.color_scale = preset.scale;
+          document.getElementById("colorScaleSelect").value = preset.scale;
+        }
+        if (preset.z_clamp !== undefined) {
+          state.z_clamp = preset.z_clamp;
+          document.getElementById("clampZToggle").checked = preset.z_clamp;
+          document.getElementById("zClampInputs").classList.toggle("hidden", !preset.z_clamp);
+          if (preset.z) {
+            state.z_range = preset.z;
+            document.getElementById("zMin").value = preset.z[0];
+            document.getElementById("zMax").value = preset.z[1];
+          }
+        }
+
+        renderParameterCards();
+        compileExpressions();
+        renderPlot(false);
+
+        if (preset.auto_animate && !state.animating_t) {
+          toggleTimeAnimation();
+        }
+      });
+
+      // Camera view shortcuts
+      document.getElementById("resetCamBtn").addEventListener("click", () => {
+        renderPlot(false);
+      });
+      document.getElementById("viewTopBtn").addEventListener("click", () => {
+        const plotDiv = document.getElementById('plotContainer');
+        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 0, y: 0, z: 2.5 } });
+      });
+      document.getElementById("viewSideBtn").addEventListener("click", () => {
+        const plotDiv = document.getElementById('plotContainer');
+        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 0, y: -2.5, z: 0.1 } });
+      });
+      document.getElementById("viewIsoBtn").addEventListener("click", () => {
+        const plotDiv = document.getElementById('plotContainer');
+        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 1.5, y: 1.5, z: 1.2 } });
+      });
+
+      // Fullscreen
+      document.getElementById("fullscreenBtn").addEventListener("click", () => {
+        const elem = document.getElementById("plotContainer");
+        if (!document.fullscreenElement) {
+          elem.requestFullscreen().catch(err => alert(err.message));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+
+      // Screenshot Export
+      document.getElementById("exportPngBtn").addEventListener("click", () => {
+        const plotDiv = document.getElementById('plotContainer');
+        Plotly.downloadImage(plotDiv, {
+          format: 'png',
+          width: 1920,
+          height: 1080,
+          filename: `multivar_graph_${Date.now()}`
+        });
+      });
+
+      // Share Modal
+      const shareModal = document.getElementById("shareModal");
+      document.getElementById("shareBtn").addEventListener("click", () => {
+        const hash = serializeStateToHash();
+        const shareUrl = `${window.location.origin}${window.location.pathname}#${hash}`;
+        document.getElementById("shareUrlInput").value = shareUrl;
+        document.getElementById("copySuccessMsg").classList.add("hidden");
+        shareModal.classList.remove("hidden");
+      });
+      document.getElementById("closeShareModal").addEventListener("click", () => {
+        shareModal.classList.add("hidden");
+      });
+      document.getElementById("copyShareUrlBtn").addEventListener("click", () => {
+        const input = document.getElementById("shareUrlInput");
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+          document.getElementById("copySuccessMsg").classList.remove("hidden");
+        });
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // App Initialization
+    // -------------------------------------------------------------------------
+    window.addEventListener("DOMContentLoaded", () => {
+      deserializeStateFromHash();
+      renderParameterCards();
+      compileExpressions();
+      initEvents();
+      renderPlot(false);
+    });
+  </script>
+</body>
+</html>
