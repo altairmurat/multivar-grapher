@@ -1,31 +1,39 @@
-# 🌌 MultivarGrapher: 3D Surfaces, Level Sets & Derivative Matrices
+# 🌌 MultivarGrapher: Affine Functions, Normal Lines & Level Sets
 
-An interactive multivariable calculus visualizer built with **Plotly.js**, **Math.js**, and **KaTeX**.
+An advanced interactive multivariable calculus suite built with **Plotly.js**, **Math.js**, and **KaTeX**.
 
 Hosted 100% free with **zero backend server** on **GitHub Pages**:
 👉 **[Open Live App: https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)**
 
 ---
 
-## ✨ Features Highlight
+## ✨ Features & Theory Highlight
 
-### 1. 🎯 Level Sets $f^{-1}(c)$ & Circle Radius $r$
-- **Level Set Equation**: Set any target value $c$ for the level set $f(x_1, x_2) = c$.
-- **Radius Helper**: For circle functions like $f(x_1, x_2) = x_1^2 + x_2^2$, enter radius $r$ (e.g. $r = 2$) and click **Set $r^2$** to instantly set $c = 4$, rendering a clean circle of radius 2.
-- **Snap Point $P_0$ to Curve**: One-click Newton-Raphson projection button snaps your evaluation point $P_0$ directly onto the level set curve.
-- **2D & 3D Views**: Switch between 2D Level Set view, 3D Surface view, or Split View (both side-by-side).
+### 1. 📐 Affine Function $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$
+- **Mathematical Definition**: The affine function is the best first-order linear approximation (tangent plane) of a differentiable function $f$ near point $\mathbf{a}$:
+  $$g(x_1, x_2) = f(a_1, a_2) + \frac{\partial f}{\partial x_1}(\mathbf{a})(x_1 - a_1) + \frac{\partial f}{\partial x_2}(\mathbf{a})(x_2 - a_2)$$
+- **3D Tangent Plane Visualization**: Render the affine function as a semi-transparent surface $z = g(x_1, x_2)$ touching $z = f(x_1, x_2)$ tangentially at point $\mathbf{a}$.
+- **Approximation Error Calculator**: Test any nearby point $\mathbf{x}$ to compare the exact nonlinear value $f(\mathbf{x})$, the affine approximation $g(\mathbf{x})$, and the error $|f(\mathbf{x}) - g(\mathbf{x})|$.
 
-### 2. 📐 90° Gradient Vector $\perp$ Tangent Line (Orthogonality)
-- **Gradient Vector $\nabla f$**: Bright amber arrow originating at $P_0$ pointing in the direction of steepest ascent.
-- **Tangent Line**: Pink dashed line tangent to the circle/level curve at $P_0$.
-- **90° Right-Angle Symbol**: A dedicated square corner symbol at $P_0$ visually confirming that **$\nabla f$ is strictly perpendicular (90 degrees / normal) to the tangent line and level curve**.
+### 2. 🧭 The Normal Line (2D & 3D Explained)
+- **What is the Normal Line?**
+  - **In 2D (Level Sets)**: The Normal Line is the line passing through point $\mathbf{a}$ in the direction of the gradient $\nabla f(\mathbf{a})$. It is **strictly perpendicular (at 90 degrees)** to the tangent line of the level curve! Along this line, the function changes fastest (steepest ascent).
+  - **In 3D (Surface)**: The Surface Normal Line is the 3D line perpendicular to the tangent plane (affine surface $z = g(\mathbf{x})$) pointing in direction $\mathbf{n} = \langle -f_{x_1}, -f_{x_2}, 1 \rangle$.
+- **90° Right-Angle Symbol**: Visually demonstrates orthogonality between the Normal Line and the Tangent Line on the graph.
 
-### 3. 🔢 Derivative as a $[1 \times n]$ Matrix ($Df = \nabla f^T$)
-- For scalar fields $f: \mathbb{R}^n \to \mathbb{R}$, the total derivative / Jacobian is represented as a **$1 \times n$ row matrix**:
-  $$\mathbf{D}f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} & \frac{\partial f}{\partial x_2} \end{bmatrix}_{1 \times 2}$$
-- **Evaluated Numerically at $P_0$**:
-  $$\mathbf{D}f(P_0) = \begin{bmatrix} f_{x_1}(P_0) & f_{x_2}(P_0) \end{bmatrix}_{1 \times 2}$$
-- Supports both **$(x_1, x_2)$** and **$(x, y)$** variable notation styles.
+### 3. 🎯 Level Sets $f^{-1}(c)$ & Circle Radius $r$
+- **Level Set Definition**: Set any level constant $c$ to view $f(x_1, x_2) = c$.
+- **Radius Helper**: For circle functions $f = x_1^2 + x_2^2$, enter radius $r$ (e.g. $r = 2$) and click **Set $r^2$** to draw the circle $c = 4$.
+- **Snap to Curve**: Instantly project point $\mathbf{a}$ onto the level set.
+
+### 4. 🔢 Derivative Matrix $\mathbf{D}f$ $[1 \times n]$
+- View both symbolic and numeric evaluations of the total derivative row matrix $\mathbf{D}f(\mathbf{a}) = [ \frac{\partial f}{\partial x_1} \;\; \frac{\partial f}{\partial x_2} ]$ and gradient column vector $\nabla f = (\mathbf{D}f)^T$.
+
+### 5. 🔍 Smooth Interactive Navigation
+- **Scroll Zoom**: Zoom in and out effortlessly using the mouse wheel or touchpad pinch gestures.
+- **Pan Mode**: Click and drag smoothly across the canvas.
+- **On-Screen Zoom Buttons**: Dedicated `[+]`, `[-]`, and `[⟲ Reset]` buttons.
+- **Seamless Boundary Buffer**: Auto-regenerates the mesh grid as you zoom or pan, preventing boundary cutoffs.
 
 ---
 
@@ -34,7 +42,6 @@ Hosted 100% free with **zero backend server** on **GitHub Pages**:
 ```powershell
 python main.py
 ```
-Starts a local server and opens your browser.
 
 ---
 

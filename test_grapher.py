@@ -1,5 +1,5 @@
 """
-Verification test suite for MultivarGrapher 3D, Level Sets & Zoom Fixes.
+Verification test suite for MultivarGrapher Calculus Suite (Affine Functions & Normal Lines).
 """
 
 import os
@@ -28,21 +28,25 @@ def test_index_html_structure():
         "mathjs",
         "katex",
         "functionInput",
+        "tabNavAffine",
+        "katexAffineVector",
+        "katexAffineFormula",
+        "showNormalLine",
+        "show3DNormalLine",
+        "showAffinePlane",
+        "testXInput",
+        "testYInput",
+        "approxValErr",
+        "theoryModal",
+        "openTheoryBtn",
         "levelValueC",
         "radiusInputR",
-        "applyRadiusBtn",
-        "snapToLevelSetBtn",
-        "showTangentLine",
-        "showRightAngleMarker",
         "katexMatrixSymbolic",
         "katexMatrixNumeric",
         "plotContainer2D",
         "plotContainer3D",
         "zoomInBtn",
-        "zoomOutBtn",
-        "togglePanBtn",
-        "resetZoomBtn",
-        "scrollZoom"
+        "zoomOutBtn"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"

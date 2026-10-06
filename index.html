@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MultivarGrapher | 3D Surfaces, Level Sets & Derivative Matrices</title>
+  <title>MultivarGrapher | Affine Functions, Normal Lines & Level Sets</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -87,13 +87,13 @@
       <div>
         <div class="flex items-center space-x-2">
           <h1 class="font-bold text-base md:text-lg text-white tracking-tight">
-            MultivarGrapher <span class="text-indigo-400 font-mono text-xs px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">Level Sets & 3D</span>
+            MultivarGrapher <span class="text-indigo-400 font-mono text-xs px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">Calculus Suite</span>
           </h1>
           <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium hidden sm:inline">
             Live on GitHub Pages
           </span>
         </div>
-        <p class="text-[11px] text-slate-400 hidden sm:block">Level Sets f⁻¹(c) • 90° Gradient Vector ⊥ Tangent • Derivative [1 × n] Matrix</p>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Affine Function g(x) • Normal Line • Level Sets f⁻¹(c) • Derivative [1 × n] Matrix</p>
       </div>
     </div>
 
@@ -115,11 +115,17 @@
 
     <!-- Quick Action Buttons -->
     <div class="flex items-center space-x-2">
+      <!-- Theory Guide Button -->
+      <button id="openTheoryBtn" class="flex items-center space-x-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg text-xs font-semibold border border-cyan-800/60 transition shadow-sm" title="View Multivariable Calculus Theory Guide">
+        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Theory</span>
+      </button>
+
       <!-- Preset Dropdown -->
-      <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer max-w-[150px] sm:max-w-none">
+      <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer max-w-[140px] sm:max-w-none">
         <option value="" disabled selected>✨ Presets...</option>
-        <option value="circle_example">🎯 Circle f(x₁,x₂) = x₁² + x₂² (r=2, c=4)</option>
-        <option value="ellipse">Ellipse f(x₁,x₂) = 2x₁² + x₂² (c=6)</option>
+        <option value="circle_example">🎯 Circle f = x₁² + x₂² (r=2, c=4)</option>
+        <option value="ellipse">Ellipse f = x₁²/3 + x₂² (c=6)</option>
         <option value="saddle">Hyperbolic Saddle f = x₁² - x₂²</option>
         <option value="ripple">Water Droplet Ripple (Sinc)</option>
         <option value="gaussian">Gaussian Bell Wave Packet</option>
@@ -145,32 +151,32 @@
   <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
     <!-- Left Controls Panel -->
-    <aside id="controlsPanel" class="w-full lg:w-[440px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[48vh] lg:max-h-[calc(100vh-57px)]">
+    <aside id="controlsPanel" class="w-full lg:w-[450px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[48vh] lg:max-h-[calc(100vh-57px)]">
       
-      <!-- Panel Tabs -->
+      <!-- Panel Tabs (Level Set | Affine g(x) | Matrix Df | Function & Domain) -->
       <div class="grid grid-cols-4 gap-1 p-2 bg-slate-950 border-b border-slate-800 sticky top-0 z-20 text-[11px] font-medium">
         <button id="tabNavLevelSets" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="circle-dot" class="w-3.5 h-3.5 text-cyan-400"></i>
           <span>Level Set</span>
+        </button>
+        <button id="tabNavAffine" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Affine g(x)</span>
         </button>
         <button id="tabNavCalculus" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="grid" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>Matrix Df</span>
         </button>
         <button id="tabNavFunctions" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
-          <i data-lucide="function-square" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
           <span>Function</span>
-        </button>
-        <button id="tabNavStyling" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
-          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-          <span>Domain</span>
         </button>
       </div>
 
       <div class="p-4 space-y-4 flex-1">
 
         <!-- ============================================================= -->
-        <!-- TAB 1: LEVEL SET f^(-1)(c)                                     -->
+        <!-- TAB 1: LEVEL SET & NORMAL LINE (GEOMETRY)                     -->
         <!-- ============================================================= -->
         <div id="tabContentLevelSets" class="space-y-4">
 
@@ -179,19 +185,15 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-1.5 text-xs font-bold text-cyan-300">
                 <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
-                <span>Level Set Definition: <span class="font-mono text-cyan-200">f(x₁, x₂) = c</span></span>
+                <span>Level Set Definition: <span class="font-mono text-cyan-200">f(x) = c</span></span>
               </div>
               <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">f⁻¹(c)</span>
             </div>
 
-            <p class="text-[11px] text-slate-300">
-              The level set <span class="font-mono text-cyan-400 font-semibold">f⁻¹(c)</span> is the curve formed by all points where the function equals constant <span class="font-mono text-cyan-400">c</span>.
-            </p>
-
             <!-- Level value c controls -->
             <div class="space-y-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
               <div class="flex items-center justify-between text-xs">
-                <span class="font-mono text-slate-300 font-semibold">Level Value c :</span>
+                <span class="font-mono text-slate-300 font-semibold">Level Constant c :</span>
                 <div class="flex items-center space-x-1.5">
                   <span class="text-[10px] text-slate-500 font-mono">c =</span>
                   <input type="number" id="levelValueC" value="4.0" step="0.5" class="w-20 bg-slate-900 border border-cyan-700/80 rounded px-2 py-1 font-mono text-cyan-300 text-xs text-center focus:outline-none focus:border-cyan-400 font-bold">
@@ -205,7 +207,7 @@
               <div class="flex items-center justify-between text-xs">
                 <div class="flex items-center space-x-1 text-cyan-300 font-medium">
                   <i data-lucide="circle" class="w-3.5 h-3.5 text-cyan-400"></i>
-                  <span>Circle Radius Helper: <span class="font-mono">c = r²</span></span>
+                  <span>Radius Helper: <span class="font-mono">c = r²</span></span>
                 </div>
                 <div class="flex items-center space-x-1">
                   <span class="text-[10px] text-slate-400 font-mono">r =</span>
@@ -215,40 +217,37 @@
                   </button>
                 </div>
               </div>
-              <p class="text-[10px] text-slate-400">
-                For <span class="font-mono text-slate-200">f = x₁² + x₂²</span>, setting <span class="font-mono text-cyan-300">r = 2</span> produces circle <span class="font-mono text-cyan-300">x₁² + x₂² = 4</span> with radius 2!
-              </p>
             </div>
           </div>
 
-          <!-- Evaluation Point P₀ on Level Set -->
+          <!-- Evaluation Point P₀ (a) on Level Set -->
           <div class="bg-slate-950 p-3.5 rounded-xl border border-indigo-900/60 space-y-3 shadow-md">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-1.5 text-xs font-bold text-indigo-300">
                 <i data-lucide="map-pin" class="w-4 h-4 text-rose-400"></i>
-                <span>Evaluation Point P₀ (x₁, x₂)</span>
+                <span>Point of Tangency a = (a₁, a₂)</span>
               </div>
-              <button id="snapToLevelSetBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium flex items-center space-x-1 transition shadow-sm" title="Project P0 directly onto the level curve f=c">
+              <button id="snapToLevelSetBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium flex items-center space-x-1 transition shadow-sm" title="Project point 'a' directly onto the level curve f=c">
                 <i data-lucide="crosshair" class="w-3 h-3"></i>
-                <span>Snap P₀ to Curve</span>
+                <span>Snap to Curve</span>
               </button>
             </div>
 
             <!-- Exact coordinate inputs -->
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div class="space-y-1">
-                <label for="x0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX1">x₁ value (or x):</label>
+                <label for="x0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX1">a₁ coordinate (x₁):</label>
                 <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
-                  <span class="px-2 font-mono text-slate-500 text-xs">x₁ =</span>
+                  <span class="px-2 font-mono text-slate-500 text-xs">a₁ =</span>
                   <input type="number" id="x0Input" value="2.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
                 </div>
                 <input type="range" id="x0Slider" min="-10" max="10" step="0.05" value="2" class="w-full">
               </div>
 
               <div class="space-y-1">
-                <label for="y0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX2">x₂ value (or y):</label>
+                <label for="y0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX2">a₂ coordinate (x₂):</label>
                 <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
-                  <span class="px-2 font-mono text-slate-500 text-xs">x₂ =</span>
+                  <span class="px-2 font-mono text-slate-500 text-xs">a₂ =</span>
                   <input type="number" id="y0Input" value="0.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
                 </div>
                 <input type="range" id="y0Slider" min="-10" max="10" step="0.05" value="0" class="w-full">
@@ -257,63 +256,158 @@
 
             <!-- Point status relative to level set -->
             <div id="pointLevelStatus" class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono flex items-center justify-between">
-              <span class="text-slate-400">At P₀: f(x₁, x₂) =</span>
+              <span class="text-slate-400">At a: f(a) =</span>
               <span id="evalZ0" class="text-emerald-400 font-bold">4.000</span>
               <span id="levelMatchBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans">On Level Set ✓</span>
             </div>
           </div>
 
-          <!-- On-Graph Vector & Tangent Toggles -->
+          <!-- On-Graph Geometric Elements Toggles (Normal Line, Tangent Line, 90° Marker, Gradient) -->
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
             <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
               <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Geometric Visualizations on Graph</span>
+              <span>Geometric Elements on Graph</span>
             </h3>
 
             <div class="space-y-2 text-xs">
-              <label class="flex items-center space-x-2 text-amber-300 cursor-pointer font-medium">
-                <input type="checkbox" id="showGradientVector" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
-                <span>Gradient Vector ∇f (Pointing 90° Normal to Curve)</span>
+              <!-- Normal Line (Core Request!) -->
+              <label class="flex items-center space-x-2 text-cyan-300 cursor-pointer font-medium">
+                <input type="checkbox" id="showNormalLine" checked class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                <span>Normal Line (Along ∇f, Perpendicular to Curve at 90°)</span>
               </label>
 
+              <!-- Tangent Line -->
               <label class="flex items-center space-x-2 text-pink-300 cursor-pointer font-medium">
                 <input type="checkbox" id="showTangentLine" checked class="rounded bg-slate-900 border-slate-700 text-pink-500 focus:ring-pink-500">
-                <span>Tangent Line to Level Set at P₀</span>
+                <span>Tangent Line to Level Set at Point a</span>
               </label>
 
-              <label class="flex items-center space-x-2 text-cyan-300 cursor-pointer">
-                <input type="checkbox" id="showRightAngleMarker" checked class="rounded bg-slate-900 border-slate-700 text-cyan-500">
-                <span>Show 90° Right-Angle Symbol (∇f ⊥ Tangent)</span>
+              <!-- 90 Degree Angle Marker -->
+              <label class="flex items-center space-x-2 text-emerald-300 cursor-pointer">
+                <input type="checkbox" id="showRightAngleMarker" checked class="rounded bg-slate-900 border-slate-700 text-emerald-500">
+                <span>Show 90° Right-Angle Symbol (Normal ⊥ Tangent)</span>
               </label>
 
+              <!-- Gradient Vector -->
+              <label class="flex items-center space-x-2 text-amber-300 cursor-pointer font-medium">
+                <input type="checkbox" id="showGradientVector" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
+                <span>Gradient Vector ∇f Arrow (Steepest Ascent)</span>
+              </label>
+
+              <!-- 3D Surface Normal Line -->
+              <label class="flex items-center space-x-2 text-cyan-200 cursor-pointer">
+                <input type="checkbox" id="show3DNormalLine" checked class="rounded bg-slate-900 border-slate-700 text-cyan-500">
+                <span>Surface Normal Line in 3D (Rod ⊥ Tangent Plane)</span>
+              </label>
+
+              <!-- Background Contours -->
               <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
                 <input type="checkbox" id="showAllContourLines" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600">
                 <span>Show Other Background Level Sets (Isolines)</span>
               </label>
+            </div>
+          </div>
 
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="show2DGradField" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
-                <span>Show Full Gradient Vector Field (Arrows Everywhere)</span>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 2: AFFINE FUNCTION g(x) = f(a) + f'(a)(x - a)             -->
+        <!-- ============================================================= -->
+        <div id="tabContentAffine" class="space-y-4 hidden">
+
+          <!-- Affine Definition Header Card -->
+          <div class="bg-gradient-to-b from-slate-950 to-slate-900 p-4 rounded-xl border border-emerald-900/60 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-emerald-300">
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+                <span>Affine Function (Linearization at a)</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono font-bold">g(x) ≈ f(x)</span>
+            </div>
+
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              The <strong>Affine Function</strong> is the best first-order linear approximation (tangent plane) of <span class="font-mono text-indigo-300">f(x)</span> near point <span class="font-mono text-rose-300">a</span>:
+            </p>
+
+            <!-- General Vector Equation -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">General Vector Definition:</div>
+              <div id="katexAffineVector" class="overflow-x-auto text-sm text-white py-0.5"></div>
+            </div>
+
+            <!-- Concrete Coordinate Equation with Values Plugged in -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-emerald-900/50 space-y-1.5">
+              <div class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Formula Evaluated at Current Point a:</div>
+              <div id="katexAffineFormula" class="overflow-x-auto text-xs sm:text-sm text-emerald-200 py-1 font-bold"></div>
+              <div id="katexAffineSimplified" class="text-[11px] font-mono text-slate-300 pt-1 border-t border-slate-800"></div>
+            </div>
+
+            <!-- 3D Tangent Plane Surface Toggle -->
+            <div class="pt-1">
+              <label class="flex items-center space-x-2 text-xs text-emerald-300 cursor-pointer font-medium">
+                <input type="checkbox" id="showAffinePlane" checked class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500">
+                <span>Display Affine Function as 3D Tangent Plane z = g(x)</span>
               </label>
             </div>
           </div>
 
-          <!-- Orthogonality Explanation Box -->
-          <div class="p-3 bg-cyan-950/30 rounded-xl border border-cyan-800/40 text-[11px] text-slate-300 space-y-1.5">
-            <div class="font-bold text-cyan-300 flex items-center space-x-1.5">
-              <i data-lucide="help-circle" class="w-4 h-4 text-cyan-400"></i>
-              <span>Why is the Gradient at 90°? (Orthogonality Theorem)</span>
+          <!-- Linearization Approximation Calculator: Compare f(x) vs g(x) -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-semibold text-slate-200 flex items-center space-x-1.5">
+                <i data-lucide="calculator" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>Test Approximation at Nearby Point x:</span>
+              </h3>
+              <span class="text-[10px] text-slate-500">Compare f(x) & g(x)</span>
             </div>
-            <p class="text-slate-400 leading-relaxed">
-              Along the level set curve <span class="font-mono text-cyan-300">f(x) = c</span>, the value is constant, so directional derivative is 0.
-              By chain rule, <span class="font-mono text-amber-300">∇f · T = 0</span>, proving that the gradient vector <span class="font-mono text-amber-300">∇f</span> is <strong>strictly perpendicular (at 90 degrees)</strong> to the tangent line of the circle/level curve!
+
+            <!-- Test point inputs -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="space-y-1">
+                <label for="testXInput" class="text-[10px] font-mono text-slate-400 block">Test x₁:</label>
+                <input type="number" id="testXInput" value="2.1" step="0.05" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-white text-xs">
+              </div>
+              <div class="space-y-1">
+                <label for="testYInput" class="text-[10px] font-mono text-slate-400 block">Test x₂:</label>
+                <input type="number" id="testYInput" value="0.2" step="0.05" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-white text-xs">
+              </div>
+            </div>
+
+            <!-- Result comparison card -->
+            <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Exact Nonlinear f(x):</span>
+                <span id="approxValF" class="text-white font-bold">4.4500</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-emerald-400">Affine Approximation g(x):</span>
+                <span id="approxValG" class="text-emerald-300 font-bold">4.4000</span>
+              </div>
+              <div class="flex justify-between pt-1 border-t border-slate-800">
+                <span class="text-amber-400">Approximation Error |f - g|:</span>
+                <span id="approxValErr" class="text-amber-300 font-bold">0.0500</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Theory: What is the Normal Line? -->
+          <div class="p-3.5 bg-cyan-950/30 rounded-xl border border-cyan-800/40 text-xs text-slate-300 space-y-2">
+            <div class="font-bold text-cyan-300 flex items-center space-x-1.5">
+              <i data-lucide="compass" class="w-4 h-4 text-cyan-400"></i>
+              <span>What is the Normal Line?</span>
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed">
+              • In <strong>2D (on level set f = c)</strong>: The <strong>Normal Line</strong> is the line passing through point <span class="font-mono text-white">a</span> in the direction of the gradient <span class="font-mono text-amber-300">∇f(a)</span>. It is <strong>perpendicular (at 90°)</strong> to the tangent line! Along this line, the function changes fastest (steepest ascent).
+            </p>
+            <p class="text-slate-400 text-[11px] leading-relaxed">
+              • In <strong>3D (on the surface z = f(x))</strong>: The <strong>Surface Normal Line</strong> is the 3D line perpendicular to the tangent plane (affine surface <span class="font-mono text-emerald-300">z = g(x)</span>) passing through <span class="font-mono text-white">(a, f(a))</span> along vector <span class="font-mono text-cyan-300">n = ⟨-fx, -fy, 1⟩</span>.
             </p>
           </div>
 
         </div>
 
         <!-- ============================================================= -->
-        <!-- TAB 2: DERIVATIVE 1xn MATRIX & CALCULUS                       -->
+        <!-- TAB 3: DERIVATIVE 1xn MATRIX & CALCULUS                       -->
         <!-- ============================================================= -->
         <div id="tabContentCalculus" class="space-y-4 hidden">
           
@@ -337,11 +431,11 @@
               <div id="katexMatrixSymbolic" class="overflow-x-auto text-sm text-white py-1"></div>
             </div>
 
-            <!-- Evaluated 1xn matrix at P0 -->
+            <!-- Evaluated 1xn matrix at a -->
             <div class="p-3 bg-slate-950 rounded-xl border border-amber-900/50 space-y-1.5">
               <div class="flex items-center justify-between text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
-                <span>Evaluated at P₀:</span>
-                <span id="matrixEvalPointLabel" class="font-mono text-slate-300">(x₁ = 2.0, x₂ = 0.0)</span>
+                <span>Evaluated at Point a:</span>
+                <span id="matrixEvalPointLabel" class="font-mono text-slate-300">(a₁ = 2.0, a₂ = 0.0)</span>
               </div>
               <div id="katexMatrixNumeric" class="overflow-x-auto text-base text-amber-200 py-1 font-bold"></div>
             </div>
@@ -367,7 +461,7 @@
                   <div id="katexDfDx" class="text-slate-200 font-mono text-xs"></div>
                 </div>
                 <div class="text-right">
-                  <div class="text-[10px] text-slate-500 font-sans">At P₀:</div>
+                  <div class="text-[10px] text-slate-500 font-sans">At a:</div>
                   <div id="resDfDx" class="font-mono font-bold text-emerald-400 text-sm">0.0000</div>
                 </div>
               </div>
@@ -378,7 +472,7 @@
                   <div id="katexDfDy" class="text-slate-200 font-mono text-xs"></div>
                 </div>
                 <div class="text-right">
-                  <div class="text-[10px] text-slate-500 font-sans">At P₀:</div>
+                  <div class="text-[10px] text-slate-500 font-sans">At a:</div>
                   <div id="resDfDy" class="font-mono font-bold text-emerald-400 text-sm">0.0000</div>
                 </div>
               </div>
@@ -392,12 +486,12 @@
               <span id="resGradMag" class="font-bold text-purple-300">4.0000</span>
             </div>
             <div class="flex justify-between p-1.5 bg-slate-900 rounded border border-slate-800">
-              <span class="text-slate-400">Steepest Ascent Angle θ:</span>
-              <span id="resGradAngle" class="text-amber-300">0.0°</span>
+              <span class="text-slate-400">Normal Vector (Level Curve):</span>
+              <span id="resNormalVec" class="text-cyan-300">⟨1.000, 0.000⟩</span>
             </div>
             <div class="flex justify-between p-1.5 bg-slate-900 rounded border border-slate-800">
-              <span class="text-slate-400">Level Curve Tangent Slope:</span>
-              <span id="resTangentSlope" class="text-pink-300">Vertical (∞)</span>
+              <span class="text-slate-400">Tangent Vector (Level Curve):</span>
+              <span id="resTangentVec" class="text-pink-300">⟨0.000, 1.000⟩</span>
             </div>
             <div class="p-2 bg-slate-900 rounded border border-slate-800 text-[11px]">
               <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold mb-0.5">Tangent Line Equation:</span>
@@ -408,7 +502,7 @@
         </div>
 
         <!-- ============================================================= -->
-        <!-- TAB 3: FUNCTION DEFINITION & PARAMETERS                       -->
+        <!-- TAB 4: FUNCTION, PARAMETERS & DOMAIN                         -->
         <!-- ============================================================= -->
         <div id="tabContentFunctions" class="space-y-4 hidden">
           
@@ -431,78 +525,27 @@
                 spellcheck="false"
               >
             </div>
-            <p class="text-[10px] text-slate-400">
-              💡 Supports both <span class="font-mono text-indigo-300">x₁, x₂</span> and <span class="font-mono text-indigo-300">x, y</span>!
-            </p>
             <!-- Quick insert buttons -->
             <div class="flex flex-wrap gap-1 text-[11px] pt-1">
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 + x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 / 3 + x2^2</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">2*x1^2 + x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 - x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x1) * cos(x2)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x1^2 - x2^2)</button>
             </div>
           </div>
 
           <!-- Notation Choice -->
           <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-            <span class="text-slate-300 font-medium">Variable Notation Style:</span>
+            <span class="text-slate-300 font-medium">Notation Style:</span>
             <div class="flex bg-slate-900 rounded-lg p-0.5 border border-slate-700">
               <button id="notationX1X2" class="px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]">x₁, x₂</button>
               <button id="notationXY" class="px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]">x, y</button>
             </div>
           </div>
 
-          <!-- Parameters & Variable Sliders -->
-          <div class="border-t border-slate-800/80 pt-3 space-y-3">
-            <div class="flex items-center justify-between">
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-                <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>Parameters (a, b, c, d)</span>
-              </h2>
-              <button id="addParamBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center space-x-0.5">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Add Var</span>
-              </button>
-            </div>
-
-            <div id="parametersList" class="space-y-2">
-              <!-- Parameter cards will be rendered dynamically here -->
-            </div>
-
-            <!-- Animated Time Parameter 't' -->
-            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">t</span>
-                  <span class="text-xs font-medium text-slate-300">Time variable (Waves)</span>
-                </div>
-                <div class="flex items-center space-x-1">
-                  <button id="timePlayBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition">
-                    <i data-lucide="play" class="w-3 h-3" id="timePlayIcon"></i>
-                    <span id="timePlayText">Animate</span>
-                  </button>
-                  <button id="timeResetBtn" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition" title="Reset t to 0">
-                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <input type="range" id="param_t_slider" min="0" max="20" step="0.05" value="0" class="flex-1">
-                <span id="param_t_val" class="font-mono text-xs text-indigo-400 w-10 text-right">0.00</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- TAB 4: DOMAIN BOUNDS & STYLING                                -->
-        <!-- ============================================================= -->
-        <div id="tabContentStyling" class="space-y-4 hidden">
-          
           <!-- Domain Bounds -->
-          <div class="space-y-2">
+          <div class="space-y-2 border-t border-slate-800/80 pt-3">
             <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
               <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-indigo-400"></i>
               <span>Domain Bounds</span>
@@ -529,18 +572,8 @@
             </div>
           </div>
 
-          <!-- Mesh Resolution -->
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Mesh Resolution</span>
-              <span id="gridResVal" class="font-mono text-indigo-400 text-[11px]">50 × 50 (2,500 pts)</span>
-            </div>
-            <input type="range" id="gridResSlider" min="20" max="100" step="5" value="50" class="w-full">
-          </div>
-
-          <!-- Color Palette -->
+          <!-- Color Scale -->
           <div class="space-y-2 border-t border-slate-800/80 pt-3">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300">Visual Palette</h2>
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <label class="text-[10px] text-slate-400 block mb-1">Color Palette</label>
@@ -550,8 +583,6 @@
                   <option value="Plasma">Plasma</option>
                   <option value="Magma">Magma</option>
                   <option value="Jet">Jet</option>
-                  <option value="Electric">Electric</option>
-                  <option value="Spectral">Spectral</option>
                 </select>
               </div>
 
@@ -579,13 +610,13 @@
           <div id="katexEquation" class="text-xs sm:text-sm text-white overflow-x-auto"></div>
         </div>
 
-        <!-- Interactive Zoom & Pan Floating Toolbar (Solves user's request!) -->
+        <!-- Interactive Zoom & Pan Floating Toolbar -->
         <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-1.5 text-xs">
           <!-- Zoom In Button -->
           <button id="zoomInBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-200 transition flex items-center" title="Zoom In (+)">
             <i data-lucide="zoom-in" class="w-4 h-4 text-cyan-400"></i>
           </button>
-          <!-- Zoom Out Button (No double-click needed!) -->
+          <!-- Zoom Out Button -->
           <button id="zoomOutBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-200 transition flex items-center" title="Zoom Out (-)">
             <i data-lucide="zoom-out" class="w-4 h-4 text-cyan-400"></i>
           </button>
@@ -624,10 +655,10 @@
       <!-- Bottom Status Bar -->
       <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-400 z-10">
         <div class="flex items-center space-x-3">
-          <span id="coordReadout" class="font-mono text-slate-300">Scroll mouse wheel to Zoom • Drag to Pan • Click to set P₀</span>
+          <span id="coordReadout" class="font-mono text-slate-300">Scroll to Zoom • Drag to Pan • Click to set Point a</span>
         </div>
         <div class="flex items-center space-x-3">
-          <span class="text-amber-400 font-medium">∇f ⊥ Level Set (90° Normal)</span>
+          <span class="text-cyan-400 font-medium">Normal Line ⊥ Tangent Line (90°)</span>
           <span class="text-slate-500">|</span>
           <span id="calcTimeBadge" class="text-[11px] text-slate-500 font-mono">Render: ~10ms</span>
         </div>
@@ -636,20 +667,79 @@
 
   </div>
 
+  <!-- Theory Guide Modal (Best tool for learning multivariable calculus!) -->
+  <div id="theoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-cyan-400"></i>
+          <h3 class="font-bold text-white text-base">Multivariable Calculus: Core Concepts</h3>
+        </div>
+        <button id="closeTheoryModal" class="p-1 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+        <!-- 1. Affine Function -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-emerald-900/40 space-y-1.5">
+          <h4 class="font-bold text-emerald-300 text-sm flex items-center space-x-1.5">
+            <span>1. What is an Affine Function?</span>
+            <span class="text-[10px] font-mono text-slate-400">g(x) = f(a) + Df(a)(x - a)</span>
+          </h4>
+          <p>
+            An <strong>Affine Function</strong> is a linear transformation shifted by a constant vector.
+            In calculus, the affine function <span class="font-mono text-emerald-300">g(x)</span> is the <strong>best first-order linear approximation</strong> (tangent plane) of <span class="font-mono text-indigo-300">f(x)</span> near point <span class="font-mono text-rose-300">a</span>.
+          </p>
+          <p class="text-slate-400">
+            Near <span class="font-mono text-white">a</span>, the difference <span class="font-mono text-amber-300">|f(x) - g(x)|</span> approaches zero much faster than <span class="font-mono text-white">||x - a||</span>. In 3D, the graph of <span class="font-mono text-emerald-300">z = g(x)</span> is the tangent plane!
+          </p>
+        </div>
+
+        <!-- 2. Normal Line -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-cyan-900/40 space-y-1.5">
+          <h4 class="font-bold text-cyan-300 text-sm flex items-center space-x-1.5">
+            <span>2. What is the Normal Line?</span>
+          </h4>
+          <p>
+            The <strong>Normal Line</strong> is the line passing through point <span class="font-mono text-white">a</span> perpendicular (at 90 degrees) to the tangent line or tangent plane:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li><strong>In 2D (Level Sets):</strong> The level curve has tangent direction <span class="font-mono text-pink-300">T = ⟨-fy, fx⟩</span>. The normal line points along the gradient <span class="font-mono text-amber-300">∇f = ⟨fx, fy⟩</span>. Because <span class="font-mono text-white">T · ∇f = 0</span>, the gradient is <strong>strictly perpendicular (at 90°)</strong> to the tangent line!</li>
+            <li><strong>In 3D (Surface):</strong> The normal line is the 3D line perpendicular to the tangent plane, pointing along <span class="font-mono text-cyan-300">n = ⟨-fx, -fy, 1⟩</span>.</li>
+          </ul>
+        </div>
+
+        <!-- 3. Total Derivative Matrix -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-amber-900/40 space-y-1.5">
+          <h4 class="font-bold text-amber-300 text-sm flex items-center space-x-1.5">
+            <span>3. Derivative Matrix [1 × n] vs Gradient [n × 1]</span>
+          </h4>
+          <p>
+            The total derivative <span class="font-mono text-amber-300">Df(a)</span> is a linear map from <span class="font-mono text-white">ℝⁿ → ℝ</span> represented as a <strong>1 × n row matrix</strong>:
+            <span class="font-mono text-amber-200">[ ∂f/∂x₁  ∂f/∂x₂ ]</span>.
+            The gradient <span class="font-mono text-amber-300">∇f(a) = (Df)ᵀ</span> is the transpose (a column vector in <span class="font-mono text-white">ℝⁿ</span>) pointing in the direction of steepest ascent.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Share Modal -->
   <div id="shareModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="share-2" class="w-5 h-5 text-indigo-400"></i>
-          <h3 class="font-bold text-white text-base">Share Graph & Level Set</h3>
+          <h3 class="font-bold text-white text-base">Share Graph & Calculations</h3>
         </div>
         <button id="closeShareModal" class="p-1 text-slate-400 hover:text-white rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       <p class="text-xs text-slate-300">
-        This link encodes your exact function, level value c, evaluation point P₀, and view settings in the URL hash.
+        This link encodes your exact function, level value c, evaluation point a, and view settings in the URL hash.
       </p>
       <div class="flex items-center space-x-2">
         <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-950 text-indigo-200 font-mono text-xs px-3 py-2.5 rounded-xl border border-slate-700 select-all">
@@ -672,9 +762,9 @@
     // Application State
     // -------------------------------------------------------------------------
     const state = {
-      view_mode: '2d', // Default to 2D Level Set view
-      notation: 'x1x2', // 'x1x2' or 'xy'
-      drag_mode: 'pan', // Default to 'pan' for smooth Google Maps-like dragging!
+      view_mode: '2d',
+      notation: 'x1x2',
+      drag_mode: 'pan',
       f_expr_raw: "x1^2 + x2^2",
       params: {
         a: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
@@ -686,12 +776,15 @@
       animating_t: false,
       animation_id: null,
       // Level set controls
-      level_c: 4.0, // For f = x1^2 + x2^2, c = 4 is circle with radius r = 2!
+      level_c: 4.0,
       radius_r: 2.0,
-      // Evaluation Point P0
+      // Point of tangency a = (x0, y0)
       x0: 2.0,
       y0: 0.0,
-      // Dynamic Domain Bounds (synced seamlessly on zoom/pan)
+      // Test approximation point x
+      test_x: 2.1,
+      test_y: 0.2,
+      // Dynamic Domain Bounds
       x_range: [-6, 6],
       y_range: [-6, 6],
       grid_res: 50,
@@ -700,9 +793,11 @@
       // Toggles
       show_gradient: true,
       show_tangent_line: true,
+      show_normal_line: true,
+      show_3d_normal_line: true,
+      show_affine_plane: true,
       show_right_angle: true,
-      show_all_contours: true,
-      show_2d_grad_field: false
+      show_all_contours: true
     };
 
     // Presets
@@ -753,12 +848,11 @@
     let symDfD1 = null;
     let symDfD2 = null;
 
-    // Guard flag to prevent recursive updates during Plotly.react
     let isInternalUpdating = false;
     let relayoutDebounce = null;
 
     // -------------------------------------------------------------------------
-    // Math Compilation & Derivative Matrix Construction
+    // Math Compilation & Differentiation
     // -------------------------------------------------------------------------
     function compileExpressions() {
       const formulaStatus = document.getElementById("formulaStatus");
@@ -774,7 +868,6 @@
         console.warn("Compile error:", err);
       }
 
-      // Compute symbolic partial derivatives
       try {
         const parsed = math.parse(expr);
         const vars = new Set();
@@ -808,6 +901,7 @@
 
       updateKatexHeader();
       updateCalculusCalculations();
+      updateAffineCalculations();
     }
 
     function updateKatexHeader() {
@@ -878,23 +972,72 @@
       return { z, fx, fy };
     }
 
+    // -------------------------------------------------------------------------
+    // Affine Function Computations & Error Evaluation
+    // -------------------------------------------------------------------------
+    function evaluateAffineAt(xVal, yVal) {
+      const ptA = evaluateAt(state.x0, state.y0);
+      return ptA.z + ptA.fx * (xVal - state.x0) + ptA.fy * (yVal - state.y0);
+    }
+
+    function updateAffineCalculations() {
+      const ptA = evaluateAt(state.x0, state.y0);
+      const var1 = state.notation === 'x1x2' ? 'x_1' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'x_2' : 'y';
+      const a1Str = state.x0.toFixed(2);
+      const a2Str = state.y0.toFixed(2);
+
+      // 1. General Vector definition KaTeX
+      const vecLatex = `g(\\mathbf{x}) = f(\\mathbf{a}) + \\mathbf{D}f(\\mathbf{a})(\\mathbf{x} - \\mathbf{a}) = f(\\mathbf{a}) + \\nabla f(\\mathbf{a}) \\cdot (\\mathbf{x} - \\mathbf{a})`;
+      katex.render(vecLatex, document.getElementById("katexAffineVector"), { throwOnError: false });
+
+      // 2. Concrete Equation with evaluated values
+      const signA1 = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
+      const signA2 = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
+      const affineLatex = `g(${var1}, ${var2}) = ${ptA.z.toFixed(2)} + (${ptA.fx.toFixed(2)})(${var1} ${signA1}) + (${ptA.fy.toFixed(2)})(${var2} ${signA2})`;
+      katex.render(affineLatex, document.getElementById("katexAffineFormula"), { throwOnError: false });
+
+      // 3. Simplified plane equation
+      const constantTerm = ptA.z - ptA.fx * state.x0 - ptA.fy * state.y0;
+      const signConst = constantTerm >= 0 ? `+ ${constantTerm.toFixed(2)}` : `- ${Math.abs(constantTerm).toFixed(2)}`;
+      document.getElementById("katexAffineSimplified").textContent = 
+        `Simplified: z = ${ptA.fx.toFixed(2)}${var1} + ${ptA.fy.toFixed(2)}${var2} ${signConst}`;
+
+      // 4. Test point approximation comparison
+      const testPt = evaluateAt(state.test_x, state.test_y);
+      const approxVal = evaluateAffineAt(state.test_x, state.test_y);
+      const err = Math.abs(testPt.z - approxVal);
+
+      document.getElementById("approxValF").textContent = testPt.z.toFixed(4);
+      document.getElementById("approxValG").textContent = approxVal.toFixed(4);
+      document.getElementById("approxValErr").textContent = err.toFixed(4);
+    }
+
     function updateCalculusCalculations() {
       const pt = evaluateAt(state.x0, state.y0);
       const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
       const angleDeg = ((Math.atan2(pt.fy, pt.fx) * 180 / Math.PI) + 360) % 360;
 
-      const matrixNumericLatex = `\\mathbf{D}f(P_0) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
+      const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
       katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
 
-      const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
-      const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
+      const var1 = state.notation === 'x1x2' ? 'a₁' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'a₂' : 'y';
       document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
       document.getElementById("evalZ0").textContent = pt.z.toFixed(3);
       document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
       document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
       document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
       document.getElementById("resGradMag").textContent = mag.toFixed(4);
-      document.getElementById("resGradAngle").textContent = `${angleDeg.toFixed(1)}° (90° to tangent)`;
+
+      // Normal and tangent unit vectors
+      if (mag > 1e-4) {
+        document.getElementById("resNormalVec").textContent = `⟨${(pt.fx / mag).toFixed(3)}, ${(pt.fy / mag).toFixed(3)}⟩`;
+        document.getElementById("resTangentVec").textContent = `⟨${(-pt.fy / mag).toFixed(3)}, ${(pt.fx / mag).toFixed(3)}⟩`;
+      } else {
+        document.getElementById("resNormalVec").textContent = "⟨0, 0⟩ (Critical pt)";
+        document.getElementById("resTangentVec").textContent = "Undefined";
+      }
 
       const diff = Math.abs(pt.z - state.level_c);
       const badge = document.getElementById("levelMatchBadge");
@@ -906,18 +1049,10 @@
         badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-sans";
       }
 
-      const slopeDisp = document.getElementById("resTangentSlope");
-      const eqDisp = document.getElementById("tangentLineEq");
-      if (Math.abs(pt.fy) > 1e-4) {
-        const m = -pt.fx / pt.fy;
-        slopeDisp.textContent = `m = ${m.toFixed(3)}`;
-      } else {
-        slopeDisp.textContent = `Vertical (m = ∞)`;
-      }
-
       const signX0 = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
       const signY0 = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
-      eqDisp.textContent = `${pt.fx.toFixed(2)}(${var1} ${signX0}) + ${pt.fy.toFixed(2)}(${var2} ${signY0}) = 0`;
+      document.getElementById("tangentLineEq").textContent = 
+        `${pt.fx.toFixed(2)}(${state.notation === 'x1x2' ? 'x₁' : 'x'} ${signX0}) + ${pt.fy.toFixed(2)}(${state.notation === 'x1x2' ? 'x₂' : 'y'} ${signY0}) = 0`;
     }
 
     function snapPointToLevelSet() {
@@ -938,18 +1073,16 @@
     }
 
     // -------------------------------------------------------------------------
-    // Seamless Mesh Grid Generation with Boundary Buffer (Fixes Cutoff Bug!)
+    // Seamless Mesh Grid Generation with Boundary Buffer (Zero Cutoffs!)
     // -------------------------------------------------------------------------
     function computeSurfaces() {
       const t0 = performance.now();
       const n = parseInt(state.grid_res);
 
-      // Add a 30% boundary buffer beyond current visible viewport range
-      // This completely prevents the cutoff bug when zooming or panning!
-      const spanX = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
-      const spanY = Math.abs(state.y_range[1] - state.y_range[0]) || 10;
-      const padX = spanX * 0.3;
-      const padY = spanY * 0.3;
+      const spanX = Math.abs(state.x_range[1] - state.x_range[0]) || 12;
+      const spanY = Math.abs(state.y_range[1] - state.y_range[0]) || 12;
+      const padX = spanX * 0.35;
+      const padY = spanY * 0.35;
 
       const meshXMin = Math.min(state.x_range[0], state.x_range[1]) - padX;
       const meshXMax = Math.max(state.x_range[0], state.x_range[1]) + padX;
@@ -995,7 +1128,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // 2D Level Set Plot Traces
+    // 2D Level Set Plot Traces (Normal Line, Tangent Line, 90° Marker, ∇f)
     // -------------------------------------------------------------------------
     function build2DTraces(mesh) {
       const traces = [];
@@ -1025,7 +1158,7 @@
         });
       }
 
-      // 2. High-priority Highlighted Level Set Curve f(x1, x2) = c
+      // 2. Highlighted Level Set Curve f(x) = c
       traces.push({
         type: 'contour',
         x: mesh.x,
@@ -1042,17 +1175,17 @@
         name: `Level Set: f = ${state.level_c.toFixed(2)}`
       });
 
-      // 3. Evaluation Point P0
+      // 3. Point of Tangency a
       traces.push({
         type: 'scatter',
         mode: 'markers+text',
         x: [state.x0],
         y: [state.y0],
-        text: [`P₀ (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`],
+        text: [`a (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`],
         textposition: 'top right',
         textfont: { color: '#ffffff', size: 12, family: 'sans-serif' },
         marker: { size: 10, color: '#f43f5e', symbol: 'circle', line: { color: '#ffffff', width: 2 } },
-        name: 'Evaluation Point P₀'
+        name: 'Point a'
       });
 
       const gradMag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
@@ -1063,23 +1196,35 @@
         const tx = -ny;
         const ty = nx;
 
-        // 4. Tangent Line to Level Set
-        if (state.show_tangent_line) {
-          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
-          const tLen = span * 0.35;
+        const span = Math.abs(state.x_range[1] - state.x_range[0]) || 12;
+        const lineLen = span * 0.45;
+
+        // 4. Normal Line in 2D (Points along ∇f, perpendicular to tangent)
+        if (state.show_normal_line) {
           traces.push({
             type: 'scatter',
             mode: 'lines',
-            x: [state.x0 - tLen * tx, state.x0 + tLen * tx],
-            y: [state.y0 - tLen * ty, state.y0 + tLen * ty],
+            x: [state.x0 - lineLen * nx, state.x0 + lineLen * nx],
+            y: [state.y0 - lineLen * ny, state.y0 + lineLen * ny],
+            line: { color: '#06b6d4', width: 3, dash: 'longdash' },
+            name: 'Normal Line (along ∇f, ⊥ Tangent)'
+          });
+        }
+
+        // 5. Tangent Line to Level Set at a
+        if (state.show_tangent_line) {
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: [state.x0 - lineLen * tx, state.x0 + lineLen * tx],
+            y: [state.y0 - lineLen * ty, state.y0 + lineLen * ty],
             line: { color: '#ec4899', width: 3, dash: 'dash' },
             name: 'Tangent Line to Curve'
           });
         }
 
-        // 5. Gradient Vector ∇f (90° Normal to Tangent Line)
+        // 6. Gradient Vector ∇f Arrow
         if (state.show_gradient) {
-          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
           const arrowLen = span * 0.22;
           const tipX = state.x0 + nx * arrowLen;
           const tipY = state.y0 + ny * arrowLen;
@@ -1098,9 +1243,8 @@
           });
         }
 
-        // 6. Right Angle Symbol (90° Square Corner at P0)
-        if (state.show_right_angle && state.show_gradient && state.show_tangent_line) {
-          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+        // 7. Right Angle Symbol (90° Square Corner between Tangent and Normal)
+        if (state.show_right_angle && (state.show_normal_line || state.show_gradient) && state.show_tangent_line) {
           const s = span * 0.04;
           const p1x = state.x0 + s * tx;
           const p1y = state.y0 + s * ty;
@@ -1114,37 +1258,10 @@
             mode: 'lines',
             x: [p1x, p2x, p3x],
             y: [p1y, p2y, p3y],
-            line: { color: '#22d3ee', width: 2 },
+            line: { color: '#10b981', width: 2.5 },
             showlegend: false,
             hoverinfo: 'none'
           });
-        }
-      }
-
-      // 7. Vector Field Grid
-      if (state.show_2d_grad_field) {
-        const step = Math.max(1, Math.floor(mesh.x.length / 10));
-        const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
-        const arrowLen = span * 0.045;
-        for (let j = 0; j < mesh.y.length; j += step) {
-          for (let i = 0; i < mesh.x.length; i += step) {
-            const gx = mesh.x[i], gy = mesh.y[j];
-            const g = evaluateAt(gx, gy);
-            const gMag = Math.sqrt(g.fx * g.fx + g.fy * g.fy);
-            if (gMag > 0.001) {
-              const dx = (g.fx / gMag) * arrowLen;
-              const dy = (g.fy / gMag) * arrowLen;
-              traces.push({
-                type: 'scatter',
-                mode: 'lines',
-                x: [gx, gx + dx],
-                y: [gy, gy + dy],
-                line: { color: 'rgba(255,255,255,0.3)', width: 1.5 },
-                showlegend: false,
-                hoverinfo: 'none'
-              });
-            }
-          }
         }
       }
 
@@ -1152,12 +1269,13 @@
     }
 
     // -------------------------------------------------------------------------
-    // 3D Surface Plot Traces
+    // 3D Surface Plot Traces (Surface, Tangent Plane g(x), 3D Normal Line)
     // -------------------------------------------------------------------------
     function build3DTraces(mesh) {
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0);
 
+      // 1. Primary nonlinear surface z = f(x)
       traces.push({
         type: 'surface',
         x: mesh.x,
@@ -1177,19 +1295,68 @@
         name: 'f(x₁, x₂)'
       });
 
+      // 2. Affine Function Surface z = g(x) (Tangent Plane!)
+      if (state.show_affine_plane) {
+        const span = 2.8;
+        const tx = [state.x0 - span, state.x0 + span];
+        const ty = [state.y0 - span, state.y0 + span];
+        const tz = [
+          [
+            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[0] - state.y0),
+            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[0] - state.y0)
+          ],
+          [
+            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[1] - state.y0),
+            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[1] - state.y0)
+          ]
+        ];
+
+        traces.push({
+          type: 'surface',
+          x: tx,
+          y: ty,
+          z: tz,
+          name: 'Affine g(x) (Tangent Plane)',
+          showscale: false,
+          opacity: 0.65,
+          colorscale: [[0, '#10b981'], [1, '#10b981']]
+        });
+      }
+
+      // 3. Point of Tangency (a, f(a))
       traces.push({
         type: 'scatter3d',
         mode: 'markers+text',
         x: [state.x0],
         y: [state.y0],
         z: [pt0.z],
-        text: [`P₀(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
+        text: [`a(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
         textposition: 'top center',
         textfont: { color: '#f43f5e', size: 11 },
         marker: { size: 7, color: '#f43f5e', symbol: 'circle' },
-        name: 'Point P₀'
+        name: 'Point a'
       });
 
+      // 4. 3D Surface Normal Line (Pierces surface and tangent plane at 90°)
+      if (state.show_3d_normal_line) {
+        const normLen = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy + 1);
+        const nx = -pt0.fx / normLen;
+        const ny = -pt0.fy / normLen;
+        const nz = 1 / normLen;
+        const L = 3.5;
+
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: [state.x0 - L * nx, state.x0 + L * nx],
+          y: [state.y0 - L * ny, state.y0 + L * ny],
+          z: [pt0.z - L * nz, pt0.z + L * nz],
+          name: '3D Normal Line (⊥ Plane)',
+          line: { color: '#06b6d4', width: 6 }
+        });
+      }
+
+      // 5. 3D Gradient Vector ∇f on surface
       if (state.show_gradient) {
         const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
         const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
@@ -1216,7 +1383,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // Layouts with Dragmode (Pan / Zoom) & Aspect Ratio
+    // Layouts
     // -------------------------------------------------------------------------
     function get2DLayout() {
       const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
@@ -1238,7 +1405,7 @@
           tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
           range: state.y_range,
           autorange: false,
-          scaleanchor: 'x', scaleratio: 1 // Keep circles perfectly circular!
+          scaleanchor: 'x', scaleratio: 1
         },
         showlegend: true,
         legend: {
@@ -1275,7 +1442,6 @@
       };
     }
 
-    // Plotly configurations: Enable scrollZoom for smooth mouse wheel zoom without double click!
     const plotConfig2D = {
       responsive: true,
       scrollZoom: true,
@@ -1292,9 +1458,6 @@
       displaylogo: false
     };
 
-    // -------------------------------------------------------------------------
-    // Zoom & Pan Helper Functions (No Double Click Required!)
-    // -------------------------------------------------------------------------
     function zoom2D(factor) {
       const cx = (state.x_range[0] + state.x_range[1]) / 2;
       const cy = (state.y_range[0] + state.y_range[1]) / 2;
@@ -1318,9 +1481,6 @@
       if (yMaxInput) yMaxInput.value = Math.max(state.y_range[0], state.y_range[1]).toFixed(1);
     }
 
-    // -------------------------------------------------------------------------
-    // Plot Rendering Loop
-    // -------------------------------------------------------------------------
     let isInitial2D = true;
     let isInitial3D = true;
 
@@ -1334,7 +1494,6 @@
 
       isInternalUpdating = true;
 
-      // 2D Level Sets Plot
       if (state.view_mode === '2d' || state.view_mode === 'split') {
         const traces2D = build2DTraces(mesh);
         if (isInitial2D) {
@@ -1350,7 +1509,6 @@
         }
       }
 
-      // 3D Surface Plot
       if (state.view_mode === '3d' || state.view_mode === 'split') {
         const traces3D = build3DTraces(mesh);
         if (isInitial3D) {
@@ -1386,10 +1544,9 @@
         }
       });
       div2D.on('plotly_unhover', function() {
-        document.getElementById('coordReadout').textContent = 'Scroll mouse wheel to Zoom • Drag to Pan • Click to set P₀';
+        document.getElementById('coordReadout').textContent = 'Scroll to Zoom • Drag to Pan • Click to set Point a';
       });
 
-      // Click anywhere to set P0
       div2D.on('plotly_click', function(data) {
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
@@ -1397,11 +1554,9 @@
         }
       });
 
-      // DYNAMIC VIEWPORT SYNCHRONIZATION (Fixes Cutoff Wall Bug permanently!)
       div2D.on('plotly_relayout', function(eventData) {
         if (isInternalUpdating || !eventData) return;
 
-        // Reset check
         if (eventData['xaxis.autorange'] || eventData['yaxis.autorange']) {
           state.x_range = [-6, 6];
           state.y_range = [-6, 6];
@@ -1435,9 +1590,6 @@
       });
     }
 
-    // -------------------------------------------------------------------------
-    // View Modes
-    // -------------------------------------------------------------------------
     function setViewMode(mode) {
       state.view_mode = mode;
       const div2D = document.getElementById('plotContainer2D');
@@ -1466,9 +1618,6 @@
       }, 50);
     }
 
-    // -------------------------------------------------------------------------
-    // Evaluation Point Handler
-    // -------------------------------------------------------------------------
     function setEvaluationPoint(x, y) {
       state.x0 = parseFloat(x);
       state.y0 = parseFloat(y);
@@ -1479,18 +1628,16 @@
       document.getElementById('y0Slider').value = state.y0;
 
       updateCalculusCalculations();
+      updateAffineCalculations();
       renderPlots(true);
     }
 
-    // -------------------------------------------------------------------------
-    // Sidebar Tabs
-    // -------------------------------------------------------------------------
     function initSidebarTabs() {
       const tabs = [
         { btn: 'tabNavLevelSets', content: 'tabContentLevelSets' },
+        { btn: 'tabNavAffine', content: 'tabContentAffine' },
         { btn: 'tabNavCalculus', content: 'tabContentCalculus' },
-        { btn: 'tabNavFunctions', content: 'tabContentFunctions' },
-        { btn: 'tabNavStyling', content: 'tabContentStyling' }
+        { btn: 'tabNavFunctions', content: 'tabContentFunctions' }
       ];
 
       tabs.forEach(t => {
@@ -1506,117 +1653,16 @@
     }
 
     // -------------------------------------------------------------------------
-    // Dynamic Parameter Cards
-    // -------------------------------------------------------------------------
-    function renderParameterCards() {
-      const container = document.getElementById("parametersList");
-      container.innerHTML = "";
-
-      for (const [key, p] of Object.entries(state.params)) {
-        const card = document.createElement("div");
-        card.className = "bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1.5 transition hover:border-slate-700";
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="w-5 h-5 rounded bg-indigo-600/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">${key}</span>
-              <span class="font-mono text-xs text-indigo-300 font-semibold" id="val_label_${key}">${p.val.toFixed(2)}</span>
-            </div>
-            <div class="flex items-center space-x-1 text-[10px] text-slate-500 font-mono">
-              <span>[${p.min}, ${p.max}]</span>
-              ${['a','b','c','d'].includes(key) ? '' : `
-                <button class="delete-param text-rose-400 hover:text-rose-300 ml-1 p-0.5" data-param="${key}" title="Delete variable">
-                  <i data-lucide="trash-2" class="w-3 h-3"></i>
-                </button>
-              `}
-            </div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input 
-              type="range" 
-              class="flex-1 param-slider" 
-              data-param="${key}" 
-              min="${p.min}" 
-              max="${p.max}" 
-              step="${p.step}" 
-              value="${p.val}"
-            >
-          </div>
-        `;
-        container.appendChild(card);
-      }
-
-      lucide.createIcons();
-
-      container.querySelectorAll('.param-slider').forEach(slider => {
-        slider.addEventListener('input', (e) => {
-          const k = e.target.getAttribute('data-param');
-          const val = parseFloat(e.target.value);
-          state.params[k].val = val;
-          document.getElementById(`val_label_${k}`).textContent = val.toFixed(2);
-          updateCalculusCalculations();
-          renderPlots(true);
-        });
-      });
-
-      container.querySelectorAll('.delete-param').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const k = btn.getAttribute('data-param');
-          delete state.params[k];
-          renderParameterCards();
-          renderPlots(true);
-        });
-      });
-    }
-
-    // -------------------------------------------------------------------------
-    // Time Animation Loop
-    // -------------------------------------------------------------------------
-    function toggleTimeAnimation() {
-      state.animating_t = !state.animating_t;
-      const btn = document.getElementById("timePlayBtn");
-      const icon = document.getElementById("timePlayIcon");
-      const txt = document.getElementById("timePlayText");
-
-      if (state.animating_t) {
-        btn.className = "px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white rounded text-[11px] flex items-center space-x-1 transition";
-        txt.textContent = "Pause";
-        icon.setAttribute("data-lucide", "pause");
-        lucide.createIcons();
-        runTimeLoop();
-      } else {
-        btn.className = "px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition";
-        txt.textContent = "Animate";
-        icon.setAttribute("data-lucide", "play");
-        lucide.createIcons();
-        if (state.animation_id) cancelAnimationFrame(state.animation_id);
-      }
-    }
-
-    function runTimeLoop() {
-      if (!state.animating_t) return;
-      state.t = (state.t + 0.05) % 20;
-      document.getElementById("param_t_slider").value = state.t;
-      document.getElementById("param_t_val").textContent = state.t.toFixed(2);
-
-      updateCalculusCalculations();
-      renderPlots(true);
-      state.animation_id = requestAnimationFrame(runTimeLoop);
-    }
-
-    // -------------------------------------------------------------------------
     // Event Listeners Binding
     // -------------------------------------------------------------------------
     function initEvents() {
-      // View modes
       document.getElementById('viewMode2D').addEventListener('click', () => setViewMode('2d'));
       document.getElementById('viewMode3D').addEventListener('click', () => setViewMode('3d'));
       document.getElementById('viewModeSplit').addEventListener('click', () => setViewMode('split'));
 
-      // Explicit Zoom In & Zoom Out Buttons (NO DOUBLE CLICK REQUIRED!)
       document.getElementById('zoomInBtn').addEventListener('click', () => zoom2D(0.72));
       document.getElementById('zoomOutBtn').addEventListener('click', () => zoom2D(1.38));
       
-      // Pan Mode Toggle Button
       document.getElementById('togglePanBtn').addEventListener('click', () => {
         state.drag_mode = state.drag_mode === 'pan' ? 'zoom' : 'pan';
         const isPan = state.drag_mode === 'pan';
@@ -1634,16 +1680,22 @@
           btn.className = "px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center space-x-1";
         }
         
-        const div2D = document.getElementById('plotContainer2D');
-        Plotly.relayout(div2D, { dragmode: state.drag_mode });
+        Plotly.relayout(document.getElementById('plotContainer2D'), { dragmode: state.drag_mode });
       });
 
-      // Reset Zoom to default [-6, 6]
       document.getElementById('resetZoomBtn').addEventListener('click', () => {
         state.x_range = [-6, 6];
         state.y_range = [-6, 6];
         syncDomainInputs();
         renderPlots(false);
+      });
+
+      // Theory modal
+      document.getElementById('openTheoryBtn').addEventListener('click', () => {
+        document.getElementById('theoryModal').classList.remove('hidden');
+      });
+      document.getElementById('closeTheoryModal').addEventListener('click', () => {
+        document.getElementById('theoryModal').classList.add('hidden');
       });
 
       // Level set constant c input and slider
@@ -1678,7 +1730,7 @@
         setEvaluationPoint(r, 0);
       });
 
-      // Snap P0 button
+      // Snap point a
       document.getElementById('snapToLevelSetBtn').addEventListener('click', snapPointToLevelSet);
 
       // Point evaluation inputs
@@ -1690,7 +1742,6 @@
       document.getElementById('x0Input').addEventListener('input', onPointType);
       document.getElementById('y0Input').addEventListener('input', onPointType);
 
-      // Sliders for x0, y0
       document.getElementById('x0Slider').addEventListener('input', (e) => {
         setEvaluationPoint(e.target.value, state.y0);
       });
@@ -1698,9 +1749,19 @@
         setEvaluationPoint(state.x0, e.target.value);
       });
 
-      // Visual toggles
-      document.getElementById('showGradientVector').addEventListener('change', (e) => {
-        state.show_gradient = e.target.checked;
+      // Linearization test point inputs
+      document.getElementById('testXInput').addEventListener('input', (e) => {
+        state.test_x = parseFloat(e.target.value) || 0;
+        updateAffineCalculations();
+      });
+      document.getElementById('testYInput').addEventListener('input', (e) => {
+        state.test_y = parseFloat(e.target.value) || 0;
+        updateAffineCalculations();
+      });
+
+      // Geometric Toggles
+      document.getElementById('showNormalLine').addEventListener('change', (e) => {
+        state.show_normal_line = e.target.checked;
         renderPlots(true);
       });
       document.getElementById('showTangentLine').addEventListener('change', (e) => {
@@ -1711,12 +1772,20 @@
         state.show_right_angle = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('showAllContourLines').addEventListener('change', (e) => {
-        state.show_all_contours = e.target.checked;
+      document.getElementById('showGradientVector').addEventListener('change', (e) => {
+        state.show_gradient = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('show2DGradField').addEventListener('change', (e) => {
-        state.show_2d_grad_field = e.target.checked;
+      document.getElementById('show3DNormalLine').addEventListener('change', (e) => {
+        state.show_3d_normal_line = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showAffinePlane').addEventListener('change', (e) => {
+        state.show_affine_plane = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showAllContourLines').addEventListener('change', (e) => {
+        state.show_all_contours = e.target.checked;
         renderPlots(true);
       });
 
@@ -1746,8 +1815,8 @@
         state.notation = 'x1x2';
         document.getElementById('notationX1X2').className = "px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]";
         document.getElementById('notationXY').className = "px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]";
-        document.getElementById('labelX1').textContent = "x₁ value (or x):";
-        document.getElementById('labelX2').textContent = "x₂ value (or y):";
+        document.getElementById('labelX1').textContent = "a₁ coordinate (x₁):";
+        document.getElementById('labelX2').textContent = "a₂ coordinate (x₂):";
         document.getElementById('dfdx1_title').textContent = "∂f / ∂x₁ :";
         document.getElementById('dfdx2_title').textContent = "∂f / ∂x₂ :";
         compileExpressions();
@@ -1757,41 +1826,12 @@
         state.notation = 'xy';
         document.getElementById('notationXY').className = "px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]";
         document.getElementById('notationX1X2').className = "px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]";
-        document.getElementById('labelX1').textContent = "x value:";
-        document.getElementById('labelX2').textContent = "y value:";
+        document.getElementById('labelX1').textContent = "a coordinate (x):";
+        document.getElementById('labelX2').textContent = "b coordinate (y):";
         document.getElementById('dfdx1_title').textContent = "∂f / ∂x :";
         document.getElementById('dfdx2_title').textContent = "∂f / ∂y :";
         compileExpressions();
         renderPlots(true);
-      });
-
-      // Time animation
-      document.getElementById("timePlayBtn").addEventListener("click", toggleTimeAnimation);
-      document.getElementById("timeResetBtn").addEventListener("click", () => {
-        state.t = 0;
-        document.getElementById("param_t_slider").value = 0;
-        document.getElementById("param_t_val").textContent = "0.00";
-        updateCalculusCalculations();
-        renderPlots(true);
-      });
-      document.getElementById("param_t_slider").addEventListener("input", (e) => {
-        state.t = parseFloat(e.target.value);
-        document.getElementById("param_t_val").textContent = state.t.toFixed(2);
-        updateCalculusCalculations();
-        renderPlots(true);
-      });
-
-      // Add custom parameter
-      document.getElementById("addParamBtn").addEventListener("click", () => {
-        const name = prompt("Enter parameter name (e.g. k, m, w):", "k");
-        if (name && /^[a-zA-Z][a-zA-Z0-9]*$/.test(name.trim())) {
-          const cleanName = name.trim();
-          if (!state.params[cleanName]) {
-            state.params[cleanName] = { val: 1.0, min: -10.0, max: 10.0, step: 0.1 };
-            renderParameterCards();
-            renderPlots(true);
-          }
-        }
       });
 
       // Domain inputs
@@ -1806,12 +1846,6 @@
       };
       ["xMin", "xMax", "yMin", "yMax"].forEach(id => {
         document.getElementById(id).addEventListener("change", updateDomainFromInputs);
-      });
-
-      document.getElementById("gridResSlider").addEventListener("input", (e) => {
-        state.grid_res = parseInt(e.target.value);
-        document.getElementById("gridResVal").textContent = `${state.grid_res} × ${state.grid_res} (${state.grid_res * state.grid_res} pts)`;
-        renderPlots(true);
       });
 
       // Visual styling
@@ -1872,7 +1906,7 @@
       document.getElementById("exportPngBtn").addEventListener("click", () => {
         const targetDiv = state.view_mode === '3d' ? document.getElementById('plotContainer3D') : document.getElementById('plotContainer2D');
         Plotly.downloadImage(targetDiv, {
-          format: 'png', width: 1920, height: 1080, filename: `multivar_levelset_${Date.now()}`
+          format: 'png', width: 1920, height: 1080, filename: `multivar_${Date.now()}`
         });
       });
 
@@ -1905,7 +1939,6 @@
     // -------------------------------------------------------------------------
     window.addEventListener("DOMContentLoaded", () => {
       initSidebarTabs();
-      renderParameterCards();
       compileExpressions();
       initEvents();
       syncDomainInputs();
