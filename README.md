@@ -35,6 +35,10 @@ Hosted 100% free with **zero backend server** on **GitHub Pages**:
 - **On-Screen Zoom Buttons**: Dedicated `[+]`, `[-]`, and `[⟲ Reset]` buttons.
 - **Seamless Boundary Buffer**: Auto-regenerates the mesh grid as you zoom or pan, preventing boundary cutoffs.
 
+### 6. 🎨 Modern Purple-and-White UI & Dark Mode Toggle
+- **Default Aesthetic**: Elegant modern purple-and-white glassmorphism design with violet accents.
+- **Dark Mode**: Interactive header toggle (persisted via `localStorage`) switching both interface elements and Plotly canvas coordinate grids between light and dark themes.
+
 ---
 
 ## 🚀 Run Locally
