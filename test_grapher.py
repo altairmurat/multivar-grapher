@@ -1,5 +1,5 @@
 """
-Verification test suite for MultivarGrapher 3D, Level Sets & Derivative Matrices.
+Verification test suite for MultivarGrapher 3D, Level Sets & Zoom Fixes.
 """
 
 import os
@@ -38,7 +38,11 @@ def test_index_html_structure():
         "katexMatrixNumeric",
         "plotContainer2D",
         "plotContainer3D",
-        "viewMode2D"
+        "zoomInBtn",
+        "zoomOutBtn",
+        "togglePanBtn",
+        "resetZoomBtn",
+        "scrollZoom"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"

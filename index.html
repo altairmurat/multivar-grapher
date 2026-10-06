@@ -93,7 +93,7 @@
             Live on GitHub Pages
           </span>
         </div>
-        <p class="text-[11px] text-slate-400 hidden sm:block">Level Sets $f^{-1}(c)$ • 90° Gradient Vector $\perp$ Tangent • Derivative $1 \times n$ Matrix</p>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Level Sets f⁻¹(c) • 90° Gradient Vector ⊥ Tangent • Derivative [1 × n] Matrix</p>
       </div>
     </div>
 
@@ -170,7 +170,7 @@
       <div class="p-4 space-y-4 flex-1">
 
         <!-- ============================================================= -->
-        <!-- TAB 1: LEVEL SET f^(-1)(c) (USER CORE FOCUS)                  -->
+        <!-- TAB 1: LEVEL SET f^(-1)(c)                                     -->
         <!-- ============================================================= -->
         <div id="tabContentLevelSets" class="space-y-4">
 
@@ -234,7 +234,7 @@
               </button>
             </div>
 
-            <!-- Exact coordinate inputs (User can type x=2, etc.) -->
+            <!-- Exact coordinate inputs -->
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div class="space-y-1">
                 <label for="x0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX1">x₁ value (or x):</label>
@@ -242,7 +242,7 @@
                   <span class="px-2 font-mono text-slate-500 text-xs">x₁ =</span>
                   <input type="number" id="x0Input" value="2.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
                 </div>
-                <input type="range" id="x0Slider" min="-5" max="5" step="0.05" value="2" class="w-full">
+                <input type="range" id="x0Slider" min="-10" max="10" step="0.05" value="2" class="w-full">
               </div>
 
               <div class="space-y-1">
@@ -251,7 +251,7 @@
                   <span class="px-2 font-mono text-slate-500 text-xs">x₂ =</span>
                   <input type="number" id="y0Input" value="0.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
                 </div>
-                <input type="range" id="y0Slider" min="-5" max="5" step="0.05" value="0" class="w-full">
+                <input type="range" id="y0Slider" min="-10" max="10" step="0.05" value="0" class="w-full">
               </div>
             </div>
 
@@ -317,7 +317,7 @@
         <!-- ============================================================= -->
         <div id="tabContentCalculus" class="space-y-4 hidden">
           
-          <!-- Derivative Matrix 1 x n Card (User Explicit Request) -->
+          <!-- Derivative Matrix 1 x n Card -->
           <div class="bg-gradient-to-b from-slate-950 to-slate-900 p-4 rounded-xl border border-amber-900/60 shadow-xl space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-300">
@@ -437,10 +437,10 @@
             <!-- Quick insert buttons -->
             <div class="flex flex-wrap gap-1 text-[11px] pt-1">
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 + x2^2</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 / 3 + x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">2*x1^2 + x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 - x2^2</button>
               <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x1) * cos(x2)</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x1^2 - x2^2)</button>
             </div>
           </div>
 
@@ -512,18 +512,18 @@
               <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
                 <label class="text-[10px] text-slate-400 font-mono block">X₁ Range [min, max]</label>
                 <div class="flex items-center space-x-1 mt-1">
-                  <input type="number" id="xMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <input type="number" id="xMin" value="-6" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                   <span class="text-slate-500">to</span>
-                  <input type="number" id="xMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <input type="number" id="xMax" value="6" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                 </div>
               </div>
 
               <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
                 <label class="text-[10px] text-slate-400 font-mono block">X₂ Range [min, max]</label>
                 <div class="flex items-center space-x-1 mt-1">
-                  <input type="number" id="yMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <input type="number" id="yMin" value="-6" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                   <span class="text-slate-500">to</span>
-                  <input type="number" id="yMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <input type="number" id="yMax" value="6" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                 </div>
               </div>
             </div>
@@ -571,7 +571,7 @@
     <!-- Right Visualization Viewports -->
     <main class="flex-1 flex flex-col relative bg-slate-950 min-h-[52vh] lg:min-h-0">
       
-      <!-- Top Overlay Banner: Function & Matrix Summary -->
+      <!-- Top Overlay Banner: Function & Interactive Zoom/Pan Toolbar -->
       <div class="absolute top-3 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         
         <!-- Rendered Equation Card -->
@@ -579,12 +579,35 @@
           <div id="katexEquation" class="text-xs sm:text-sm text-white overflow-x-auto"></div>
         </div>
 
-        <!-- Camera Toolbar -->
+        <!-- Interactive Zoom & Pan Floating Toolbar (Solves user's request!) -->
         <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-1.5 text-xs">
-          <button id="resetCamBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Reset View">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <!-- Zoom In Button -->
+          <button id="zoomInBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-200 transition flex items-center" title="Zoom In (+)">
+            <i data-lucide="zoom-in" class="w-4 h-4 text-cyan-400"></i>
           </button>
-          <button id="fullscreenBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Toggle Fullscreen">
+          <!-- Zoom Out Button (No double-click needed!) -->
+          <button id="zoomOutBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-200 transition flex items-center" title="Zoom Out (-)">
+            <i data-lucide="zoom-out" class="w-4 h-4 text-cyan-400"></i>
+          </button>
+          
+          <div class="h-4 w-px bg-slate-800"></div>
+
+          <!-- Pan Mode Toggle -->
+          <button id="togglePanBtn" class="px-2 py-1 rounded bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-200 transition flex items-center space-x-1" title="Toggle Drag Mode: Pan / Box Zoom">
+            <i data-lucide="hand" class="w-3.5 h-3.5" id="panIcon"></i>
+            <span id="panText" class="text-[11px] font-medium">Pan</span>
+          </button>
+
+          <div class="h-4 w-px bg-slate-800"></div>
+
+          <!-- Reset Zoom to Default -->
+          <button id="resetZoomBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition flex items-center space-x-1" title="Reset Range to [-6, 6]">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span class="text-[11px] hidden sm:inline">Reset</span>
+          </button>
+
+          <!-- Fullscreen Toggle -->
+          <button id="fullscreenBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-300 transition" title="Toggle Fullscreen">
             <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -601,7 +624,7 @@
       <!-- Bottom Status Bar -->
       <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-400 z-10">
         <div class="flex items-center space-x-3">
-          <span id="coordReadout" class="font-mono text-slate-300">Hover over curve or click to set P₀</span>
+          <span id="coordReadout" class="font-mono text-slate-300">Scroll mouse wheel to Zoom • Drag to Pan • Click to set P₀</span>
         </div>
         <div class="flex items-center space-x-3">
           <span class="text-amber-400 font-medium">∇f ⊥ Level Set (90° Normal)</span>
@@ -651,6 +674,7 @@
     const state = {
       view_mode: '2d', // Default to 2D Level Set view
       notation: 'x1x2', // 'x1x2' or 'xy'
+      drag_mode: 'pan', // Default to 'pan' for smooth Google Maps-like dragging!
       f_expr_raw: "x1^2 + x2^2",
       params: {
         a: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
@@ -667,9 +691,9 @@
       // Evaluation Point P0
       x0: 2.0,
       y0: 0.0,
-      // Domain Bounds
-      x_range: [-5, 5],
-      y_range: [-5, 5],
+      // Dynamic Domain Bounds (synced seamlessly on zoom/pan)
+      x_range: [-6, 6],
+      y_range: [-6, 6],
       grid_res: 50,
       color_scale: "Turbo",
       opacity: 0.95,
@@ -686,27 +710,27 @@
       circle_example: {
         expr: "x1^2 + x2^2",
         c: 4.0, r: 2.0, x0: 2.0, y0: 0.0,
-        x: [-4, 4], y: [-4, 4], mode: '2d'
+        x: [-6, 6], y: [-6, 6], mode: '2d'
       },
       ellipse: {
-        expr: "2 * x1^2 + x2^2",
-        c: 6.0, r: 2.45, x0: 1.414, y0: 1.414,
-        x: [-4, 4], y: [-4, 4], mode: '2d'
+        expr: "x1^2 / 3 + x2^2",
+        c: 6.0, r: 2.45, x0: 2.0, y0: 1.0,
+        x: [-7, 7], y: [-7, 7], mode: '2d'
       },
       saddle: {
         expr: "x1^2 - x2^2",
         c: 1.0, r: 1.0, x0: 1.414, y0: 1.0,
-        x: [-4, 4], y: [-4, 4], mode: 'split'
+        x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       ripple: {
         expr: "sin(sqrt(x1^2 + x2^2) * 2) / (sqrt(x1^2 + x2^2) + 0.1)",
         c: 0.5, r: 1.0, x0: 1.2, y0: 0.8,
-        x: [-5, 5], y: [-5, 5], mode: 'split'
+        x: [-6, 6], y: [-6, 6], mode: 'split'
       },
       gaussian: {
         expr: "3 * exp(-(x1^2 + x2^2) / 4)",
         c: 1.5, r: 1.66, x0: 1.18, y0: 1.18,
-        x: [-4, 4], y: [-4, 4], mode: 'split'
+        x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       egg_carton: {
         expr: "sin(x1) * cos(x2)",
@@ -716,12 +740,12 @@
       rosenbrock: {
         expr: "(1 - x1)^2 + 10 * (x2 - x1^2)^2",
         c: 5.0, r: 1.0, x0: 1.0, y0: 1.5,
-        x: [-2, 2], y: [-1, 3], mode: 'split'
+        x: [-3, 3], y: [-2, 4], mode: 'split'
       },
       sombrero: {
         expr: "cos(2 * sqrt(x1^2 + x2^2) - t) / (sqrt(x1^2 + x2^2) + 0.5)",
         c: 0.5, r: 1.0, x0: 1.5, y0: 0.5,
-        x: [-5, 5], y: [-5, 5], mode: 'split'
+        x: [-6, 6], y: [-6, 6], mode: 'split'
       }
     };
 
@@ -729,17 +753,13 @@
     let symDfD1 = null;
     let symDfD2 = null;
 
+    // Guard flag to prevent recursive updates during Plotly.react
+    let isInternalUpdating = false;
+    let relayoutDebounce = null;
+
     // -------------------------------------------------------------------------
     // Math Compilation & Derivative Matrix Construction
     // -------------------------------------------------------------------------
-    function getNormalizedExpression(expr) {
-      // Allow user to write x1, x2 or x, y interchangeably
-      let norm = expr;
-      // If formula has x without a digit after it, e.g. x^2, map to x1
-      // We will define both (x1, x2) and (x, y) in the math.js scope!
-      return norm;
-    }
-
     function compileExpressions() {
       const formulaStatus = document.getElementById("formulaStatus");
       const expr = state.f_expr_raw;
@@ -757,7 +777,6 @@
       // Compute symbolic partial derivatives
       try {
         const parsed = math.parse(expr);
-        // Detect variable names used
         const vars = new Set();
         parsed.traverse(node => {
           if (node.isSymbolNode) vars.add(node.name);
@@ -769,13 +788,11 @@
         symDfD1 = math.derivative(parsed, v1);
         symDfD2 = math.derivative(parsed, v2);
 
-        // Display individual derivatives
         const tex1 = symDfD1.toTex({ parenthesis: 'auto' });
         const tex2 = symDfD2.toTex({ parenthesis: 'auto' });
         katex.render(tex1, document.getElementById("katexDfDx"), { throwOnError: false });
         katex.render(tex2, document.getElementById("katexDfDy"), { throwOnError: false });
 
-        // Render Symbolic 1 x n Derivative Matrix Df
         const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
         const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
         const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
@@ -819,7 +836,6 @@
       return scope;
     }
 
-    // Evaluate f(x1, x2) and partial derivatives
     function evaluateAt(xVal, yVal) {
       if (!compiledF) return { z: 0, fx: 0, fy: 0 };
       const scope = getEvalScope(xVal, yVal);
@@ -842,7 +858,6 @@
         }
       }
 
-      // Central difference fallback if needed
       if (fx === null || typeof fx !== 'number' || isNaN(fx)) {
         const h = 1e-5;
         try {
@@ -863,17 +878,14 @@
       return { z, fx, fy };
     }
 
-    // Update numbers and the 1 x n Matrix display
     function updateCalculusCalculations() {
       const pt = evaluateAt(state.x0, state.y0);
       const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
       const angleDeg = ((Math.atan2(pt.fy, pt.fx) * 180 / Math.PI) + 360) % 360;
 
-      // Evaluated 1 x 2 Matrix Df(P0) KaTeX
       const matrixNumericLatex = `\\mathbf{D}f(P_0) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
       katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
 
-      // Labels and readouts
       const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
       const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
       document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
@@ -884,7 +896,6 @@
       document.getElementById("resGradMag").textContent = mag.toFixed(4);
       document.getElementById("resGradAngle").textContent = `${angleDeg.toFixed(1)}° (90° to tangent)`;
 
-      // Level Match status
       const diff = Math.abs(pt.z - state.level_c);
       const badge = document.getElementById("levelMatchBadge");
       if (diff < 0.05) {
@@ -895,8 +906,6 @@
         badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-sans";
       }
 
-      // Tangent line slope & equation
-      // Tangent line equation: fx*(x1 - x0) + fy*(x2 - y0) = 0
       const slopeDisp = document.getElementById("resTangentSlope");
       const eqDisp = document.getElementById("tangentLineEq");
       if (Math.abs(pt.fy) > 1e-4) {
@@ -911,9 +920,6 @@
       eqDisp.textContent = `${pt.fx.toFixed(2)}(${var1} ${signX0}) + ${pt.fy.toFixed(2)}(${var2} ${signY0}) = 0`;
     }
 
-    // -------------------------------------------------------------------------
-    // Snap Point P₀ onto Level Set f(x) = c (Newton-Raphson Projection)
-    // -------------------------------------------------------------------------
     function snapPointToLevelSet() {
       let x = state.x0, y = state.y0;
       const targetC = state.level_c;
@@ -932,21 +938,31 @@
     }
 
     // -------------------------------------------------------------------------
-    // Mesh Grid Generation
+    // Seamless Mesh Grid Generation with Boundary Buffer (Fixes Cutoff Bug!)
     // -------------------------------------------------------------------------
     function computeSurfaces() {
       const t0 = performance.now();
       const n = parseInt(state.grid_res);
-      const [xMin, xMax] = state.x_range;
-      const [yMin, yMax] = state.y_range;
+
+      // Add a 30% boundary buffer beyond current visible viewport range
+      // This completely prevents the cutoff bug when zooming or panning!
+      const spanX = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+      const spanY = Math.abs(state.y_range[1] - state.y_range[0]) || 10;
+      const padX = spanX * 0.3;
+      const padY = spanY * 0.3;
+
+      const meshXMin = Math.min(state.x_range[0], state.x_range[1]) - padX;
+      const meshXMax = Math.max(state.x_range[0], state.x_range[1]) + padX;
+      const meshYMin = Math.min(state.y_range[0], state.y_range[1]) - padY;
+      const meshYMax = Math.max(state.y_range[0], state.y_range[1]) + padY;
 
       const xArr = new Float64Array(n);
       const yArr = new Float64Array(n);
-      const dx = (xMax - xMin) / (n - 1);
-      const dy = (yMax - yMin) / (n - 1);
+      const dx = (meshXMax - meshXMin) / (n - 1);
+      const dy = (meshYMax - meshYMin) / (n - 1);
 
-      for (let i = 0; i < n; i++) xArr[i] = xMin + i * dx;
-      for (let j = 0; j < n; j++) yArr[j] = yMin + j * dy;
+      for (let i = 0; i < n; i++) xArr[i] = meshXMin + i * dx;
+      for (let j = 0; j < n; j++) yArr[j] = meshYMin + j * dy;
 
       const zArr = [];
 
@@ -984,8 +1000,6 @@
     function build2DTraces(mesh) {
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0);
-      const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
-      const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
 
       // 1. Background Level Sets (Isolines)
       if (state.show_all_contours) {
@@ -1011,7 +1025,7 @@
         });
       }
 
-      // 2. High-priority Highlighted Level Set Curve f(x1, x2) = c (e.g. circle with radius r=2)
+      // 2. High-priority Highlighted Level Set Curve f(x1, x2) = c
       traces.push({
         type: 'contour',
         x: mesh.x,
@@ -1025,7 +1039,7 @@
         },
         line: { color: '#00f5ff', width: 4.5 },
         showscale: false,
-        name: `Level Set f = ${state.level_c}`
+        name: `Level Set: f = ${state.level_c.toFixed(2)}`
       });
 
       // 3. Evaluation Point P0
@@ -1041,20 +1055,18 @@
         name: 'Evaluation Point P₀'
       });
 
-      // Compute vector geometry at P0
       const gradMag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
 
       if (gradMag > 1e-4) {
-        // Unit normal (gradient direction)
         const nx = pt0.fx / gradMag;
         const ny = pt0.fy / gradMag;
-        // Unit tangent direction (perpendicular to gradient: dot product nx*tx + ny*ty = 0)
         const tx = -ny;
         const ty = nx;
 
-        // 4. Tangent Line to the Level Set Curve at P0
+        // 4. Tangent Line to Level Set
         if (state.show_tangent_line) {
-          const tLen = 2.4; // Half-length of tangent segment
+          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+          const tLen = span * 0.35;
           traces.push({
             type: 'scatter',
             mode: 'lines',
@@ -1065,13 +1077,13 @@
           });
         }
 
-        // 5. Gradient Vector ∇f Arrow (Pointing Normal / 90° to Tangent Line)
+        // 5. Gradient Vector ∇f (90° Normal to Tangent Line)
         if (state.show_gradient) {
-          const arrowLen = 1.6;
+          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+          const arrowLen = span * 0.22;
           const tipX = state.x0 + nx * arrowLen;
           const tipY = state.y0 + ny * arrowLen;
 
-          // Vector shaft
           traces.push({
             type: 'scatter',
             mode: 'lines+markers+text',
@@ -1088,7 +1100,8 @@
 
         // 6. Right Angle Symbol (90° Square Corner at P0)
         if (state.show_right_angle && state.show_gradient && state.show_tangent_line) {
-          const s = 0.32; // Corner size
+          const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+          const s = span * 0.04;
           const p1x = state.x0 + s * tx;
           const p1y = state.y0 + s * ty;
           const p2x = state.x0 + s * tx + s * nx;
@@ -1108,16 +1121,17 @@
         }
       }
 
-      // 7. Gradient Vector Field Grid (Optional)
+      // 7. Vector Field Grid
       if (state.show_2d_grad_field) {
         const step = Math.max(1, Math.floor(mesh.x.length / 10));
+        const span = Math.abs(state.x_range[1] - state.x_range[0]) || 10;
+        const arrowLen = span * 0.045;
         for (let j = 0; j < mesh.y.length; j += step) {
           for (let i = 0; i < mesh.x.length; i += step) {
             const gx = mesh.x[i], gy = mesh.y[j];
             const g = evaluateAt(gx, gy);
             const gMag = Math.sqrt(g.fx * g.fx + g.fy * g.fy);
             if (gMag > 0.001) {
-              const arrowLen = 0.4;
               const dx = (g.fx / gMag) * arrowLen;
               const dy = (g.fy / gMag) * arrowLen;
               traces.push({
@@ -1144,7 +1158,6 @@
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0);
 
-      // Primary surface
       traces.push({
         type: 'surface',
         x: mesh.x,
@@ -1164,7 +1177,6 @@
         name: 'f(x₁, x₂)'
       });
 
-      // Point P0 on 3D surface
       traces.push({
         type: 'scatter3d',
         mode: 'markers+text',
@@ -1178,7 +1190,6 @@
         name: 'Point P₀'
       });
 
-      // Gradient vector on 3D graph (Steepest ascent)
       if (state.show_gradient) {
         const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
         const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
@@ -1205,25 +1216,28 @@
     }
 
     // -------------------------------------------------------------------------
-    // Layouts
+    // Layouts with Dragmode (Pan / Zoom) & Aspect Ratio
     // -------------------------------------------------------------------------
     function get2DLayout() {
       const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
       const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
       return {
         autosize: true,
+        dragmode: state.drag_mode || 'pan',
         margin: { l: 45, r: 20, b: 40, t: 25 },
         paper_bgcolor: '#020617',
         plot_bgcolor: '#020617',
         xaxis: {
           title: `${var1} (Horizontal Axis)`, gridcolor: '#1e293b', zerolinecolor: '#475569',
           tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
-          range: state.x_range
+          range: state.x_range,
+          autorange: false
         },
         yaxis: {
           title: `${var2} (Vertical Axis)`, gridcolor: '#1e293b', zerolinecolor: '#475569',
           tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
           range: state.y_range,
+          autorange: false,
           scaleanchor: 'x', scaleratio: 1 // Keep circles perfectly circular!
         },
         showlegend: true,
@@ -1261,6 +1275,49 @@
       };
     }
 
+    // Plotly configurations: Enable scrollZoom for smooth mouse wheel zoom without double click!
+    const plotConfig2D = {
+      responsive: true,
+      scrollZoom: true,
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+      doubleClick: 'reset+autosize'
+    };
+
+    const plotConfig3D = {
+      responsive: true,
+      scrollZoom: true,
+      displayModeBar: true,
+      displaylogo: false
+    };
+
+    // -------------------------------------------------------------------------
+    // Zoom & Pan Helper Functions (No Double Click Required!)
+    // -------------------------------------------------------------------------
+    function zoom2D(factor) {
+      const cx = (state.x_range[0] + state.x_range[1]) / 2;
+      const cy = (state.y_range[0] + state.y_range[1]) / 2;
+      const hx = (state.x_range[1] - state.x_range[0]) * factor / 2;
+      const hy = (state.y_range[1] - state.y_range[0]) * factor / 2;
+
+      state.x_range = [cx - hx, cx + hx];
+      state.y_range = [cy - hy, cy + hy];
+      syncDomainInputs();
+      renderPlots(false);
+    }
+
+    function syncDomainInputs() {
+      const xMinInput = document.getElementById("xMin");
+      const xMaxInput = document.getElementById("xMax");
+      const yMinInput = document.getElementById("yMin");
+      const yMaxInput = document.getElementById("yMax");
+      if (xMinInput) xMinInput.value = Math.min(state.x_range[0], state.x_range[1]).toFixed(1);
+      if (xMaxInput) xMaxInput.value = Math.max(state.x_range[0], state.x_range[1]).toFixed(1);
+      if (yMinInput) yMinInput.value = Math.min(state.y_range[0], state.y_range[1]).toFixed(1);
+      if (yMaxInput) yMaxInput.value = Math.max(state.y_range[0], state.y_range[1]).toFixed(1);
+    }
+
     // -------------------------------------------------------------------------
     // Plot Rendering Loop
     // -------------------------------------------------------------------------
@@ -1275,14 +1332,21 @@
       const div2D = document.getElementById('plotContainer2D');
       const div3D = document.getElementById('plotContainer3D');
 
+      isInternalUpdating = true;
+
       // 2D Level Sets Plot
       if (state.view_mode === '2d' || state.view_mode === 'split') {
         const traces2D = build2DTraces(mesh);
         if (isInitial2D) {
-          Plotly.newPlot(div2D, traces2D, get2DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents2D);
+          Plotly.newPlot(div2D, traces2D, get2DLayout(), plotConfig2D).then(() => {
+            attachPlotEvents2D();
+            isInternalUpdating = false;
+          });
           isInitial2D = false;
         } else {
-          Plotly.react(div2D, traces2D, get2DLayout());
+          Plotly.react(div2D, traces2D, get2DLayout()).then(() => {
+            setTimeout(() => { isInternalUpdating = false; }, 50);
+          });
         }
       }
 
@@ -1290,16 +1354,22 @@
       if (state.view_mode === '3d' || state.view_mode === 'split') {
         const traces3D = build3DTraces(mesh);
         if (isInitial3D) {
-          Plotly.newPlot(div3D, traces3D, get3DLayout(), { responsive: true, displayModeBar: false });
+          Plotly.newPlot(div3D, traces3D, get3DLayout(), plotConfig3D).then(() => {
+            isInternalUpdating = false;
+          });
           isInitial3D = false;
         } else {
           if (preserveCamera && div3D._fullLayout && div3D._fullLayout.scene) {
             const cam = div3D._fullLayout.scene._scene.getCamera();
             const layout = get3DLayout();
             if (cam) layout.scene.camera = { eye: cam.eye, center: cam.center, up: cam.up };
-            Plotly.react(div3D, traces3D, layout);
+            Plotly.react(div3D, traces3D, layout).then(() => {
+              setTimeout(() => { isInternalUpdating = false; }, 50);
+            });
           } else {
-            Plotly.react(div3D, traces3D, get3DLayout());
+            Plotly.react(div3D, traces3D, get3DLayout()).then(() => {
+              setTimeout(() => { isInternalUpdating = false; }, 50);
+            });
           }
         }
       }
@@ -1307,6 +1377,7 @@
 
     function attachPlotEvents2D() {
       const div2D = document.getElementById('plotContainer2D');
+      
       div2D.on('plotly_hover', function(data) {
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
@@ -1315,7 +1386,7 @@
         }
       });
       div2D.on('plotly_unhover', function() {
-        document.getElementById('coordReadout').textContent = 'Hover over curve or click to set P₀';
+        document.getElementById('coordReadout').textContent = 'Scroll mouse wheel to Zoom • Drag to Pan • Click to set P₀';
       });
 
       // Click anywhere to set P0
@@ -1323,6 +1394,43 @@
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
           setEvaluationPoint(pt.x, pt.y);
+        }
+      });
+
+      // DYNAMIC VIEWPORT SYNCHRONIZATION (Fixes Cutoff Wall Bug permanently!)
+      div2D.on('plotly_relayout', function(eventData) {
+        if (isInternalUpdating || !eventData) return;
+
+        // Reset check
+        if (eventData['xaxis.autorange'] || eventData['yaxis.autorange']) {
+          state.x_range = [-6, 6];
+          state.y_range = [-6, 6];
+          syncDomainInputs();
+          renderPlots(false);
+          return;
+        }
+
+        let newX0 = eventData['xaxis.range[0]'];
+        let newX1 = eventData['xaxis.range[1]'];
+        let newY0 = eventData['yaxis.range[0]'];
+        let newY1 = eventData['yaxis.range[1]'];
+
+        let changed = false;
+        if (newX0 !== undefined && newX1 !== undefined && isFinite(newX0) && isFinite(newX1)) {
+          state.x_range = [newX0, newX1];
+          changed = true;
+        }
+        if (newY0 !== undefined && newY1 !== undefined && isFinite(newY0) && isFinite(newY1)) {
+          state.y_range = [newY0, newY1];
+          changed = true;
+        }
+
+        if (changed) {
+          clearTimeout(relayoutDebounce);
+          relayoutDebounce = setTimeout(() => {
+            syncDomainInputs();
+            renderPlots(true);
+          }, 120);
         }
       });
     }
@@ -1504,6 +1612,40 @@
       document.getElementById('viewMode3D').addEventListener('click', () => setViewMode('3d'));
       document.getElementById('viewModeSplit').addEventListener('click', () => setViewMode('split'));
 
+      // Explicit Zoom In & Zoom Out Buttons (NO DOUBLE CLICK REQUIRED!)
+      document.getElementById('zoomInBtn').addEventListener('click', () => zoom2D(0.72));
+      document.getElementById('zoomOutBtn').addEventListener('click', () => zoom2D(1.38));
+      
+      // Pan Mode Toggle Button
+      document.getElementById('togglePanBtn').addEventListener('click', () => {
+        state.drag_mode = state.drag_mode === 'pan' ? 'zoom' : 'pan';
+        const isPan = state.drag_mode === 'pan';
+        const btn = document.getElementById('togglePanBtn');
+        const txt = document.getElementById('panText');
+        const icon = document.getElementById('panIcon');
+        
+        txt.textContent = isPan ? 'Pan' : 'Box Zoom';
+        icon.setAttribute('data-lucide', isPan ? 'hand' : 'zoom-in');
+        lucide.createIcons();
+
+        if (isPan) {
+          btn.className = "px-2 py-1 rounded bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-200 transition flex items-center space-x-1";
+        } else {
+          btn.className = "px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center space-x-1";
+        }
+        
+        const div2D = document.getElementById('plotContainer2D');
+        Plotly.relayout(div2D, { dragmode: state.drag_mode });
+      });
+
+      // Reset Zoom to default [-6, 6]
+      document.getElementById('resetZoomBtn').addEventListener('click', () => {
+        state.x_range = [-6, 6];
+        state.y_range = [-6, 6];
+        syncDomainInputs();
+        renderPlots(false);
+      });
+
       // Level set constant c input and slider
       document.getElementById('levelValueC').addEventListener('input', (e) => {
         state.level_c = parseFloat(e.target.value) || 0;
@@ -1533,14 +1675,13 @@
         state.level_c = r * r;
         document.getElementById('levelValueC').value = state.level_c.toFixed(1);
         document.getElementById('levelSliderC').value = state.level_c;
-        // If circle, set P0 on circle at (r, 0)
         setEvaluationPoint(r, 0);
       });
 
       // Snap P0 button
       document.getElementById('snapToLevelSetBtn').addEventListener('click', snapPointToLevelSet);
 
-      // Point evaluation inputs (Typing x=2, etc.)
+      // Point evaluation inputs
       const onPointType = () => {
         const x = parseFloat(document.getElementById('x0Input').value) || 0;
         const y = parseFloat(document.getElementById('y0Input').value) || 0;
@@ -1653,22 +1794,18 @@
         }
       });
 
-      // Domain & resolution
-      const updateDomain = () => {
-        const xMin = parseFloat(document.getElementById("xMin").value) || -5;
-        const xMax = parseFloat(document.getElementById("xMax").value) || 5;
-        const yMin = parseFloat(document.getElementById("yMin").value) || -5;
-        const yMax = parseFloat(document.getElementById("yMax").value) || 5;
+      // Domain inputs
+      const updateDomainFromInputs = () => {
+        const xMin = parseFloat(document.getElementById("xMin").value) || -6;
+        const xMax = parseFloat(document.getElementById("xMax").value) || 6;
+        const yMin = parseFloat(document.getElementById("yMin").value) || -6;
+        const yMax = parseFloat(document.getElementById("yMax").value) || 6;
         state.x_range = [Math.min(xMin, xMax - 0.5), Math.max(xMax, xMin + 0.5)];
         state.y_range = [Math.min(yMin, yMax - 0.5), Math.max(yMax, yMin + 0.5)];
-        document.getElementById("x0Slider").min = state.x_range[0];
-        document.getElementById("x0Slider").max = state.x_range[1];
-        document.getElementById("y0Slider").min = state.y_range[0];
-        document.getElementById("y0Slider").max = state.y_range[1];
-        renderPlots(true);
+        renderPlots(false);
       };
       ["xMin", "xMax", "yMin", "yMax"].forEach(id => {
-        document.getElementById(id).addEventListener("change", updateDomain);
+        document.getElementById(id).addEventListener("change", updateDomainFromInputs);
       });
 
       document.getElementById("gridResSlider").addEventListener("input", (e) => {
@@ -1708,13 +1845,11 @@
         if (preset.y0 !== undefined) state.y0 = preset.y0;
         if (preset.x) {
           state.x_range = preset.x;
-          document.getElementById("xMin").value = preset.x[0];
-          document.getElementById("xMax").value = preset.x[1];
+          syncDomainInputs();
         }
         if (preset.y) {
           state.y_range = preset.y;
-          document.getElementById("yMin").value = preset.y[0];
-          document.getElementById("yMax").value = preset.y[1];
+          syncDomainInputs();
         }
         if (preset.mode) setViewMode(preset.mode);
 
@@ -1722,9 +1857,6 @@
         setEvaluationPoint(state.x0, state.y0);
         renderPlots(false);
       });
-
-      // Camera reset
-      document.getElementById("resetCamBtn").addEventListener("click", () => renderPlots(false));
 
       // Fullscreen
       document.getElementById("fullscreenBtn").addEventListener("click", () => {
@@ -1749,7 +1881,8 @@
       document.getElementById("shareBtn").addEventListener("click", () => {
         const data = {
           f: state.f_expr_raw, c: state.level_c, r: state.radius_r,
-          x0: state.x0, y0: state.y0, mode: state.view_mode
+          x0: state.x0, y0: state.y0, mode: state.view_mode,
+          xr: state.x_range, yr: state.y_range
         };
         const hash = encodeURIComponent(JSON.stringify(data));
         const shareUrl = `${window.location.origin}${window.location.pathname}#${hash}`;
@@ -1775,6 +1908,7 @@
       renderParameterCards();
       compileExpressions();
       initEvents();
+      syncDomainInputs();
       setEvaluationPoint(state.x0, state.y0);
       setViewMode(state.view_mode);
     });
