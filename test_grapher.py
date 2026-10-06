@@ -1,5 +1,5 @@
 """
-Verification test suite for MultivarGrapher 3D & Level Sets.
+Verification test suite for MultivarGrapher 3D, Level Sets & Derivative Matrices.
 """
 
 import os
@@ -28,16 +28,17 @@ def test_index_html_structure():
         "mathjs",
         "katex",
         "functionInput",
-        "x0Input",
-        "y0Input",
-        "showGradientVector",
-        "showNormalVector",
-        "plotContainer3D",
+        "levelValueC",
+        "radiusInputR",
+        "applyRadiusBtn",
+        "snapToLevelSetBtn",
+        "showTangentLine",
+        "showRightAngleMarker",
+        "katexMatrixSymbolic",
+        "katexMatrixNumeric",
         "plotContainer2D",
-        "viewMode2D",
-        "viewModeSplit",
-        "tabNavLevelSets",
-        "tabNavCalculus"
+        "plotContainer3D",
+        "viewMode2D"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"
@@ -46,7 +47,7 @@ def test_index_html_structure():
 def test_python_plotter():
     print("Testing Python-native Plotly/SymPy plotter...")
     result = subprocess.run(
-        [sys.executable, "main.py", "--plot", "--no-browser", "--formula", "x**2 - y**2", "--a", "1.0"],
+        [sys.executable, "main.py", "--plot", "--no-browser", "--formula", "x**2 + y**2", "--a", "1.0"],
         cwd=BASE_DIR,
         capture_output=True,
         text=True,

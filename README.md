@@ -1,44 +1,31 @@
-# 🌌 MultivarGrapher 3D & Level Sets
+# 🌌 MultivarGrapher: 3D Surfaces, Level Sets & Derivative Matrices
 
-An interactive, high-performance 3D multivariable function visualizer and 2D Level Sets (Contour Map) explorer built with **Plotly.js**, **Math.js**, and **KaTeX**.
-
-Features real-time parameter manipulation, exact point evaluation (e.g. $x = 2, y = 1$), symbolic partial derivatives, interactive gradient vectors $\nabla f$, surface normal vectors $\mathbf{n}$, and tangent planes.
+An interactive multivariable calculus visualizer built with **Plotly.js**, **Math.js**, and **KaTeX**.
 
 Hosted 100% free with **zero backend server** on **GitHub Pages**:
 👉 **[Open Live App: https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)**
 
 ---
 
-## ✨ Key Features
+## ✨ Features Highlight
 
-### 1. 🗺️ Level Sets & Contour Map (2D & 3D)
-- **Dedicated 2D Level Sets View**: Switch between **3D Surface**, **2D Level Sets (Contour Map)**, or **Split View** side-by-side.
-- **Isolines with Value Labels**: Clearly labeled contour lines with adjustable contour density.
-- **Specific Level Curve $f(x, y) = c$**: Highlight any specific level curve with slider/input or click **Set $c = f(x_0, y_0)$** to highlight the exact curve passing through your evaluation point.
-- **Gradient Vector Field**: Toggle a vector field of gradient arrows across the entire domain, demonstrating the fundamental calculus theorem that **gradient vectors are always orthogonal (perpendicular) to level sets**.
+### 1. 🎯 Level Sets $f^{-1}(c)$ & Circle Radius $r$
+- **Level Set Equation**: Set any target value $c$ for the level set $f(x_1, x_2) = c$.
+- **Radius Helper**: For circle functions like $f(x_1, x_2) = x_1^2 + x_2^2$, enter radius $r$ (e.g. $r = 2$) and click **Set $r^2$** to instantly set $c = 4$, rendering a clean circle of radius 2.
+- **Snap Point $P_0$ to Curve**: One-click Newton-Raphson projection button snaps your evaluation point $P_0$ directly onto the level set curve.
+- **2D & 3D Views**: Switch between 2D Level Set view, 3D Surface view, or Split View (both side-by-side).
 
-### 2. 📐 Exact Point Evaluation & Live Derivatives
-- **Exact Point Inputs**: Type any exact coordinates (e.g., $x = 2$, $y = 1$) or drag the sliders. You can also click anywhere on the 2D contour map to set $P_0$.
-- **Symbolic Partial Derivatives**: Live analytic display of $\frac{\partial f}{\partial x}$ and $\frac{\partial f}{\partial y}$ rendered via KaTeX.
-- **Exact Numerical Calculus Values**:
-  - Surface Value: $f(x_0, y_0)$
-  - Partial Derivatives: $\frac{\partial f}{\partial x}(x_0, y_0)$ and $\frac{\partial f}{\partial y}(x_0, y_0)$
-  - Gradient Vector: $\nabla f = \langle f_x, f_y \rangle$
-  - Gradient Magnitude: $\|\nabla f\| = \sqrt{f_x^2 + f_y^2}$ (rate of steepest ascent)
-  - Angle of Steepest Ascent: $\theta$
-  - Tangent Plane Equation: $z = f_0 + f_x(x - x_0) + f_y(y - y_0)$
+### 2. 📐 90° Gradient Vector $\perp$ Tangent Line (Orthogonality)
+- **Gradient Vector $\nabla f$**: Bright amber arrow originating at $P_0$ pointing in the direction of steepest ascent.
+- **Tangent Line**: Pink dashed line tangent to the circle/level curve at $P_0$.
+- **90° Right-Angle Symbol**: A dedicated square corner symbol at $P_0$ visually confirming that **$\nabla f$ is strictly perpendicular (90 degrees / normal) to the tangent line and level curve**.
 
-### 3. 🎯 On-Graph Vector Visualizations
-- **3D Gradient Vector $\nabla f$**: Bright vector arrow drawn on the 3D surface pointing in the direction of steepest ascent.
-- **2D Gradient Vector**: Vector arrow on the 2D level set map perpendicular to the contour curves.
-- **Surface Normal Vector $\mathbf{n}$**: Vector $\mathbf{n} = \langle -f_x, -f_y, 1 \rangle$ pointing perpendicularly outward from the surface.
-- **Tangent Plane**: Semi-transparent plane touching the surface tangentially at $P_0$.
-- **Cross-Section Curves**: 3D slices along planes $x = x_0$ and $y = y_0$.
-
-### 4. 🎛️ Real-Time Sliders & 4D Time Animation
-- Interactive sliders for parameters $a, b, c, d$ (with live formula recalculation at 60 FPS).
-- Add custom variables dynamically on the fly ($k, m, w$).
-- Animated time variable $t$ with Play/Pause for ripples and traveling wave packets.
+### 3. 🔢 Derivative as a $[1 \times n]$ Matrix ($Df = \nabla f^T$)
+- For scalar fields $f: \mathbb{R}^n \to \mathbb{R}$, the total derivative / Jacobian is represented as a **$1 \times n$ row matrix**:
+  $$\mathbf{D}f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} & \frac{\partial f}{\partial x_2} \end{bmatrix}_{1 \times 2}$$
+- **Evaluated Numerically at $P_0$**:
+  $$\mathbf{D}f(P_0) = \begin{bmatrix} f_{x_1}(P_0) & f_{x_2}(P_0) \end{bmatrix}_{1 \times 2}$$
+- Supports both **$(x_1, x_2)$** and **$(x, y)$** variable notation styles.
 
 ---
 
@@ -47,16 +34,11 @@ Hosted 100% free with **zero backend server** on **GitHub Pages**:
 ```powershell
 python main.py
 ```
-This starts a local development server and automatically opens the app in your browser.
+Starts a local server and opens your browser.
 
 ---
 
-## 🌐 Deploy to GitHub Pages
+## 🌐 GitHub Pages Deployment
 
-To push any updates:
-```powershell
-git add .
-git commit -m "Update grapher features"
-git push -u origin main
-```
-Your live link updates automatically at [https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/).
+Updates are pushed directly to `main` branch and served via GitHub Pages:
+[https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)

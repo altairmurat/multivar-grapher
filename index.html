@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MultivarGrapher 3D & Level Sets | Interactive Multivariable Calculus</title>
+  <title>MultivarGrapher | 3D Surfaces, Level Sets & Derivative Matrices</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <!-- Math.js for robust formula parsing and symbolic differentiation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
-  <!-- KaTeX for beautiful math equations -->
+  <!-- KaTeX for beautiful math equations and matrices -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <!-- Lucide Icons -->
@@ -60,7 +60,6 @@
       width: 100% !important;
       height: 100% !important;
     }
-    /* Tab active styles */
     .tab-btn.active {
       background-color: #4f46e5;
       color: #ffffff;
@@ -80,7 +79,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none overflow-x-hidden">
 
   <!-- Top Navigation Header -->
-  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2.5 flex items-center justify-between sticky top-0 z-50">
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur px-4 py-2.5 flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center space-x-3">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
         <i data-lucide="layers" class="w-5 h-5 text-white"></i>
@@ -88,47 +87,45 @@
       <div>
         <div class="flex items-center space-x-2">
           <h1 class="font-bold text-base md:text-lg text-white tracking-tight">
-            MultivarGrapher <span class="text-indigo-400 font-mono text-xs px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">3D & Level Sets</span>
+            MultivarGrapher <span class="text-indigo-400 font-mono text-xs px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">Level Sets & 3D</span>
           </h1>
           <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium hidden sm:inline">
             Live on GitHub Pages
           </span>
         </div>
-        <p class="text-[11px] text-slate-400 hidden sm:block">3D Surfaces • 2D Level Sets (Contours) • Derivatives • Gradient Vectors • Tangent Planes</p>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Level Sets $f^{-1}(c)$ • 90° Gradient Vector $\perp$ Tangent • Derivative $1 \times n$ Matrix</p>
       </div>
     </div>
 
     <!-- Center View Mode Selector -->
     <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-      <button id="viewMode3D" class="view-mode-btn active px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
-        <i data-lucide="box" class="w-3.5 h-3.5"></i>
-        <span class="hidden md:inline">3D Surface</span>
-      </button>
-      <button id="viewMode2D" class="view-mode-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
-        <i data-lucide="map" class="w-3.5 h-3.5"></i>
-        <span>Level Sets (2D)</span>
+      <button id="viewMode2D" class="view-mode-btn active px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
+        <i data-lucide="circle-dot" class="w-3.5 h-3.5 text-cyan-400"></i>
+        <span>Level Set (2D)</span>
       </button>
       <button id="viewModeSplit" class="view-mode-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
         <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
-        <span class="hidden sm:inline">Split View</span>
+        <span class="hidden sm:inline">Split (3D + 2D)</span>
+      </button>
+      <button id="viewMode3D" class="view-mode-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
+        <i data-lucide="box" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">3D Surface</span>
       </button>
     </div>
 
     <!-- Quick Action Buttons -->
     <div class="flex items-center space-x-2">
       <!-- Preset Dropdown -->
-      <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer max-w-[140px] sm:max-w-none">
+      <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer max-w-[150px] sm:max-w-none">
         <option value="" disabled selected>✨ Presets...</option>
-        <option value="saddle">Hyperbolic Paraboloid (Saddle)</option>
-        <option value="paraboloid">Elliptic Paraboloid (Bowl)</option>
-        <option value="monkey_saddle">Monkey Saddle (3 Dips)</option>
+        <option value="circle_example">🎯 Circle f(x₁,x₂) = x₁² + x₂² (r=2, c=4)</option>
+        <option value="ellipse">Ellipse f(x₁,x₂) = 2x₁² + x₂² (c=6)</option>
+        <option value="saddle">Hyperbolic Saddle f = x₁² - x₂²</option>
         <option value="ripple">Water Droplet Ripple (Sinc)</option>
         <option value="gaussian">Gaussian Bell Wave Packet</option>
         <option value="egg_carton">Egg Carton Grid</option>
         <option value="rosenbrock">Rosenbrock Valley</option>
         <option value="sombrero">Animated Sombrero Wave</option>
-        <option value="chladni">Chladni Nodal Surface</option>
-        <option value="cliff">Sigmoid Transition Step</option>
       </select>
 
       <button id="shareBtn" title="Copy Shareable Link" class="flex items-center space-x-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-indigo-600/30 transition">
@@ -148,21 +145,21 @@
   <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
     <!-- Left Controls Panel -->
-    <aside id="controlsPanel" class="w-full lg:w-[420px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[48vh] lg:max-h-[calc(100vh-57px)]">
+    <aside id="controlsPanel" class="w-full lg:w-[440px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[48vh] lg:max-h-[calc(100vh-57px)]">
       
       <!-- Panel Tabs -->
       <div class="grid grid-cols-4 gap-1 p-2 bg-slate-950 border-b border-slate-800 sticky top-0 z-20 text-[11px] font-medium">
-        <button id="tabNavFunctions" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
-          <i data-lucide="function-square" class="w-3.5 h-3.5"></i>
-          <span>Formula</span>
+        <button id="tabNavLevelSets" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="circle-dot" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Level Set</span>
         </button>
         <button id="tabNavCalculus" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
-          <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>Calculus</span>
+          <i data-lucide="grid" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Matrix Df</span>
         </button>
-        <button id="tabNavLevelSets" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
-          <i data-lucide="map" class="w-3.5 h-3.5 text-cyan-400"></i>
-          <span>Level Sets</span>
+        <button id="tabNavFunctions" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="function-square" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Function</span>
         </button>
         <button id="tabNavStyling" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
@@ -173,16 +170,254 @@
       <div class="p-4 space-y-4 flex-1">
 
         <!-- ============================================================= -->
-        <!-- TAB 1: FORMULAS & VARIABLES                                   -->
+        <!-- TAB 1: LEVEL SET f^(-1)(c) (USER CORE FOCUS)                  -->
         <!-- ============================================================= -->
-        <div id="tabContentFunctions" class="space-y-4">
+        <div id="tabContentLevelSets" class="space-y-4">
+
+          <!-- Level Set Value Input Card -->
+          <div class="bg-gradient-to-b from-slate-950 to-slate-900 p-3.5 rounded-xl border border-cyan-900/60 shadow-lg space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-cyan-300">
+                <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
+                <span>Level Set Definition: <span class="font-mono text-cyan-200">f(x₁, x₂) = c</span></span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">f⁻¹(c)</span>
+            </div>
+
+            <p class="text-[11px] text-slate-300">
+              The level set <span class="font-mono text-cyan-400 font-semibold">f⁻¹(c)</span> is the curve formed by all points where the function equals constant <span class="font-mono text-cyan-400">c</span>.
+            </p>
+
+            <!-- Level value c controls -->
+            <div class="space-y-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-mono text-slate-300 font-semibold">Level Value c :</span>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[10px] text-slate-500 font-mono">c =</span>
+                  <input type="number" id="levelValueC" value="4.0" step="0.5" class="w-20 bg-slate-900 border border-cyan-700/80 rounded px-2 py-1 font-mono text-cyan-300 text-xs text-center focus:outline-none focus:border-cyan-400 font-bold">
+                </div>
+              </div>
+              <input type="range" id="levelSliderC" min="-10" max="25" step="0.1" value="4.0" class="w-full">
+            </div>
+
+            <!-- Radius Helper for Circles (r -> c = r^2) -->
+            <div class="bg-cyan-950/40 p-2.5 rounded-lg border border-cyan-900/40 space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-1 text-cyan-300 font-medium">
+                  <i data-lucide="circle" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>Circle Radius Helper: <span class="font-mono">c = r²</span></span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <span class="text-[10px] text-slate-400 font-mono">r =</span>
+                  <input type="number" id="radiusInputR" value="2.0" step="0.5" min="0.1" class="w-14 bg-slate-900 border border-cyan-800 rounded px-1.5 py-0.5 font-mono text-white text-xs text-center">
+                  <button id="applyRadiusBtn" class="px-2 py-0.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-[11px] font-semibold transition" title="Set c = r^2">
+                    Set r²
+                  </button>
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-400">
+                For <span class="font-mono text-slate-200">f = x₁² + x₂²</span>, setting <span class="font-mono text-cyan-300">r = 2</span> produces circle <span class="font-mono text-cyan-300">x₁² + x₂² = 4</span> with radius 2!
+              </p>
+            </div>
+          </div>
+
+          <!-- Evaluation Point P₀ on Level Set -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-indigo-900/60 space-y-3 shadow-md">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-indigo-300">
+                <i data-lucide="map-pin" class="w-4 h-4 text-rose-400"></i>
+                <span>Evaluation Point P₀ (x₁, x₂)</span>
+              </div>
+              <button id="snapToLevelSetBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-medium flex items-center space-x-1 transition shadow-sm" title="Project P0 directly onto the level curve f=c">
+                <i data-lucide="crosshair" class="w-3 h-3"></i>
+                <span>Snap P₀ to Curve</span>
+              </button>
+            </div>
+
+            <!-- Exact coordinate inputs (User can type x=2, etc.) -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="space-y-1">
+                <label for="x0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX1">x₁ value (or x):</label>
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
+                  <span class="px-2 font-mono text-slate-500 text-xs">x₁ =</span>
+                  <input type="number" id="x0Input" value="2.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
+                </div>
+                <input type="range" id="x0Slider" min="-5" max="5" step="0.05" value="2" class="w-full">
+              </div>
+
+              <div class="space-y-1">
+                <label for="y0Input" class="text-[11px] font-mono text-slate-400 block" id="labelX2">x₂ value (or y):</label>
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
+                  <span class="px-2 font-mono text-slate-500 text-xs">x₂ =</span>
+                  <input type="number" id="y0Input" value="0.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none font-bold">
+                </div>
+                <input type="range" id="y0Slider" min="-5" max="5" step="0.05" value="0" class="w-full">
+              </div>
+            </div>
+
+            <!-- Point status relative to level set -->
+            <div id="pointLevelStatus" class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono flex items-center justify-between">
+              <span class="text-slate-400">At P₀: f(x₁, x₂) =</span>
+              <span id="evalZ0" class="text-emerald-400 font-bold">4.000</span>
+              <span id="levelMatchBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans">On Level Set ✓</span>
+            </div>
+          </div>
+
+          <!-- On-Graph Vector & Tangent Toggles -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+              <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Geometric Visualizations on Graph</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+              <label class="flex items-center space-x-2 text-amber-300 cursor-pointer font-medium">
+                <input type="checkbox" id="showGradientVector" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
+                <span>Gradient Vector ∇f (Pointing 90° Normal to Curve)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-pink-300 cursor-pointer font-medium">
+                <input type="checkbox" id="showTangentLine" checked class="rounded bg-slate-900 border-slate-700 text-pink-500 focus:ring-pink-500">
+                <span>Tangent Line to Level Set at P₀</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-cyan-300 cursor-pointer">
+                <input type="checkbox" id="showRightAngleMarker" checked class="rounded bg-slate-900 border-slate-700 text-cyan-500">
+                <span>Show 90° Right-Angle Symbol (∇f ⊥ Tangent)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="showAllContourLines" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600">
+                <span>Show Other Background Level Sets (Isolines)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="show2DGradField" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
+                <span>Show Full Gradient Vector Field (Arrows Everywhere)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Orthogonality Explanation Box -->
+          <div class="p-3 bg-cyan-950/30 rounded-xl border border-cyan-800/40 text-[11px] text-slate-300 space-y-1.5">
+            <div class="font-bold text-cyan-300 flex items-center space-x-1.5">
+              <i data-lucide="help-circle" class="w-4 h-4 text-cyan-400"></i>
+              <span>Why is the Gradient at 90°? (Orthogonality Theorem)</span>
+            </div>
+            <p class="text-slate-400 leading-relaxed">
+              Along the level set curve <span class="font-mono text-cyan-300">f(x) = c</span>, the value is constant, so directional derivative is 0.
+              By chain rule, <span class="font-mono text-amber-300">∇f · T = 0</span>, proving that the gradient vector <span class="font-mono text-amber-300">∇f</span> is <strong>strictly perpendicular (at 90 degrees)</strong> to the tangent line of the circle/level curve!
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 2: DERIVATIVE 1xn MATRIX & CALCULUS                       -->
+        <!-- ============================================================= -->
+        <div id="tabContentCalculus" class="space-y-4 hidden">
           
-          <!-- Primary Function Input -->
+          <!-- Derivative Matrix 1 x n Card (User Explicit Request) -->
+          <div class="bg-gradient-to-b from-slate-950 to-slate-900 p-4 rounded-xl border border-amber-900/60 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-300">
+                <i data-lucide="grid" class="w-4 h-4 text-amber-400"></i>
+                <span>Total Derivative / Jacobian Matrix [1 × n]</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-mono font-bold">Df = ∇fᵀ</span>
+            </div>
+
+            <p class="text-[11px] text-slate-400">
+              For scalar field <span class="font-mono text-slate-200">f: ℝⁿ → ℝ</span>, the derivative is formally the <span class="font-mono text-amber-300 font-semibold">1 × n row matrix</span> of partial derivatives:
+            </p>
+
+            <!-- Symbolic 1xn matrix -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Symbolic Derivative Matrix [1 × 2]:</div>
+              <div id="katexMatrixSymbolic" class="overflow-x-auto text-sm text-white py-1"></div>
+            </div>
+
+            <!-- Evaluated 1xn matrix at P0 -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-amber-900/50 space-y-1.5">
+              <div class="flex items-center justify-between text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
+                <span>Evaluated at P₀:</span>
+                <span id="matrixEvalPointLabel" class="font-mono text-slate-300">(x₁ = 2.0, x₂ = 0.0)</span>
+              </div>
+              <div id="katexMatrixNumeric" class="overflow-x-auto text-base text-amber-200 py-1 font-bold"></div>
+            </div>
+
+            <!-- Gradient Column Vector representation -->
+            <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">Gradient Column Vector ∇f = (Df)ᵀ :</span>
+              <span id="gradColumnVecDisplay" class="text-amber-300 font-bold">⟨4.000, 0.000⟩ᵀ</span>
+            </div>
+          </div>
+
+          <!-- Individual Partial Derivatives -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2.5">
+            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+              <i data-lucide="variable" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Partial Derivatives Breakdown</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-indigo-400 font-semibold" id="dfdx1_title">∂f / ∂x₁ :</div>
+                  <div id="katexDfDx" class="text-slate-200 font-mono text-xs"></div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-500 font-sans">At P₀:</div>
+                  <div id="resDfDx" class="font-mono font-bold text-emerald-400 text-sm">0.0000</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-cyan-400 font-semibold" id="dfdx2_title">∂f / ∂x₂ :</div>
+                  <div id="katexDfDy" class="text-slate-200 font-mono text-xs"></div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-500 font-sans">At P₀:</div>
+                  <div id="resDfDy" class="font-mono font-bold text-emerald-400 text-sm">0.0000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculus Metrics Card -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 font-mono text-xs text-slate-300">
+            <div class="flex justify-between p-1.5 bg-slate-900 rounded border border-slate-800">
+              <span class="text-slate-400">Gradient Magnitude ||∇f||:</span>
+              <span id="resGradMag" class="font-bold text-purple-300">4.0000</span>
+            </div>
+            <div class="flex justify-between p-1.5 bg-slate-900 rounded border border-slate-800">
+              <span class="text-slate-400">Steepest Ascent Angle θ:</span>
+              <span id="resGradAngle" class="text-amber-300">0.0°</span>
+            </div>
+            <div class="flex justify-between p-1.5 bg-slate-900 rounded border border-slate-800">
+              <span class="text-slate-400">Level Curve Tangent Slope:</span>
+              <span id="resTangentSlope" class="text-pink-300">Vertical (∞)</span>
+            </div>
+            <div class="p-2 bg-slate-900 rounded border border-slate-800 text-[11px]">
+              <span class="text-slate-400 block text-[10px] uppercase font-sans font-semibold mb-0.5">Tangent Line Equation:</span>
+              <div id="tangentLineEq" class="text-pink-200 overflow-x-auto">4.00(x₁ - 2.00) = 0</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 3: FUNCTION DEFINITION & PARAMETERS                       -->
+        <!-- ============================================================= -->
+        <div id="tabContentFunctions" class="space-y-4 hidden">
+          
+          <!-- Function Input -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <label for="functionInput" class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1">
-                <span>Primary Surface</span>
-                <span class="text-indigo-400 font-mono">z = f(x, y)</span>
+                <span>Function Definition</span>
+                <span class="text-indigo-400 font-mono">f(x₁, x₂)</span>
               </label>
               <span id="formulaStatus" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Valid</span>
             </div>
@@ -190,40 +425,31 @@
               <input 
                 type="text" 
                 id="functionInput" 
-                value="sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)" 
+                value="x1^2 + x2^2" 
                 class="w-full bg-slate-950 font-mono text-sm text-indigo-100 px-3 py-2.5 rounded-xl border border-indigo-900/60 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none tracking-wide shadow-inner transition"
-                placeholder="e.g. x^2 - y^2"
+                placeholder="e.g. x1^2 + x2^2 or x^2 + y^2"
                 spellcheck="false"
               >
             </div>
-            <!-- Math helper insert buttons -->
+            <p class="text-[10px] text-slate-400">
+              💡 Supports both <span class="font-mono text-indigo-300">x₁, x₂</span> and <span class="font-mono text-indigo-300">x, y</span>!
+            </p>
+            <!-- Quick insert buttons -->
             <div class="flex flex-wrap gap-1 text-[11px] pt-1">
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x)</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">cos(y)</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sqrt(x^2+y^2)</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x^2-y^2)</button>
-              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x^2 - y^2</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 + x2^2</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">2*x1^2 + x2^2</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x1^2 - x2^2</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x1) * cos(x2)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x1^2 - x2^2)</button>
             </div>
           </div>
 
-          <!-- Secondary Function Toggle & Input -->
-          <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
-            <div class="flex items-center justify-between">
-              <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-300">
-                <input type="checkbox" id="showSecondSurface" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span>Second Surface <span class="text-cyan-400 font-mono text-xs">z₂ = g(x, y)</span></span>
-              </label>
-              <span class="text-[10px] text-slate-500">Intersect/Dual</span>
-            </div>
-            <div id="secondSurfaceContainer" class="hidden">
-              <input 
-                type="text" 
-                id="secondFunctionInput" 
-                value="0.5 * (x + y)" 
-                class="w-full bg-slate-950 font-mono text-sm text-cyan-200 px-3 py-2 rounded-xl border border-cyan-900/60 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none tracking-wide shadow-inner transition"
-                placeholder="e.g. 0.5 * (x + y)"
-                spellcheck="false"
-              >
+          <!-- Notation Choice -->
+          <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+            <span class="text-slate-300 font-medium">Variable Notation Style:</span>
+            <div class="flex bg-slate-900 rounded-lg p-0.5 border border-slate-700">
+              <button id="notationX1X2" class="px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]">x₁, x₂</button>
+              <button id="notationXY" class="px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]">x, y</button>
             </div>
           </div>
 
@@ -232,7 +458,7 @@
             <div class="flex items-center justify-between">
               <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
                 <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>Parameters & Variables</span>
+                <span>Parameters (a, b, c, d)</span>
               </h2>
               <button id="addParamBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center space-x-0.5">
                 <i data-lucide="plus" class="w-3 h-3"></i>
@@ -249,7 +475,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                   <span class="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">t</span>
-                  <span class="text-xs font-medium text-slate-300">Time variable (4D Waves)</span>
+                  <span class="text-xs font-medium text-slate-300">Time variable (Waves)</span>
                 </div>
                 <div class="flex items-center space-x-1">
                   <button id="timePlayBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition">
@@ -267,226 +493,11 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- TAB 2: CALCULUS, DERIVATIVES & GRADIENT (CORE REQUEST)         -->
-        <!-- ============================================================= -->
-        <div id="tabContentCalculus" class="space-y-4 hidden">
-          
-          <!-- Exact Point Selection -->
-          <div class="bg-slate-950 p-3.5 rounded-xl border border-indigo-900/50 space-y-3 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-1.5 text-xs font-semibold text-indigo-300">
-                <i data-lucide="map-pin" class="w-4 h-4 text-rose-400"></i>
-                <span>Evaluation Point P₀ (x, y)</span>
-              </div>
-              <span class="text-[10px] text-slate-400">Type or slide</span>
-            </div>
-
-            <!-- Exact numeric input inputs -->
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <div class="space-y-1">
-                <label for="x0Input" class="text-[11px] font-mono text-slate-400 block">x value:</label>
-                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
-                  <span class="px-2 font-mono text-slate-500 text-xs">x =</span>
-                  <input type="number" id="x0Input" value="2.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none">
-                </div>
-                <input type="range" id="x0Slider" min="-5" max="5" step="0.1" value="2" class="w-full">
-              </div>
-
-              <div class="space-y-1">
-                <label for="y0Input" class="text-[11px] font-mono text-slate-400 block">y value:</label>
-                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
-                  <span class="px-2 font-mono text-slate-500 text-xs">y =</span>
-                  <input type="number" id="y0Input" value="1.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none">
-                </div>
-                <input type="range" id="y0Slider" min="-5" max="5" step="0.1" value="1" class="w-full">
-              </div>
-            </div>
-
-            <p class="text-[10px] text-slate-400 italic">
-              💡 Tip: Click anywhere on the 2D Level Sets map to instantly set (x, y)!
-            </p>
-          </div>
-
-          <!-- Symbolic Formulas Display -->
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
-              <i data-lucide="variable" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Symbolic Partial Derivatives</span>
-            </h3>
-            
-            <div class="space-y-2 text-xs">
-              <div class="p-2 bg-slate-900 rounded-lg border border-slate-800/80">
-                <div class="text-[11px] text-indigo-400 font-semibold mb-1">∂f / ∂x :</div>
-                <div id="katexDfDx" class="overflow-x-auto text-slate-200 py-0.5"></div>
-              </div>
-              <div class="p-2 bg-slate-900 rounded-lg border border-slate-800/80">
-                <div class="text-[11px] text-cyan-400 font-semibold mb-1">∂f / ∂y :</div>
-                <div id="katexDfDy" class="overflow-x-auto text-slate-200 py-0.5"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Numeric Results Card -->
-          <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-3.5 rounded-xl border border-indigo-900/60 space-y-2.5">
-            <h3 class="text-xs font-semibold text-indigo-300 flex items-center justify-between">
-              <span class="flex items-center space-x-1.5">
-                <i data-lucide="calculator" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>Calculated Results at P₀</span>
-              </span>
-              <span id="pointSummaryBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono">(2.0, 1.0)</span>
-            </h3>
-
-            <div class="space-y-1.5 font-mono text-xs text-slate-200">
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-slate-400">Surface Value f(x₀, y₀):</span>
-                <span id="resZ0" class="font-bold text-white">0.0000</span>
-              </div>
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-indigo-400">∂f/∂x (x-slope):</span>
-                <span id="resDfDx" class="font-bold text-emerald-400">0.0000</span>
-              </div>
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-cyan-400">∂f/∂y (y-slope):</span>
-                <span id="resDfDy" class="font-bold text-emerald-400">0.0000</span>
-              </div>
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-amber-400">Gradient ∇f = ⟨fx, fy⟩:</span>
-                <span id="resGradVector" class="font-bold text-amber-300">⟨0.00, 0.00⟩</span>
-              </div>
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-slate-400">Magnitude ||∇f|| (Max slope):</span>
-                <span id="resGradMag" class="font-bold text-purple-300">0.0000</span>
-              </div>
-              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
-                <span class="text-slate-400">Direction θ (Steepest ascent):</span>
-                <span id="resGradAngle" class="text-slate-300">0.0°</span>
-              </div>
-            </div>
-
-            <!-- Tangent plane formula -->
-            <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300">
-              <div class="text-slate-400 text-[10px] uppercase font-sans font-semibold mb-0.5">Tangent Plane Formula:</div>
-              <div id="tangentPlaneFormula" class="text-indigo-200">z = ...</div>
-            </div>
-          </div>
-
-          <!-- On-Graph Vector Visualization Toggles -->
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
-              <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Show on Graph (3D & 2D)</span>
-            </h3>
-
-            <div class="space-y-2 text-xs">
-              <label class="flex items-center space-x-2 text-amber-300 cursor-pointer">
-                <input type="checkbox" id="showGradientVector" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
-                <span class="font-medium">Show Gradient Vector ∇f on Graph</span>
-              </label>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="showNormalVector" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span>Show Surface Normal Vector n = ⟨-fx, -fy, 1⟩</span>
-              </label>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="showTangentPlane" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span>Show Tangent Plane at P₀</span>
-              </label>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="showCrossSections" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-                <span>Show Slice Curves (x = x₀ & y = y₀)</span>
-              </label>
-            </div>
-          </div>
 
         </div>
 
         <!-- ============================================================= -->
-        <!-- TAB 3: LEVEL SETS & CONTOUR SETTINGS                          -->
-        <!-- ============================================================= -->
-        <div id="tabContentLevelSets" class="space-y-4 hidden">
-          
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-semibold text-cyan-300 flex items-center space-x-1.5">
-                <i data-lucide="map" class="w-3.5 h-3.5 text-cyan-400"></i>
-                <span>Level Sets (Isolines f(x, y) = c)</span>
-              </h3>
-              <span class="text-[10px] text-slate-400 font-mono">f(x,y) = c</span>
-            </div>
-
-            <!-- Contour Density -->
-            <div class="space-y-1">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-400">Number of Contour Levels:</span>
-                <span id="contourDensityVal" class="font-mono text-cyan-400 text-xs">20</span>
-              </div>
-              <input type="range" id="contourDensitySlider" min="5" max="50" step="5" value="20" class="w-full">
-            </div>
-
-            <!-- Contour display options -->
-            <div class="space-y-2 text-xs pt-1">
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="showContourLabels" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
-                <span>Show Contour Value Labels (c numbers)</span>
-              </label>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="show2DGradField" class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
-                <span>Show Gradient Vector Field (Arrows Everywhere)</span>
-              </label>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="floorContoursToggle" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
-                <span>Project Contours onto 3D Floor</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Highlight specific level set c -->
-          <div class="bg-slate-950 p-3 rounded-xl border border-cyan-900/60 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-cyan-300">Highlight Specific Level Curve</span>
-              <button id="snapLevelToP0Btn" class="text-[10px] px-2 py-0.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-medium transition">
-                Set c = f(x₀, y₀)
-              </button>
-            </div>
-
-            <p class="text-[11px] text-slate-400">
-              Draws the exact level set curve <span class="font-mono text-cyan-300">f(x, y) = c</span> in bright neon on the 2D map & 3D surface:
-            </p>
-
-            <div class="flex items-center space-x-2 text-xs">
-              <span class="font-mono text-slate-400">c =</span>
-              <input type="number" id="specificLevelInput" value="0.5" step="0.1" class="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-white text-xs">
-              <input type="range" id="specificLevelSlider" min="-5" max="5" step="0.1" value="0.5" class="flex-1">
-            </div>
-
-            <label class="flex items-center space-x-2 text-xs text-cyan-300 cursor-pointer pt-1">
-              <input type="checkbox" id="showSpecificLevelToggle" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600">
-              <span>Highlight curve f(x, y) = c</span>
-            </label>
-          </div>
-
-          <!-- Quick Level Set Math Explanation -->
-          <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-            <div class="font-semibold text-slate-300 flex items-center space-x-1">
-              <i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Orthogonality Theorem:</span>
-            </div>
-            <p>
-              The gradient vector <span class="font-mono text-amber-300">∇f</span> at any point is always <strong>perpendicular (orthogonal)</strong> to the level curve <span class="font-mono text-cyan-300">f(x, y) = c</span> passing through that point!
-            </p>
-          </div>
-
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- TAB 4: DOMAIN, RESOLUTION & STYLING                          -->
+        <!-- TAB 4: DOMAIN BOUNDS & STYLING                                -->
         <!-- ============================================================= -->
         <div id="tabContentStyling" class="space-y-4 hidden">
           
@@ -499,7 +510,7 @@
             
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-                <label class="text-[10px] text-slate-400 font-mono block">X Domain [min, max]</label>
+                <label class="text-[10px] text-slate-400 font-mono block">X₁ Range [min, max]</label>
                 <div class="flex items-center space-x-1 mt-1">
                   <input type="number" id="xMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                   <span class="text-slate-500">to</span>
@@ -508,7 +519,7 @@
               </div>
 
               <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-                <label class="text-[10px] text-slate-400 font-mono block">Y Domain [min, max]</label>
+                <label class="text-[10px] text-slate-400 font-mono block">X₂ Range [min, max]</label>
                 <div class="flex items-center space-x-1 mt-1">
                   <input type="number" id="yMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
                   <span class="text-slate-500">to</span>
@@ -525,33 +536,11 @@
               <span id="gridResVal" class="font-mono text-indigo-400 text-[11px]">50 × 50 (2,500 pts)</span>
             </div>
             <input type="range" id="gridResSlider" min="20" max="100" step="5" value="50" class="w-full">
-            <div class="flex justify-between text-[10px] text-slate-500">
-              <span>Fast (20)</span>
-              <span>Balanced (50)</span>
-              <span>Ultra (100)</span>
-            </div>
           </div>
 
-          <!-- Z Clamping -->
-          <div class="space-y-1">
-            <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
-              <input type="checkbox" id="clampZToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-              <span>Clamp Z Axis (Prevents Infinite Spikes)</span>
-            </label>
-            <div id="zClampInputs" class="flex items-center space-x-2 text-xs pt-1 hidden">
-              <input type="number" id="zMin" value="-10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
-              <span class="text-slate-500">to</span>
-              <input type="number" id="zMax" value="10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
-            </div>
-          </div>
-
-          <!-- Color Palette & Mesh options -->
-          <div class="space-y-3 border-t border-slate-800/80 pt-3">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-              <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span>Visual Palette</span>
-            </h2>
-
+          <!-- Color Palette -->
+          <div class="space-y-2 border-t border-slate-800/80 pt-3">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300">Visual Palette</h2>
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <label class="text-[10px] text-slate-400 block mb-1">Color Palette</label>
@@ -563,7 +552,6 @@
                   <option value="Jet">Jet</option>
                   <option value="Electric">Electric</option>
                   <option value="Spectral">Spectral</option>
-                  <option value="Rainbow">Rainbow</option>
                 </select>
               </div>
 
@@ -571,17 +559,6 @@
                 <label class="text-[10px] text-slate-400 block mb-1">Surface Opacity</label>
                 <input type="range" id="opacitySlider" min="0.2" max="1.0" step="0.05" value="0.95" class="w-full mt-2">
               </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-              <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="wireframeToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-                <span>Show Wireframe</span>
-              </label>
-              <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="contoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-                <span>3D Surface Contours</span>
-              </label>
             </div>
           </div>
 
@@ -591,25 +568,22 @@
 
     </aside>
 
-    <!-- Right Visualization Area -->
+    <!-- Right Visualization Viewports -->
     <main class="flex-1 flex flex-col relative bg-slate-950 min-h-[52vh] lg:min-h-0">
       
-      <!-- Top Overlay: Current Equation & Camera Toolbar -->
+      <!-- Top Overlay Banner: Function & Matrix Summary -->
       <div class="absolute top-3 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         
-        <!-- Rendered Equation & Gradient Badge -->
+        <!-- Rendered Equation Card -->
         <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-3 max-w-xl">
           <div id="katexEquation" class="text-xs sm:text-sm text-white overflow-x-auto"></div>
         </div>
 
-        <!-- View Controls Floating Toolbar -->
+        <!-- Camera Toolbar -->
         <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-1.5 text-xs">
           <button id="resetCamBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Reset View">
             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
           </button>
-          <button id="viewTopBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Top-down XY view">Top XY</button>
-          <button id="viewIsoBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-indigo-300 font-medium transition" title="Isometric 3D view">3D Iso</button>
-          <div class="h-4 w-px bg-slate-800"></div>
           <button id="fullscreenBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Toggle Fullscreen">
             <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
           </button>
@@ -618,21 +592,21 @@
 
       <!-- Graph Viewports Container -->
       <div id="graphContainer" class="flex-1 w-full h-full flex flex-col md:flex-row overflow-hidden">
+        <!-- 2D Level Sets Area (Default Prominent) -->
+        <div id="plotContainer2D" class="flex-1 w-full h-full min-h-[300px]"></div>
         <!-- 3D Plot Area -->
-        <div id="plotContainer3D" class="flex-1 w-full h-full min-h-[300px]"></div>
-        <!-- 2D Level Sets (Contour Map) Area -->
-        <div id="plotContainer2D" class="flex-1 w-full h-full min-h-[300px] hidden border-t md:border-t-0 md:border-l border-slate-800"></div>
+        <div id="plotContainer3D" class="flex-1 w-full h-full min-h-[300px] hidden border-t md:border-t-0 md:border-l border-slate-800"></div>
       </div>
 
       <!-- Bottom Status Bar -->
       <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-400 z-10">
         <div class="flex items-center space-x-3">
-          <span id="coordReadout" class="font-mono text-slate-300">Hover over surface or contour to inspect</span>
+          <span id="coordReadout" class="font-mono text-slate-300">Hover over curve or click to set P₀</span>
         </div>
         <div class="flex items-center space-x-3">
+          <span class="text-amber-400 font-medium">∇f ⊥ Level Set (90° Normal)</span>
+          <span class="text-slate-500">|</span>
           <span id="calcTimeBadge" class="text-[11px] text-slate-500 font-mono">Render: ~10ms</span>
-          <span class="text-slate-500 hidden sm:inline">|</span>
-          <span class="text-indigo-400 font-medium hidden sm:inline">Deployable to GitHub Pages</span>
         </div>
       </footer>
     </main>
@@ -645,14 +619,14 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="share-2" class="w-5 h-5 text-indigo-400"></i>
-          <h3 class="font-bold text-white text-base">Share This Multivariable Graph</h3>
+          <h3 class="font-bold text-white text-base">Share Graph & Level Set</h3>
         </div>
         <button id="closeShareModal" class="p-1 text-slate-400 hover:text-white rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       <p class="text-xs text-slate-300">
-        This link encodes your exact function, parameters, domain bounds, and evaluation point (x₀, y₀) in the URL hash. Anyone opening it will see your exact visualization!
+        This link encodes your exact function, level value c, evaluation point P₀, and view settings in the URL hash.
       </p>
       <div class="flex items-center space-x-2">
         <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-950 text-indigo-200 font-mono text-xs px-3 py-2.5 rounded-xl border border-slate-700 select-all">
@@ -667,20 +641,19 @@
     </div>
   </div>
 
-  <!-- Application Logic -->
+  <!-- Main JavaScript Logic -->
   <script>
     lucide.createIcons();
 
     // -------------------------------------------------------------------------
-    // Global Application State
+    // Application State
     // -------------------------------------------------------------------------
     const state = {
-      view_mode: '3d', // '3d', '2d', or 'split'
-      f1_expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
-      f2_expr: "0.5 * (x + y)",
-      show_f2: false,
+      view_mode: '2d', // Default to 2D Level Set view
+      notation: 'x1x2', // 'x1x2' or 'xy'
+      f_expr_raw: "x1^2 + x2^2",
       params: {
-        a: { val: 2.0, min: 0.1, max: 10.0, step: 0.1 },
+        a: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
         b: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
         c: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
         d: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 }
@@ -688,129 +661,132 @@
       t: 0.0,
       animating_t: false,
       animation_id: null,
+      // Level set controls
+      level_c: 4.0, // For f = x1^2 + x2^2, c = 4 is circle with radius r = 2!
+      radius_r: 2.0,
+      // Evaluation Point P0
+      x0: 2.0,
+      y0: 0.0,
+      // Domain Bounds
       x_range: [-5, 5],
       y_range: [-5, 5],
-      z_clamp: false,
-      z_range: [-10, 10],
       grid_res: 50,
       color_scale: "Turbo",
       opacity: 0.95,
-      show_wireframe: false,
-      show_contours: true,
-      show_floor_contours: true,
-      // Calculus & Point Evaluation
-      x0: 2.0,
-      y0: 1.0,
+      // Toggles
       show_gradient: true,
-      show_normal: false,
-      show_tangent: false,
-      show_cross_sections: false,
-      // Level Sets
-      contour_density: 20,
-      show_contour_labels: true,
-      show_2d_grad_field: false,
-      specific_level_c: 0.5,
-      show_specific_level: true
+      show_tangent_line: true,
+      show_right_angle: true,
+      show_all_contours: true,
+      show_2d_grad_field: false
     };
 
     // Presets
     const presets = {
+      circle_example: {
+        expr: "x1^2 + x2^2",
+        c: 4.0, r: 2.0, x0: 2.0, y0: 0.0,
+        x: [-4, 4], y: [-4, 4], mode: '2d'
+      },
+      ellipse: {
+        expr: "2 * x1^2 + x2^2",
+        c: 6.0, r: 2.45, x0: 1.414, y0: 1.414,
+        x: [-4, 4], y: [-4, 4], mode: '2d'
+      },
       saddle: {
-        expr: "a * (x^2 - y^2) / 4",
-        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Turbo", x0: 1.5, y0: 1.0
-      },
-      paraboloid: {
-        expr: "a * (x^2 + y^2) / 4",
-        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Viridis", x0: 1.5, y0: 1.5
-      },
-      monkey_saddle: {
-        expr: "a * (x^3 - 3*x*y^2) / 10",
-        params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-3, 3], y: [-3, 3], scale: "Plasma", x0: 1.0, y0: 1.0
+        expr: "x1^2 - x2^2",
+        c: 1.0, r: 1.0, x0: 1.414, y0: 1.0,
+        x: [-4, 4], y: [-4, 4], mode: 'split'
       },
       ripple: {
-        expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
-        params: { a: 2.5, b: 1.5, c: 1.0, d: 1.0 },
-        x: [-6, 6], y: [-6, 6], scale: "Jet", x0: 2.0, y0: 1.0
+        expr: "sin(sqrt(x1^2 + x2^2) * 2) / (sqrt(x1^2 + x2^2) + 0.1)",
+        c: 0.5, r: 1.0, x0: 1.2, y0: 0.8,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       gaussian: {
-        expr: "a * exp(-(x^2 + y^2) / (2 * b^2)) * cos(c * x)",
-        params: { a: 3.0, b: 2.0, c: 3.0, d: 1.0 },
-        x: [-5, 5], y: [-5, 5], scale: "Electric", x0: 1.0, y0: 0.5
+        expr: "3 * exp(-(x1^2 + x2^2) / 4)",
+        c: 1.5, r: 1.66, x0: 1.18, y0: 1.18,
+        x: [-4, 4], y: [-4, 4], mode: 'split'
       },
       egg_carton: {
-        expr: "a * sin(b * x) * cos(c * y)",
-        params: { a: 1.5, b: 1.5, c: 1.5, d: 1.0 },
-        x: [-5, 5], y: [-5, 5], scale: "Rainbow", x0: 1.0, y0: 1.0
+        expr: "sin(x1) * cos(x2)",
+        c: 0.5, r: 1.0, x0: 0.78, y0: 0.61,
+        x: [-5, 5], y: [-5, 5], mode: '2d'
       },
       rosenbrock: {
-        expr: "(1 - x)^2 + 10 * (y - x^2)^2",
-        params: { a: 1.0, b: 10.0, c: 1.0, d: 1.0 },
-        x: [-2, 2], y: [-1, 3], scale: "Magma",
-        z_clamp: true, z: [0, 50], x0: 0.5, y0: 1.0
+        expr: "(1 - x1)^2 + 10 * (x2 - x1^2)^2",
+        c: 5.0, r: 1.0, x0: 1.0, y0: 1.5,
+        x: [-2, 2], y: [-1, 3], mode: 'split'
       },
       sombrero: {
-        expr: "a * cos(b * sqrt(x^2 + y^2) - t) / (sqrt(x^2 + y^2) + 0.5)",
-        params: { a: 3.0, b: 2.0, c: 1.0, d: 1.0 },
-        x: [-6, 6], y: [-6, 6], scale: "Turbo",
-        auto_animate: true, x0: 2.0, y0: 1.0
-      },
-      chladni: {
-        expr: "cos(a * x) * cos(b * y) - cos(b * x) * cos(a * y)",
-        params: { a: 2.0, b: 3.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Spectral", x0: 1.0, y0: 1.0
-      },
-      cliff: {
-        expr: "a / (1 + exp(-b * (x + y)))",
-        params: { a: 4.0, b: 1.5, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Viridis", x0: 0.0, y0: 0.0
+        expr: "cos(2 * sqrt(x1^2 + x2^2) - t) / (sqrt(x1^2 + x2^2) + 0.5)",
+        c: 0.5, r: 1.0, x0: 1.5, y0: 0.5,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
       }
     };
 
-    let compiledF1 = null;
-    let compiledF2 = null;
-    let symDfDx = null;
-    let symDfDy = null;
+    let compiledF = null;
+    let symDfD1 = null;
+    let symDfD2 = null;
 
     // -------------------------------------------------------------------------
-    // Math Compilation & Differentiation
+    // Math Compilation & Derivative Matrix Construction
     // -------------------------------------------------------------------------
+    function getNormalizedExpression(expr) {
+      // Allow user to write x1, x2 or x, y interchangeably
+      let norm = expr;
+      // If formula has x without a digit after it, e.g. x^2, map to x1
+      // We will define both (x1, x2) and (x, y) in the math.js scope!
+      return norm;
+    }
+
     function compileExpressions() {
       const formulaStatus = document.getElementById("formulaStatus");
+      const expr = state.f_expr_raw;
+
       try {
-        compiledF1 = math.compile(state.f1_expr);
+        compiledF = math.compile(expr);
         formulaStatus.textContent = "Valid";
         formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium";
       } catch (err) {
         formulaStatus.textContent = "Syntax Error";
         formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium";
-        console.warn("Formula compile error:", err);
+        console.warn("Compile error:", err);
       }
 
-      if (state.show_f2) {
-        try {
-          compiledF2 = math.compile(state.f2_expr);
-        } catch (err) {
-          console.warn("Formula 2 compile error:", err);
-        }
-      }
-
-      // Compute symbolic derivatives
+      // Compute symbolic partial derivatives
       try {
-        const parsed = math.parse(state.f1_expr);
-        symDfDx = math.derivative(parsed, 'x');
-        symDfDy = math.derivative(parsed, 'y');
+        const parsed = math.parse(expr);
+        // Detect variable names used
+        const vars = new Set();
+        parsed.traverse(node => {
+          if (node.isSymbolNode) vars.add(node.name);
+        });
 
-        // Render KaTeX for partial derivatives
-        katex.render(`\\frac{\\partial f}{\\partial x} = ${symDfDx.toTex({ parenthesis: 'auto' })}`, document.getElementById("katexDfDx"), { throwOnError: false });
-        katex.render(`\\frac{\\partial f}{\\partial y} = ${symDfDy.toTex({ parenthesis: 'auto' })}`, document.getElementById("katexDfDy"), { throwOnError: false });
+        const v1 = vars.has('x1') ? 'x1' : (vars.has('x') ? 'x' : 'x1');
+        const v2 = vars.has('x2') ? 'x2' : (vars.has('y') ? 'y' : 'x2');
+
+        symDfD1 = math.derivative(parsed, v1);
+        symDfD2 = math.derivative(parsed, v2);
+
+        // Display individual derivatives
+        const tex1 = symDfD1.toTex({ parenthesis: 'auto' });
+        const tex2 = symDfD2.toTex({ parenthesis: 'auto' });
+        katex.render(tex1, document.getElementById("katexDfDx"), { throwOnError: false });
+        katex.render(tex2, document.getElementById("katexDfDy"), { throwOnError: false });
+
+        // Render Symbolic 1 x n Derivative Matrix Df
+        const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
+        const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
+        const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
+        katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+
       } catch (e) {
-        document.getElementById("katexDfDx").textContent = "Numerical derivative active";
-        document.getElementById("katexDfDy").textContent = "Numerical derivative active";
-        symDfDx = null;
-        symDfDy = null;
+        symDfD1 = null;
+        symDfD2 = null;
+        document.getElementById("katexDfDx").textContent = "Numerical derivative";
+        document.getElementById("katexDfDy").textContent = "Numerical derivative";
+        document.getElementById("katexMatrixSymbolic").textContent = "Df = [ ∂f/∂x₁   ∂f/∂x₂ ]";
       }
 
       updateKatexHeader();
@@ -820,58 +796,62 @@
     function updateKatexHeader() {
       const container = document.getElementById("katexEquation");
       try {
-        const parsed = math.parse(state.f1_expr);
+        const parsed = math.parse(state.f_expr_raw);
         const tex = parsed.toTex({ parenthesis: 'auto' });
-        katex.render(`z = f(x, y) = ${tex}`, container, { throwOnError: false });
+        const varTuple = state.notation === 'x1x2' ? '(x_1, x_2)' : '(x, y)';
+        katex.render(`f${varTuple} = ${tex}`, container, { throwOnError: false });
       } catch (e) {
-        container.textContent = `z = ${state.f1_expr}`;
+        container.textContent = `f = ${state.f_expr_raw}`;
       }
     }
 
-    function getEvalScope() {
-      const scope = { t: state.t };
+    function getEvalScope(xVal, yVal) {
+      const scope = {
+        x1: xVal,
+        x2: yVal,
+        x: xVal,
+        y: yVal,
+        t: state.t
+      };
       for (const [k, v] of Object.entries(state.params)) {
         scope[k] = v.val;
       }
       return scope;
     }
 
-    // Evaluate function value and derivatives at probe point
-    function evaluateAt(x, y) {
-      if (!compiledF1) return { z: 0, fx: 0, fy: 0 };
-      const scope = getEvalScope();
-      scope.x = x;
-      scope.y = y;
+    // Evaluate f(x1, x2) and partial derivatives
+    function evaluateAt(xVal, yVal) {
+      if (!compiledF) return { z: 0, fx: 0, fy: 0 };
+      const scope = getEvalScope(xVal, yVal);
 
       let z = 0;
       try {
-        z = compiledF1.evaluate(scope);
+        z = compiledF.evaluate(scope);
         if (typeof z !== 'number' || isNaN(z)) z = 0;
       } catch {
         z = 0;
       }
 
-      let fx = 0, fy = 0;
-      // Try symbolic derivative evaluation
-      if (symDfDx && symDfDy) {
+      let fx = null, fy = null;
+      if (symDfD1 && symDfD2) {
         try {
-          fx = symDfDx.evaluate(scope);
-          fy = symDfDy.evaluate(scope);
+          fx = symDfD1.evaluate(scope);
+          fy = symDfD2.evaluate(scope);
         } catch {
-          fx = null;
+          fx = null; fy = null;
         }
       }
 
-      // Fallback to high-precision central finite difference if needed
+      // Central difference fallback if needed
       if (fx === null || typeof fx !== 'number' || isNaN(fx)) {
         const h = 1e-5;
-        const scopeR = { ...scope, x: x + h };
-        const scopeL = { ...scope, x: x - h };
-        const scopeU = { ...scope, y: y + h };
-        const scopeD = { ...scope, y: y - h };
         try {
-          fx = (compiledF1.evaluate(scopeR) - compiledF1.evaluate(scopeL)) / (2 * h);
-          fy = (compiledF1.evaluate(scopeU) - compiledF1.evaluate(scopeD)) / (2 * h);
+          const sR = getEvalScope(xVal + h, yVal);
+          const sL = getEvalScope(xVal - h, yVal);
+          const sU = getEvalScope(xVal, yVal + h);
+          const sD = getEvalScope(xVal, yVal - h);
+          fx = (compiledF.evaluate(sR) - compiledF.evaluate(sL)) / (2 * h);
+          fy = (compiledF.evaluate(sU) - compiledF.evaluate(sD)) / (2 * h);
         } catch {
           fx = 0; fy = 0;
         }
@@ -883,24 +863,72 @@
       return { z, fx, fy };
     }
 
+    // Update numbers and the 1 x n Matrix display
     function updateCalculusCalculations() {
       const pt = evaluateAt(state.x0, state.y0);
       const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
       const angleDeg = ((Math.atan2(pt.fy, pt.fx) * 180 / Math.PI) + 360) % 360;
 
-      document.getElementById("pointSummaryBadge").textContent = `(${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`;
-      document.getElementById("resZ0").textContent = pt.z.toFixed(4);
+      // Evaluated 1 x 2 Matrix Df(P0) KaTeX
+      const matrixNumericLatex = `\\mathbf{D}f(P_0) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
+      katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+
+      // Labels and readouts
+      const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
+      document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
+      document.getElementById("evalZ0").textContent = pt.z.toFixed(3);
       document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
       document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
-      document.getElementById("resGradVector").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩`;
+      document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
       document.getElementById("resGradMag").textContent = mag.toFixed(4);
-      document.getElementById("resGradAngle").textContent = `${angleDeg.toFixed(1)}°`;
+      document.getElementById("resGradAngle").textContent = `${angleDeg.toFixed(1)}° (90° to tangent)`;
 
-      // Tangent plane formula string
-      const signX = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
-      const signY = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
-      document.getElementById("tangentPlaneFormula").textContent = 
-        `z = ${pt.z.toFixed(2)} + (${pt.fx.toFixed(2)})(x ${signX}) + (${pt.fy.toFixed(2)})(y ${signY})`;
+      // Level Match status
+      const diff = Math.abs(pt.z - state.level_c);
+      const badge = document.getElementById("levelMatchBadge");
+      if (diff < 0.05) {
+        badge.textContent = "On Level Set ✓";
+        badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans";
+      } else {
+        badge.textContent = `Off Level Set (Δ = ${diff.toFixed(2)})`;
+        badge.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-sans";
+      }
+
+      // Tangent line slope & equation
+      // Tangent line equation: fx*(x1 - x0) + fy*(x2 - y0) = 0
+      const slopeDisp = document.getElementById("resTangentSlope");
+      const eqDisp = document.getElementById("tangentLineEq");
+      if (Math.abs(pt.fy) > 1e-4) {
+        const m = -pt.fx / pt.fy;
+        slopeDisp.textContent = `m = ${m.toFixed(3)}`;
+      } else {
+        slopeDisp.textContent = `Vertical (m = ∞)`;
+      }
+
+      const signX0 = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
+      const signY0 = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
+      eqDisp.textContent = `${pt.fx.toFixed(2)}(${var1} ${signX0}) + ${pt.fy.toFixed(2)}(${var2} ${signY0}) = 0`;
+    }
+
+    // -------------------------------------------------------------------------
+    // Snap Point P₀ onto Level Set f(x) = c (Newton-Raphson Projection)
+    // -------------------------------------------------------------------------
+    function snapPointToLevelSet() {
+      let x = state.x0, y = state.y0;
+      const targetC = state.level_c;
+
+      for (let iter = 0; iter < 12; iter++) {
+        const pt = evaluateAt(x, y);
+        const diff = targetC - pt.z;
+        const gradSq = pt.fx * pt.fx + pt.fy * pt.fy;
+        if (Math.abs(diff) < 1e-5 || gradSq < 1e-12) break;
+        const step = diff / gradSq;
+        x += pt.fx * step;
+        y += pt.fy * step;
+      }
+
+      setEvaluationPoint(x, y);
     }
 
     // -------------------------------------------------------------------------
@@ -920,54 +948,24 @@
       for (let i = 0; i < n; i++) xArr[i] = xMin + i * dx;
       for (let j = 0; j < n; j++) yArr[j] = yMin + j * dy;
 
-      const zArr1 = [];
-      const zArr2 = state.show_f2 ? [] : null;
-      const scope = getEvalScope();
-
-      let minZ = Infinity;
-      let maxZ = -Infinity;
+      const zArr = [];
 
       for (let j = 0; j < n; j++) {
-        const row1 = new Float64Array(n);
-        const row2 = state.show_f2 ? new Float64Array(n) : null;
-        scope.y = yArr[j];
-
+        const row = new Float64Array(n);
+        const yVal = yArr[j];
         for (let i = 0; i < n; i++) {
-          scope.x = xArr[i];
-          let val1 = 0;
+          const xVal = xArr[i];
+          const scope = getEvalScope(xVal, yVal);
+          let val = 0;
           try {
-            val1 = compiledF1 ? compiledF1.evaluate(scope) : 0;
-            if (typeof val1 !== 'number' || isNaN(val1) || !isFinite(val1)) {
-              val1 = null;
-            } else if (state.z_clamp) {
-              val1 = Math.max(state.z_range[0], Math.min(state.z_range[1], val1));
-            }
+            val = compiledF ? compiledF.evaluate(scope) : 0;
+            if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) val = null;
           } catch {
-            val1 = null;
+            val = null;
           }
-          row1[i] = val1;
-          if (val1 !== null) {
-            if (val1 < minZ) minZ = val1;
-            if (val1 > maxZ) maxZ = val1;
-          }
-
-          if (state.show_f2 && compiledF2) {
-            let val2 = 0;
-            try {
-              val2 = compiledF2.evaluate(scope);
-              if (typeof val2 !== 'number' || isNaN(val2) || !isFinite(val2)) {
-                val2 = null;
-              } else if (state.z_clamp) {
-                val2 = Math.max(state.z_range[0], Math.min(state.z_range[1], val2));
-              }
-            } catch {
-              val2 = null;
-            }
-            row2[i] = val2;
-          }
+          row[i] = val;
         }
-        zArr1.push(Array.from(row1));
-        if (state.show_f2) zArr2.push(Array.from(row2));
+        zArr.push(Array.from(row));
       }
 
       const t1 = performance.now();
@@ -976,301 +974,61 @@
       return {
         x: Array.from(xArr),
         y: Array.from(yArr),
-        z1: zArr1,
-        z2: zArr2,
-        minZ: isFinite(minZ) ? minZ : -5,
-        maxZ: isFinite(maxZ) ? maxZ : 5
+        z: zArr
       };
     }
 
     // -------------------------------------------------------------------------
-    // 3D Traces Builder
-    // -------------------------------------------------------------------------
-    function build3DTraces(mesh) {
-      const traces = [];
-      const pt0 = evaluateAt(state.x0, state.y0);
-
-      // 1. Primary surface trace
-      const surface1 = {
-        type: 'surface',
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z1,
-        name: 'f(x, y)',
-        colorscale: state.color_scale,
-        opacity: state.opacity,
-        showscale: true,
-        colorbar: {
-          len: 0.65,
-          thickness: 12,
-          tickfont: { color: '#94a3b8', size: 10 },
-          title: { text: 'z', font: { color: '#cbd5e1', size: 12 } }
-        },
-        contours: {
-          z: {
-            show: state.show_contours,
-            usecolormap: true,
-            highlightcolor: "#ffffff",
-            project: { z: state.show_floor_contours }
-          }
-        }
-      };
-
-      if (state.show_wireframe) {
-        surface1.contours.x = { show: true, color: 'rgba(255,255,255,0.25)', width: 1 };
-        surface1.contours.y = { show: true, color: 'rgba(255,255,255,0.25)', width: 1 };
-      }
-
-      traces.push(surface1);
-
-      // 2. Secondary surface
-      if (state.show_f2 && mesh.z2) {
-        traces.push({
-          type: 'surface',
-          x: mesh.x,
-          y: mesh.y,
-          z: mesh.z2,
-          name: 'g(x, y)',
-          colorscale: 'Blues',
-          opacity: 0.65,
-          showscale: false
-        });
-      }
-
-      // 3. Highlighted specific level set curve f(x, y) = c on the floor
-      if (state.show_specific_level) {
-        const c = state.specific_level_c;
-        // Draw constant z plane slice or marker on floor
-      }
-
-      // 4. Probe point P₀
-      traces.push({
-        type: 'scatter3d',
-        mode: 'markers+text',
-        x: [state.x0],
-        y: [state.y0],
-        z: [pt0.z],
-        name: 'Point P₀',
-        text: [`P₀(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
-        textposition: 'top center',
-        textfont: { color: '#f43f5e', size: 11 },
-        marker: {
-          size: 7,
-          color: '#f43f5e',
-          symbol: 'circle'
-        }
-      });
-
-      // 5. Gradient Vector ∇f on 3D Graph (Steepest Ascent)
-      if (state.show_gradient) {
-        const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
-        // Scale vector for visual clarity
-        const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
-        const vx = pt0.fx * scale;
-        const vy = pt0.fy * scale;
-        const vz = (pt0.fx * pt0.fx + pt0.fy * pt0.fy) * scale * 0.4; // lift along surface tangent
-
-        // Vector line
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines',
-          x: [state.x0, state.x0 + vx],
-          y: [state.y0, state.y0 + vy],
-          z: [pt0.z, pt0.z + vz],
-          name: '∇f Gradient Vector',
-          line: { color: '#f59e0b', width: 7 }
-        });
-
-        // Vector arrowhead marker
-        traces.push({
-          type: 'scatter3d',
-          mode: 'markers+text',
-          x: [state.x0 + vx],
-          y: [state.y0 + vy],
-          z: [pt0.z + vz],
-          name: '∇f Tip',
-          text: ['∇f (Steepest Ascent)'],
-          textposition: 'top right',
-          textfont: { color: '#f59e0b', size: 11 },
-          showlegend: false,
-          marker: {
-            size: 6,
-            color: '#f59e0b',
-            symbol: 'diamond'
-          }
-        });
-      }
-
-      // 6. Normal Vector n = ⟨-fx, -fy, 1⟩
-      if (state.show_normal) {
-        const nNorm = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy + 1);
-        const nx = -pt0.fx / nNorm * 1.5;
-        const ny = -pt0.fy / nNorm * 1.5;
-        const nz = 1 / nNorm * 1.5;
-
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines+markers',
-          x: [state.x0, state.x0 + nx],
-          y: [state.y0, state.y0 + ny],
-          z: [pt0.z, pt0.z + nz],
-          name: 'Normal Vector n',
-          line: { color: '#06b6d4', width: 5 },
-          marker: { size: 5, color: '#06b6d4' }
-        });
-      }
-
-      // 7. Tangent Plane patch
-      if (state.show_tangent) {
-        const span = 1.4;
-        const tx = [state.x0 - span, state.x0 + span];
-        const ty = [state.y0 - span, state.y0 + span];
-        const tz = [
-          [
-            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[0] - state.y0),
-            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[0] - state.y0)
-          ],
-          [
-            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[1] - state.y0),
-            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[1] - state.y0)
-          ]
-        ];
-
-        traces.push({
-          type: 'surface',
-          x: tx,
-          y: ty,
-          z: tz,
-          name: 'Tangent Plane',
-          showscale: false,
-          opacity: 0.6,
-          colorscale: [[0, '#ec4899'], [1, '#ec4899']]
-        });
-      }
-
-      // 8. Cross-Section Curves (x = x0 and y = y0 slices)
-      if (state.show_cross_sections) {
-        const scope = getEvalScope();
-        const n = mesh.x.length;
-
-        // x = x0 curve
-        scope.x = state.x0;
-        const sliceY_x = [], sliceY_y = [], sliceY_z = [];
-        for (let j = 0; j < n; j++) {
-          scope.y = mesh.y[j];
-          sliceY_x.push(state.x0);
-          sliceY_y.push(mesh.y[j]);
-          sliceY_z.push(compiledF1 ? compiledF1.evaluate(scope) : 0);
-        }
-
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines',
-          x: sliceY_x, y: sliceY_y, z: sliceY_z,
-          name: `x = ${state.x0.toFixed(1)} slice`,
-          line: { color: '#f59e0b', width: 5 }
-        });
-
-        // y = y0 curve
-        scope.y = state.y0;
-        const sliceX_x = [], sliceX_y = [], sliceX_z = [];
-        for (let i = 0; i < n; i++) {
-          scope.x = mesh.x[i];
-          sliceX_x.push(mesh.x[i]);
-          sliceX_y.push(state.y0);
-          sliceX_z.push(compiledF1 ? compiledF1.evaluate(scope) : 0);
-        }
-
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines',
-          x: sliceX_x, y: sliceX_y, z: sliceX_z,
-          name: `y = ${state.y0.toFixed(1)} slice`,
-          line: { color: '#10b981', width: 5 }
-        });
-      }
-
-      return traces;
-    }
-
-    // -------------------------------------------------------------------------
-    // 2D Level Sets (Contour Map) Traces Builder
+    // 2D Level Set Plot Traces
     // -------------------------------------------------------------------------
     function build2DTraces(mesh) {
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0);
+      const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
 
-      // 1. 2D Contour map with isolines and labels
-      traces.push({
-        type: 'contour',
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z1,
-        colorscale: state.color_scale,
-        autocontour: false,
-        ncontours: state.contour_density,
-        contours: {
-          coloring: 'heatmap',
-          showlabels: state.show_contour_labels,
-          labelfont: { size: 10, color: '#f8fafc', family: 'monospace' }
-        },
-        colorbar: {
-          len: 0.8,
-          thickness: 14,
-          tickfont: { color: '#94a3b8', size: 10 },
-          title: { text: 'f(x,y)', font: { color: '#cbd5e1', size: 11 } }
-        },
-        name: 'Level Sets'
-      });
-
-      // 2. Highlighted specific level set f(x, y) = c
-      if (state.show_specific_level) {
-        const c = state.specific_level_c;
+      // 1. Background Level Sets (Isolines)
+      if (state.show_all_contours) {
         traces.push({
           type: 'contour',
           x: mesh.x,
           y: mesh.y,
-          z: mesh.z1,
+          z: mesh.z,
+          colorscale: state.color_scale,
+          opacity: 0.65,
+          ncontours: 24,
           contours: {
-            type: 'constraint',
-            operation: '=',
-            value: c,
-            coloring: 'none'
+            coloring: 'heatmap',
+            showlabels: true,
+            labelfont: { size: 10, color: '#f8fafc', family: 'monospace' }
           },
-          line: { color: '#00ffff', width: 3.5 },
-          showscale: false,
-          name: `Level f(x,y) = ${c.toFixed(2)}`
+          colorbar: {
+            len: 0.8, thickness: 12,
+            tickfont: { color: '#94a3b8', size: 10 },
+            title: { text: 'f(x₁,x₂)', font: { color: '#cbd5e1', size: 11 } }
+          },
+          name: 'Isolines'
         });
       }
 
-      // 3. Gradient Vector Field grid (arrows everywhere)
-      if (state.show_2d_grad_field) {
-        const step = Math.max(1, Math.floor(mesh.x.length / 10));
-        const arrX = [], arrY = [];
-        for (let j = 0; j < mesh.y.length; j += step) {
-          for (let i = 0; i < mesh.x.length; i += step) {
-            const gx = mesh.x[i], gy = mesh.y[j];
-            const g = evaluateAt(gx, gy);
-            const gMag = Math.sqrt(g.fx * g.fx + g.fy * g.fy);
-            if (gMag > 0.001) {
-              const arrowLen = 0.45;
-              const dx = (g.fx / gMag) * arrowLen;
-              const dy = (g.fy / gMag) * arrowLen;
-              traces.push({
-                type: 'scatter',
-                mode: 'lines',
-                x: [gx, gx + dx],
-                y: [gy, gy + dy],
-                line: { color: 'rgba(255,255,255,0.4)', width: 1.5 },
-                showlegend: false,
-                hoverinfo: 'none'
-              });
-            }
-          }
-        }
-      }
+      // 2. High-priority Highlighted Level Set Curve f(x1, x2) = c (e.g. circle with radius r=2)
+      traces.push({
+        type: 'contour',
+        x: mesh.x,
+        y: mesh.y,
+        z: mesh.z,
+        contours: {
+          type: 'constraint',
+          operation: '=',
+          value: state.level_c,
+          coloring: 'none'
+        },
+        line: { color: '#00f5ff', width: 4.5 },
+        showscale: false,
+        name: `Level Set f = ${state.level_c}`
+      });
 
-      // 4. Probe Point P₀ on 2D map
+      // 3. Evaluation Point P0
       traces.push({
         type: 'scatter',
         mode: 'markers+text',
@@ -1280,27 +1038,166 @@
         textposition: 'top right',
         textfont: { color: '#ffffff', size: 12, family: 'sans-serif' },
         marker: { size: 10, color: '#f43f5e', symbol: 'circle', line: { color: '#ffffff', width: 2 } },
-        name: 'Evaluation Point'
+        name: 'Evaluation Point P₀'
       });
 
-      // 5. 2D Gradient Vector ∇f Arrow
+      // Compute vector geometry at P0
+      const gradMag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
+
+      if (gradMag > 1e-4) {
+        // Unit normal (gradient direction)
+        const nx = pt0.fx / gradMag;
+        const ny = pt0.fy / gradMag;
+        // Unit tangent direction (perpendicular to gradient: dot product nx*tx + ny*ty = 0)
+        const tx = -ny;
+        const ty = nx;
+
+        // 4. Tangent Line to the Level Set Curve at P0
+        if (state.show_tangent_line) {
+          const tLen = 2.4; // Half-length of tangent segment
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: [state.x0 - tLen * tx, state.x0 + tLen * tx],
+            y: [state.y0 - tLen * ty, state.y0 + tLen * ty],
+            line: { color: '#ec4899', width: 3, dash: 'dash' },
+            name: 'Tangent Line to Curve'
+          });
+        }
+
+        // 5. Gradient Vector ∇f Arrow (Pointing Normal / 90° to Tangent Line)
+        if (state.show_gradient) {
+          const arrowLen = 1.6;
+          const tipX = state.x0 + nx * arrowLen;
+          const tipY = state.y0 + ny * arrowLen;
+
+          // Vector shaft
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers+text',
+            x: [state.x0, tipX],
+            y: [state.y0, tipY],
+            text: ['', '∇f (90° Normal)'],
+            textposition: 'top right',
+            textfont: { color: '#f59e0b', size: 12, family: 'sans-serif' },
+            line: { color: '#f59e0b', width: 4.5 },
+            marker: { size: [0, 9], color: '#f59e0b', symbol: 'arrow' },
+            name: 'Gradient Vector ∇f'
+          });
+        }
+
+        // 6. Right Angle Symbol (90° Square Corner at P0)
+        if (state.show_right_angle && state.show_gradient && state.show_tangent_line) {
+          const s = 0.32; // Corner size
+          const p1x = state.x0 + s * tx;
+          const p1y = state.y0 + s * ty;
+          const p2x = state.x0 + s * tx + s * nx;
+          const p2y = state.y0 + s * ty + s * ny;
+          const p3x = state.x0 + s * nx;
+          const p3y = state.y0 + s * ny;
+
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: [p1x, p2x, p3x],
+            y: [p1y, p2y, p3y],
+            line: { color: '#22d3ee', width: 2 },
+            showlegend: false,
+            hoverinfo: 'none'
+          });
+        }
+      }
+
+      // 7. Gradient Vector Field Grid (Optional)
+      if (state.show_2d_grad_field) {
+        const step = Math.max(1, Math.floor(mesh.x.length / 10));
+        for (let j = 0; j < mesh.y.length; j += step) {
+          for (let i = 0; i < mesh.x.length; i += step) {
+            const gx = mesh.x[i], gy = mesh.y[j];
+            const g = evaluateAt(gx, gy);
+            const gMag = Math.sqrt(g.fx * g.fx + g.fy * g.fy);
+            if (gMag > 0.001) {
+              const arrowLen = 0.4;
+              const dx = (g.fx / gMag) * arrowLen;
+              const dy = (g.fy / gMag) * arrowLen;
+              traces.push({
+                type: 'scatter',
+                mode: 'lines',
+                x: [gx, gx + dx],
+                y: [gy, gy + dy],
+                line: { color: 'rgba(255,255,255,0.3)', width: 1.5 },
+                showlegend: false,
+                hoverinfo: 'none'
+              });
+            }
+          }
+        }
+      }
+
+      return traces;
+    }
+
+    // -------------------------------------------------------------------------
+    // 3D Surface Plot Traces
+    // -------------------------------------------------------------------------
+    function build3DTraces(mesh) {
+      const traces = [];
+      const pt0 = evaluateAt(state.x0, state.y0);
+
+      // Primary surface
+      traces.push({
+        type: 'surface',
+        x: mesh.x,
+        y: mesh.y,
+        z: mesh.z,
+        colorscale: state.color_scale,
+        opacity: state.opacity,
+        showscale: true,
+        contours: {
+          z: { show: true, usecolormap: true, highlightcolor: "#ffffff", project: { z: true } }
+        },
+        colorbar: {
+          len: 0.65, thickness: 12,
+          tickfont: { color: '#94a3b8', size: 10 },
+          title: { text: 'z', font: { color: '#cbd5e1', size: 12 } }
+        },
+        name: 'f(x₁, x₂)'
+      });
+
+      // Point P0 on 3D surface
+      traces.push({
+        type: 'scatter3d',
+        mode: 'markers+text',
+        x: [state.x0],
+        y: [state.y0],
+        z: [pt0.z],
+        text: [`P₀(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
+        textposition: 'top center',
+        textfont: { color: '#f43f5e', size: 11 },
+        marker: { size: 7, color: '#f43f5e', symbol: 'circle' },
+        name: 'Point P₀'
+      });
+
+      // Gradient vector on 3D graph (Steepest ascent)
       if (state.show_gradient) {
         const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
         const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
-        const gx = state.x0 + pt0.fx * scale;
-        const gy = state.y0 + pt0.fy * scale;
+        const vx = pt0.fx * scale;
+        const vy = pt0.fy * scale;
+        const vz = (pt0.fx * pt0.fx + pt0.fy * pt0.fy) * scale * 0.35;
 
         traces.push({
-          type: 'scatter',
+          type: 'scatter3d',
           mode: 'lines+markers+text',
-          x: [state.x0, gx],
-          y: [state.y0, gy],
-          text: ['', '∇f (Steepest Ascent ⊥ Isolines)'],
+          x: [state.x0, state.x0 + vx],
+          y: [state.y0, state.y0 + vy],
+          z: [pt0.z, pt0.z + vz],
+          text: ['', '∇f (Steepest Ascent)'],
           textposition: 'top right',
-          textfont: { color: '#f59e0b', size: 12, weight: 'bold' },
-          line: { color: '#f59e0b', width: 4 },
-          marker: { size: [0, 8], color: '#f59e0b', symbol: 'arrow' },
-          name: 'Gradient ∇f'
+          textfont: { color: '#f59e0b', size: 11 },
+          line: { color: '#f59e0b', width: 7 },
+          marker: { size: [0, 6], color: '#f59e0b', symbol: 'diamond' },
+          name: '3D Gradient ∇f'
         });
       }
 
@@ -1308,28 +1205,49 @@
     }
 
     // -------------------------------------------------------------------------
-    // Layout Configurations
+    // Layouts
     // -------------------------------------------------------------------------
+    function get2DLayout() {
+      const var1 = state.notation === 'x1x2' ? 'x₁' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'x₂' : 'y';
+      return {
+        autosize: true,
+        margin: { l: 45, r: 20, b: 40, t: 25 },
+        paper_bgcolor: '#020617',
+        plot_bgcolor: '#020617',
+        xaxis: {
+          title: `${var1} (Horizontal Axis)`, gridcolor: '#1e293b', zerolinecolor: '#475569',
+          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
+          range: state.x_range
+        },
+        yaxis: {
+          title: `${var2} (Vertical Axis)`, gridcolor: '#1e293b', zerolinecolor: '#475569',
+          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
+          range: state.y_range,
+          scaleanchor: 'x', scaleratio: 1 // Keep circles perfectly circular!
+        },
+        showlegend: true,
+        legend: {
+          x: 0.02, y: 0.98,
+          bgcolor: 'rgba(15, 23, 42, 0.85)',
+          bordercolor: '#334155', borderwidth: 1,
+          font: { color: '#e2e8f0', size: 11 }
+        }
+      };
+    }
+
     function get3DLayout() {
+      const var1 = state.notation === 'x1x2' ? 'X₁' : 'X';
+      const var2 = state.notation === 'x1x2' ? 'X₂' : 'Y';
       return {
         autosize: true,
         margin: { l: 0, r: 0, b: 0, t: 0 },
         paper_bgcolor: '#020617',
         plot_bgcolor: '#020617',
         scene: {
-          xaxis: {
-            title: 'X', gridcolor: '#1e293b', zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' }
-          },
-          yaxis: {
-            title: 'Y', gridcolor: '#1e293b', zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' }
-          },
-          zaxis: {
-            title: 'Z', gridcolor: '#1e293b', zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
-            range: state.z_clamp ? state.z_range : undefined
-          },
+          xaxis: { title: var1, gridcolor: '#1e293b', zerolinecolor: '#475569', tickfont: { color: '#94a3b8' } },
+          yaxis: { title: var2, gridcolor: '#1e293b', zerolinecolor: '#475569', tickfont: { color: '#94a3b8' } },
+          zaxis: { title: 'Z', gridcolor: '#1e293b', zerolinecolor: '#475569', tickfont: { color: '#94a3b8' } },
           camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } },
           aspectmode: 'cube'
         },
@@ -1343,46 +1261,36 @@
       };
     }
 
-    function get2DLayout() {
-      return {
-        autosize: true,
-        margin: { l: 45, r: 20, b: 40, t: 20 },
-        paper_bgcolor: '#020617',
-        plot_bgcolor: '#020617',
-        xaxis: {
-          title: 'X', gridcolor: '#1e293b', zerolinecolor: '#475569',
-          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
-          range: state.x_range
-        },
-        yaxis: {
-          title: 'Y', gridcolor: '#1e293b', zerolinecolor: '#475569',
-          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
-          range: state.y_range,
-          scaleanchor: 'x', scaleratio: 1
-        },
-        showlegend: false
-      };
-    }
-
     // -------------------------------------------------------------------------
-    // Rendering Plots (3D & 2D)
+    // Plot Rendering Loop
     // -------------------------------------------------------------------------
-    let isInitial3D = true;
     let isInitial2D = true;
+    let isInitial3D = true;
 
     function renderPlots(preserveCamera = true) {
-      if (!compiledF1) compileExpressions();
-      if (!compiledF1) return;
+      if (!compiledF) compileExpressions();
+      if (!compiledF) return;
 
       const mesh = computeSurfaces();
-      const div3D = document.getElementById('plotContainer3D');
       const div2D = document.getElementById('plotContainer2D');
+      const div3D = document.getElementById('plotContainer3D');
 
-      // Render 3D Plot if active
+      // 2D Level Sets Plot
+      if (state.view_mode === '2d' || state.view_mode === 'split') {
+        const traces2D = build2DTraces(mesh);
+        if (isInitial2D) {
+          Plotly.newPlot(div2D, traces2D, get2DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents2D);
+          isInitial2D = false;
+        } else {
+          Plotly.react(div2D, traces2D, get2DLayout());
+        }
+      }
+
+      // 3D Surface Plot
       if (state.view_mode === '3d' || state.view_mode === 'split') {
         const traces3D = build3DTraces(mesh);
         if (isInitial3D) {
-          Plotly.newPlot(div3D, traces3D, get3DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents3D);
+          Plotly.newPlot(div3D, traces3D, get3DLayout(), { responsive: true, displayModeBar: false });
           isInitial3D = false;
         } else {
           if (preserveCamera && div3D._fullLayout && div3D._fullLayout.scene) {
@@ -1395,31 +1303,6 @@
           }
         }
       }
-
-      // Render 2D Level Sets Plot if active
-      if (state.view_mode === '2d' || state.view_mode === 'split') {
-        const traces2D = build2DTraces(mesh);
-        if (isInitial2D) {
-          Plotly.newPlot(div2D, traces2D, get2DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents2D);
-          isInitial2D = false;
-        } else {
-          Plotly.react(div2D, traces2D, get2DLayout());
-        }
-      }
-    }
-
-    function attachPlotEvents3D() {
-      const div3D = document.getElementById('plotContainer3D');
-      div3D.on('plotly_hover', function(data) {
-        if (data.points && data.points.length > 0) {
-          const pt = data.points[0];
-          document.getElementById('coordReadout').textContent = 
-            `3D Hover: X: ${pt.x !== undefined ? pt.x.toFixed(3) : '-'} | Y: ${pt.y !== undefined ? pt.y.toFixed(3) : '-'} | Z: ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
-        }
-      });
-      div3D.on('plotly_unhover', function() {
-        document.getElementById('coordReadout').textContent = 'Hover over surface or contour to inspect';
-      });
     }
 
     function attachPlotEvents2D() {
@@ -1428,14 +1311,14 @@
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
           document.getElementById('coordReadout').textContent = 
-            `Level Set Hover: X: ${pt.x.toFixed(3)} | Y: ${pt.y.toFixed(3)} | Value f(x,y): ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
+            `Hover: (${pt.x.toFixed(3)}, ${pt.y.toFixed(3)}) | Value f = ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
         }
       });
       div2D.on('plotly_unhover', function() {
-        document.getElementById('coordReadout').textContent = 'Hover over surface or contour to inspect';
+        document.getElementById('coordReadout').textContent = 'Hover over curve or click to set P₀';
       });
 
-      // Click to set P₀
+      // Click anywhere to set P0
       div2D.on('plotly_click', function(data) {
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
@@ -1445,33 +1328,32 @@
     }
 
     // -------------------------------------------------------------------------
-    // View Mode Management
+    // View Modes
     // -------------------------------------------------------------------------
     function setViewMode(mode) {
       state.view_mode = mode;
-      const div3D = document.getElementById('plotContainer3D');
       const div2D = document.getElementById('plotContainer2D');
+      const div3D = document.getElementById('plotContainer3D');
 
       document.querySelectorAll('.view-mode-btn').forEach(btn => btn.classList.remove('active'));
 
-      if (mode === '3d') {
-        document.getElementById('viewMode3D').classList.add('active');
-        div3D.classList.remove('hidden');
-        div2D.classList.add('hidden');
-      } else if (mode === '2d') {
+      if (mode === '2d') {
         document.getElementById('viewMode2D').classList.add('active');
-        div3D.classList.add('hidden');
         div2D.classList.remove('hidden');
+        div3D.classList.add('hidden');
+      } else if (mode === '3d') {
+        document.getElementById('viewMode3D').classList.add('active');
+        div2D.classList.add('hidden');
+        div3D.classList.remove('hidden');
       } else if (mode === 'split') {
         document.getElementById('viewModeSplit').classList.add('active');
-        div3D.classList.remove('hidden');
         div2D.classList.remove('hidden');
+        div3D.classList.remove('hidden');
       }
 
-      // Re-trigger layout resize
       setTimeout(() => {
-        Plotly.Plots.resize(div3D);
         Plotly.Plots.resize(div2D);
+        Plotly.Plots.resize(div3D);
         renderPlots(true);
       }, 50);
     }
@@ -1497,9 +1379,9 @@
     // -------------------------------------------------------------------------
     function initSidebarTabs() {
       const tabs = [
-        { btn: 'tabNavFunctions', content: 'tabContentFunctions' },
-        { btn: 'tabNavCalculus', content: 'tabContentCalculus' },
         { btn: 'tabNavLevelSets', content: 'tabContentLevelSets' },
+        { btn: 'tabNavCalculus', content: 'tabContentCalculus' },
+        { btn: 'tabNavFunctions', content: 'tabContentFunctions' },
         { btn: 'tabNavStyling', content: 'tabContentStyling' }
       ];
 
@@ -1614,94 +1496,51 @@
     }
 
     // -------------------------------------------------------------------------
-    // State Serialization / Deserialization
-    // -------------------------------------------------------------------------
-    function serializeStateToHash() {
-      const data = {
-        f1: state.f1_expr,
-        f2: state.show_f2 ? state.f2_expr : undefined,
-        p: Object.fromEntries(Object.entries(state.params).map(([k, v]) => [k, v.val])),
-        xr: state.x_range,
-        yr: state.y_range,
-        x0: state.x0,
-        y0: state.y0,
-        mode: state.view_mode,
-        col: state.color_scale
-      };
-      return encodeURIComponent(JSON.stringify(data));
-    }
-
-    function deserializeStateFromHash() {
-      try {
-        const hash = window.location.hash.slice(1);
-        if (!hash) return;
-        const data = JSON.parse(decodeURIComponent(hash));
-        if (data.f1) {
-          state.f1_expr = data.f1;
-          document.getElementById("functionInput").value = data.f1;
-        }
-        if (data.p) {
-          for (const [k, v] of Object.entries(data.p)) {
-            if (state.params[k]) state.params[k].val = v;
-          }
-        }
-        if (data.x0 !== undefined) state.x0 = data.x0;
-        if (data.y0 !== undefined) state.y0 = data.y0;
-        if (data.mode) state.view_mode = data.mode;
-        if (data.col) state.color_scale = data.col;
-      } catch (e) {
-        console.warn("Hash deserialize error:", e);
-      }
-    }
-
-    // -------------------------------------------------------------------------
     // Event Listeners Binding
     // -------------------------------------------------------------------------
     function initEvents() {
-      // View mode buttons
-      document.getElementById('viewMode3D').addEventListener('click', () => setViewMode('3d'));
+      // View modes
       document.getElementById('viewMode2D').addEventListener('click', () => setViewMode('2d'));
+      document.getElementById('viewMode3D').addEventListener('click', () => setViewMode('3d'));
       document.getElementById('viewModeSplit').addEventListener('click', () => setViewMode('split'));
 
-      // Formula input
-      let debounce = null;
-      document.getElementById("functionInput").addEventListener("input", (e) => {
-        clearTimeout(debounce);
-        debounce = setTimeout(() => {
-          state.f1_expr = e.target.value;
-          compileExpressions();
-          renderPlots(true);
-        }, 200);
+      // Level set constant c input and slider
+      document.getElementById('levelValueC').addEventListener('input', (e) => {
+        state.level_c = parseFloat(e.target.value) || 0;
+        document.getElementById('levelSliderC').value = state.level_c;
+        if (state.level_c >= 0) {
+          state.radius_r = Math.sqrt(state.level_c);
+          document.getElementById('radiusInputR').value = state.radius_r.toFixed(2);
+        }
+        updateCalculusCalculations();
+        renderPlots(true);
       });
-
-      document.querySelectorAll(".math-insert").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const input = document.getElementById("functionInput");
-          input.value = btn.textContent;
-          state.f1_expr = input.value;
-          compileExpressions();
-          renderPlots(true);
-        });
-      });
-
-      // Secondary function
-      document.getElementById("showSecondSurface").addEventListener("change", (e) => {
-        state.show_f2 = e.target.checked;
-        document.getElementById("secondSurfaceContainer").classList.toggle("hidden", !state.show_f2);
-        compileExpressions();
+      document.getElementById('levelSliderC').addEventListener('input', (e) => {
+        state.level_c = parseFloat(e.target.value);
+        document.getElementById('levelValueC').value = state.level_c.toFixed(1);
+        if (state.level_c >= 0) {
+          state.radius_r = Math.sqrt(state.level_c);
+          document.getElementById('radiusInputR').value = state.radius_r.toFixed(2);
+        }
+        updateCalculusCalculations();
         renderPlots(true);
       });
 
-      document.getElementById("secondFunctionInput").addEventListener("input", (e) => {
-        clearTimeout(debounce);
-        debounce = setTimeout(() => {
-          state.f2_expr = e.target.value;
-          compileExpressions();
-          renderPlots(true);
-        }, 200);
+      // Radius helper r -> c = r^2
+      document.getElementById('applyRadiusBtn').addEventListener('click', () => {
+        const r = parseFloat(document.getElementById('radiusInputR').value) || 1;
+        state.radius_r = r;
+        state.level_c = r * r;
+        document.getElementById('levelValueC').value = state.level_c.toFixed(1);
+        document.getElementById('levelSliderC').value = state.level_c;
+        // If circle, set P0 on circle at (r, 0)
+        setEvaluationPoint(r, 0);
       });
 
-      // Exact Evaluation Point inputs (Typing x=2, etc.)
+      // Snap P0 button
+      document.getElementById('snapToLevelSetBtn').addEventListener('click', snapPointToLevelSet);
+
+      // Point evaluation inputs (Typing x=2, etc.)
       const onPointType = () => {
         const x = parseFloat(document.getElementById('x0Input').value) || 0;
         const y = parseFloat(document.getElementById('y0Input').value) || 0;
@@ -1718,61 +1557,70 @@
         setEvaluationPoint(state.x0, e.target.value);
       });
 
-      // Calculus vector toggles
+      // Visual toggles
       document.getElementById('showGradientVector').addEventListener('change', (e) => {
         state.show_gradient = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('showNormalVector').addEventListener('change', (e) => {
-        state.show_normal = e.target.checked;
+      document.getElementById('showTangentLine').addEventListener('change', (e) => {
+        state.show_tangent_line = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('showTangentPlane').addEventListener('change', (e) => {
-        state.show_tangent = e.target.checked;
+      document.getElementById('showRightAngleMarker').addEventListener('change', (e) => {
+        state.show_right_angle = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('showCrossSections').addEventListener('change', (e) => {
-        state.show_cross_sections = e.target.checked;
-        renderPlots(true);
-      });
-
-      // Level Sets controls
-      document.getElementById('contourDensitySlider').addEventListener('input', (e) => {
-        state.contour_density = parseInt(e.target.value);
-        document.getElementById('contourDensityVal').textContent = state.contour_density;
-        renderPlots(true);
-      });
-      document.getElementById('showContourLabels').addEventListener('change', (e) => {
-        state.show_contour_labels = e.target.checked;
+      document.getElementById('showAllContourLines').addEventListener('change', (e) => {
+        state.show_all_contours = e.target.checked;
         renderPlots(true);
       });
       document.getElementById('show2DGradField').addEventListener('change', (e) => {
         state.show_2d_grad_field = e.target.checked;
         renderPlots(true);
       });
-      document.getElementById('floorContoursToggle').addEventListener('change', (e) => {
-        state.show_floor_contours = e.target.checked;
+
+      // Formula input
+      let debounce = null;
+      document.getElementById("functionInput").addEventListener("input", (e) => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          state.f_expr_raw = e.target.value;
+          compileExpressions();
+          renderPlots(true);
+        }, 200);
+      });
+
+      document.querySelectorAll(".math-insert").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const input = document.getElementById("functionInput");
+          input.value = btn.textContent;
+          state.f_expr_raw = input.value;
+          compileExpressions();
+          renderPlots(true);
+        });
+      });
+
+      // Notation toggles
+      document.getElementById('notationX1X2').addEventListener('click', () => {
+        state.notation = 'x1x2';
+        document.getElementById('notationX1X2').className = "px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]";
+        document.getElementById('notationXY').className = "px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]";
+        document.getElementById('labelX1').textContent = "x₁ value (or x):";
+        document.getElementById('labelX2').textContent = "x₂ value (or y):";
+        document.getElementById('dfdx1_title').textContent = "∂f / ∂x₁ :";
+        document.getElementById('dfdx2_title').textContent = "∂f / ∂x₂ :";
+        compileExpressions();
         renderPlots(true);
       });
-      document.getElementById('showSpecificLevelToggle').addEventListener('change', (e) => {
-        state.show_specific_level = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById('specificLevelInput').addEventListener('input', (e) => {
-        state.specific_level_c = parseFloat(e.target.value) || 0;
-        document.getElementById('specificLevelSlider').value = state.specific_level_c;
-        renderPlots(true);
-      });
-      document.getElementById('specificLevelSlider').addEventListener('input', (e) => {
-        state.specific_level_c = parseFloat(e.target.value);
-        document.getElementById('specificLevelInput').value = state.specific_level_c.toFixed(2);
-        renderPlots(true);
-      });
-      document.getElementById('snapLevelToP0Btn').addEventListener('click', () => {
-        const pt = evaluateAt(state.x0, state.y0);
-        state.specific_level_c = pt.z;
-        document.getElementById('specificLevelInput').value = pt.z.toFixed(2);
-        document.getElementById('specificLevelSlider').value = pt.z;
+      document.getElementById('notationXY').addEventListener('click', () => {
+        state.notation = 'xy';
+        document.getElementById('notationXY').className = "px-2.5 py-1 rounded bg-indigo-600 text-white font-mono text-[11px]";
+        document.getElementById('notationX1X2').className = "px-2.5 py-1 rounded text-slate-400 hover:text-white font-mono text-[11px]";
+        document.getElementById('labelX1').textContent = "x value:";
+        document.getElementById('labelX2').textContent = "y value:";
+        document.getElementById('dfdx1_title').textContent = "∂f / ∂x :";
+        document.getElementById('dfdx2_title').textContent = "∂f / ∂y :";
+        compileExpressions();
         renderPlots(true);
       });
 
@@ -1794,7 +1642,7 @@
 
       // Add custom parameter
       document.getElementById("addParamBtn").addEventListener("click", () => {
-        const name = prompt("Enter parameter variable name (e.g. k, m, w):", "k");
+        const name = prompt("Enter parameter name (e.g. k, m, w):", "k");
         if (name && /^[a-zA-Z][a-zA-Z0-9]*$/.test(name.trim())) {
           const cleanName = name.trim();
           if (!state.params[cleanName]) {
@@ -1829,21 +1677,6 @@
         renderPlots(true);
       });
 
-      // Z clamp
-      document.getElementById("clampZToggle").addEventListener("change", (e) => {
-        state.z_clamp = e.target.checked;
-        document.getElementById("zClampInputs").classList.toggle("hidden", !state.z_clamp);
-        renderPlots(true);
-      });
-      const updateZClamp = () => {
-        state.z_range = [
-          parseFloat(document.getElementById("zMin").value) || -10,
-          parseFloat(document.getElementById("zMax").value) || 10
-        ];
-        renderPlots(true);
-      };
-      ["zMin", "zMax"].forEach(id => document.getElementById(id).addEventListener("change", updateZClamp));
-
       // Visual styling
       document.getElementById("colorScaleSelect").addEventListener("change", (e) => {
         state.color_scale = e.target.value;
@@ -1853,14 +1686,6 @@
         state.opacity = parseFloat(e.target.value);
         renderPlots(true);
       });
-      document.getElementById("wireframeToggle").addEventListener("change", (e) => {
-        state.show_wireframe = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById("contoursToggle").addEventListener("change", (e) => {
-        state.show_contours = e.target.checked;
-        renderPlots(true);
-      });
 
       // Presets
       document.getElementById("presetSelect").addEventListener("change", (e) => {
@@ -1868,14 +1693,19 @@
         const preset = presets[pKey];
         if (!preset) return;
 
-        state.f1_expr = preset.expr;
+        state.f_expr_raw = preset.expr;
         document.getElementById("functionInput").value = preset.expr;
-
-        if (preset.params) {
-          for (const [k, v] of Object.entries(preset.params)) {
-            if (state.params[k]) state.params[k].val = v;
-          }
+        if (preset.c !== undefined) {
+          state.level_c = preset.c;
+          document.getElementById("levelValueC").value = preset.c;
+          document.getElementById("levelSliderC").value = preset.c;
         }
+        if (preset.r !== undefined) {
+          state.radius_r = preset.r;
+          document.getElementById("radiusInputR").value = preset.r;
+        }
+        if (preset.x0 !== undefined) state.x0 = preset.x0;
+        if (preset.y0 !== undefined) state.y0 = preset.y0;
         if (preset.x) {
           state.x_range = preset.x;
           document.getElementById("xMin").value = preset.x[0];
@@ -1886,29 +1716,15 @@
           document.getElementById("yMin").value = preset.y[0];
           document.getElementById("yMax").value = preset.y[1];
         }
-        if (preset.x0 !== undefined) state.x0 = preset.x0;
-        if (preset.y0 !== undefined) state.y0 = preset.y0;
-        if (preset.scale) {
-          state.color_scale = preset.scale;
-          document.getElementById("colorScaleSelect").value = preset.scale;
-        }
+        if (preset.mode) setViewMode(preset.mode);
 
-        renderParameterCards();
         compileExpressions();
         setEvaluationPoint(state.x0, state.y0);
         renderPlots(false);
-
-        if (preset.auto_animate && !state.animating_t) toggleTimeAnimation();
       });
 
-      // Camera view shortcuts
+      // Camera reset
       document.getElementById("resetCamBtn").addEventListener("click", () => renderPlots(false));
-      document.getElementById("viewTopBtn").addEventListener("click", () => {
-        Plotly.relayout(document.getElementById('plotContainer3D'), { 'scene.camera.eye': { x: 0, y: 0, z: 2.5 } });
-      });
-      document.getElementById("viewIsoBtn").addEventListener("click", () => {
-        Plotly.relayout(document.getElementById('plotContainer3D'), { 'scene.camera.eye': { x: 1.5, y: 1.5, z: 1.2 } });
-      });
 
       // Fullscreen
       document.getElementById("fullscreenBtn").addEventListener("click", () => {
@@ -1922,16 +1738,20 @@
 
       // Export PNG
       document.getElementById("exportPngBtn").addEventListener("click", () => {
-        const targetDiv = state.view_mode === '2d' ? document.getElementById('plotContainer2D') : document.getElementById('plotContainer3D');
+        const targetDiv = state.view_mode === '3d' ? document.getElementById('plotContainer3D') : document.getElementById('plotContainer2D');
         Plotly.downloadImage(targetDiv, {
-          format: 'png', width: 1920, height: 1080, filename: `multivar_${state.view_mode}_${Date.now()}`
+          format: 'png', width: 1920, height: 1080, filename: `multivar_levelset_${Date.now()}`
         });
       });
 
       // Share modal
       const shareModal = document.getElementById("shareModal");
       document.getElementById("shareBtn").addEventListener("click", () => {
-        const hash = serializeStateToHash();
+        const data = {
+          f: state.f_expr_raw, c: state.level_c, r: state.radius_r,
+          x0: state.x0, y0: state.y0, mode: state.view_mode
+        };
+        const hash = encodeURIComponent(JSON.stringify(data));
         const shareUrl = `${window.location.origin}${window.location.pathname}#${hash}`;
         document.getElementById("shareUrlInput").value = shareUrl;
         document.getElementById("copySuccessMsg").classList.add("hidden");
@@ -1952,12 +1772,11 @@
     // -------------------------------------------------------------------------
     window.addEventListener("DOMContentLoaded", () => {
       initSidebarTabs();
-      deserializeStateFromHash();
       renderParameterCards();
       compileExpressions();
       initEvents();
       setEvaluationPoint(state.x0, state.y0);
-      setViewMode(state.view_mode || '3d');
+      setViewMode(state.view_mode);
     });
   </script>
 </body>
