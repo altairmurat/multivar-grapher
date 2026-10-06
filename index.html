@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MultivarGrapher 3D | Interactive Multivariable Function Visualizer</title>
+  <title>MultivarGrapher 3D & Level Sets | Interactive Multivariable Calculus</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,16 +44,15 @@
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #1e293b;
+      background: #0f172a;
     }
     ::-webkit-scrollbar-thumb {
-      background: #475569;
+      background: #334155;
       border-radius: 3px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
+      background: #475569;
     }
-    /* Smooth slider styling */
     input[type=range] {
       accent-color: #6366f1;
     }
@@ -61,57 +60,86 @@
       width: 100% !important;
       height: 100% !important;
     }
+    /* Tab active styles */
+    .tab-btn.active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      border-color: #6366f1;
+    }
+    .tab-btn:not(.active) {
+      background-color: #1e293b;
+      color: #94a3b8;
+    }
+    .view-mode-btn.active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none overflow-x-hidden">
 
   <!-- Top Navigation Header -->
-  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2.5 flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center space-x-3">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-        <i data-lucide="box" class="w-5 h-5 text-white"></i>
+        <i data-lucide="layers" class="w-5 h-5 text-white"></i>
       </div>
       <div>
         <div class="flex items-center space-x-2">
-          <h1 class="font-bold text-lg text-white tracking-tight">MultivarGrapher <span class="text-indigo-400 font-mono text-sm px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">3D</span></h1>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Static / GitHub Pages Ready</span>
+          <h1 class="font-bold text-base md:text-lg text-white tracking-tight">
+            MultivarGrapher <span class="text-indigo-400 font-mono text-xs px-1.5 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/50">3D & Level Sets</span>
+          </h1>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium hidden sm:inline">
+            Live on GitHub Pages
+          </span>
         </div>
-        <p class="text-xs text-slate-400 hidden sm:block">Interactive Multivariable Calculus, Real-Time Sliders & Tangent Planes</p>
+        <p class="text-[11px] text-slate-400 hidden sm:block">3D Surfaces • 2D Level Sets (Contours) • Derivatives • Gradient Vectors • Tangent Planes</p>
       </div>
     </div>
 
+    <!-- Center View Mode Selector -->
+    <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+      <button id="viewMode3D" class="view-mode-btn active px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
+        <i data-lucide="box" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">3D Surface</span>
+      </button>
+      <button id="viewMode2D" class="view-mode-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
+        <i data-lucide="map" class="w-3.5 h-3.5"></i>
+        <span>Level Sets (2D)</span>
+      </button>
+      <button id="viewModeSplit" class="view-mode-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center space-x-1.5">
+        <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Split View</span>
+      </button>
+    </div>
+
+    <!-- Quick Action Buttons -->
     <div class="flex items-center space-x-2">
       <!-- Preset Dropdown -->
-      <div class="relative">
-        <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer">
-          <option value="" disabled selected>✨ Load Preset...</option>
-          <option value="saddle">Hyperbolic Paraboloid (Saddle)</option>
-          <option value="paraboloid">Elliptic Paraboloid (Bowl)</option>
-          <option value="monkey_saddle">Monkey Saddle (3 Dips)</option>
-          <option value="ripple">Water Droplet Ripple (Sinc)</option>
-          <option value="gaussian">Gaussian Bell Wave Packet</option>
-          <option value="egg_carton">Egg Carton Grid</option>
-          <option value="rosenbrock">Rosenbrock Valley</option>
-          <option value="sombrero">Animated Sombrero Wave</option>
-          <option value="chladni">Chladni Nodal Surface</option>
-          <option value="cliff">Sigmoid Transition Step</option>
-        </select>
-      </div>
+      <select id="presetSelect" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none hover:bg-slate-750 transition cursor-pointer max-w-[140px] sm:max-w-none">
+        <option value="" disabled selected>✨ Presets...</option>
+        <option value="saddle">Hyperbolic Paraboloid (Saddle)</option>
+        <option value="paraboloid">Elliptic Paraboloid (Bowl)</option>
+        <option value="monkey_saddle">Monkey Saddle (3 Dips)</option>
+        <option value="ripple">Water Droplet Ripple (Sinc)</option>
+        <option value="gaussian">Gaussian Bell Wave Packet</option>
+        <option value="egg_carton">Egg Carton Grid</option>
+        <option value="rosenbrock">Rosenbrock Valley</option>
+        <option value="sombrero">Animated Sombrero Wave</option>
+        <option value="chladni">Chladni Nodal Surface</option>
+        <option value="cliff">Sigmoid Transition Step</option>
+      </select>
 
-      <!-- Quick Action Buttons -->
-      <button id="resetCamBtn" title="Reset Camera View" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
-        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-      </button>
-      <button id="shareBtn" title="Copy Shareable Link" class="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-indigo-600/30 transition">
+      <button id="shareBtn" title="Copy Shareable Link" class="flex items-center space-x-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-indigo-600/30 transition">
         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-        <span class="hidden md:inline">Share</span>
+        <span class="hidden lg:inline">Share</span>
       </button>
-      <button id="exportPngBtn" title="Export High-Res PNG" class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700 transition">
+      <button id="exportPngBtn" title="Export High-Res PNG" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition">
         <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-        <span class="hidden md:inline">Screenshot</span>
       </button>
-      <a href="https://github.com" target="_blank" id="repoLink" title="View on GitHub" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
-        <i data-lucide="github" class="w-4 h-4"></i>
+      <a href="https://github.com/altairmurat/multivar-grapher" target="_blank" title="Repository on GitHub" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
+        <i data-lucide="github" class="w-3.5 h-3.5"></i>
       </a>
     </div>
   </header>
@@ -120,283 +148,491 @@
   <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
     <!-- Left Controls Panel -->
-    <aside id="controlsPanel" class="w-full lg:w-96 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-[calc(100vh-61px)] p-4 space-y-4">
+    <aside id="controlsPanel" class="w-full lg:w-[420px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto max-h-[48vh] lg:max-h-[calc(100vh-57px)]">
       
-      <!-- Primary Function Input -->
-      <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label for="functionInput" class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1">
-            <span>Primary Surface</span>
-            <span class="text-indigo-400 font-mono">z = f(x, y)</span>
-          </label>
-          <span id="formulaStatus" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Valid</span>
-        </div>
-        <div class="relative">
-          <input 
-            type="text" 
-            id="functionInput" 
-            value="sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)" 
-            class="w-full bg-slate-950 font-mono text-sm text-indigo-100 px-3.5 py-2.5 rounded-xl border border-indigo-900/60 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none tracking-wide shadow-inner transition"
-            placeholder="e.g. sin(x * a) * cos(y * b)"
-            spellcheck="false"
-          >
-        </div>
-        <!-- Math shortcuts -->
-        <div class="flex flex-wrap gap-1 text-[11px] pt-1">
-          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x)</button>
-          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">cos(y)</button>
-          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sqrt(x^2+y^2)</button>
-          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x^2-y^2)</button>
-          <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x^2 - y^2</button>
-        </div>
+      <!-- Panel Tabs -->
+      <div class="grid grid-cols-4 gap-1 p-2 bg-slate-950 border-b border-slate-800 sticky top-0 z-20 text-[11px] font-medium">
+        <button id="tabNavFunctions" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="function-square" class="w-3.5 h-3.5"></i>
+          <span>Formula</span>
+        </button>
+        <button id="tabNavCalculus" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Calculus</span>
+        </button>
+        <button id="tabNavLevelSets" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="map" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Level Sets</span>
+        </button>
+        <button id="tabNavStyling" class="tab-btn py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span>Domain</span>
+        </button>
       </div>
 
-      <!-- Secondary Function Toggle & Input -->
-      <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
-        <div class="flex items-center justify-between">
-          <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-300">
-            <input type="checkbox" id="showSecondSurface" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-            <span>Second Surface <span class="text-cyan-400 font-mono text-xs">z₂ = g(x, y)</span></span>
-          </label>
-          <span class="text-[10px] text-slate-500">Intersect/Compare</span>
-        </div>
-        <div id="secondSurfaceContainer" class="hidden">
-          <input 
-            type="text" 
-            id="secondFunctionInput" 
-            value="0.5 * (x + y)" 
-            class="w-full bg-slate-950 font-mono text-sm text-cyan-200 px-3.5 py-2 rounded-xl border border-cyan-900/60 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none tracking-wide shadow-inner transition"
-            placeholder="e.g. 0.5 * (x + y)"
-            spellcheck="false"
-          >
-        </div>
-      </div>
+      <div class="p-4 space-y-4 flex-1">
 
-      <!-- Live Parameters & Sliders -->
-      <div class="border-t border-slate-800/80 pt-3 space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-            <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
-            <span>Parameters & Variables</span>
-          </h2>
-          <button id="addParamBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center space-x-0.5">
-            <i data-lucide="plus" class="w-3 h-3"></i>
-            <span>Add Var</span>
-          </button>
-        </div>
-
-        <div id="parametersList" class="space-y-2.5">
-          <!-- Parameter cards will be rendered dynamically here -->
-        </div>
-
-        <!-- Animated Time Parameter 't' -->
-        <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">t</span>
-              <span class="text-xs font-medium text-slate-300">Time variable (4D)</span>
+        <!-- ============================================================= -->
+        <!-- TAB 1: FORMULAS & VARIABLES                                   -->
+        <!-- ============================================================= -->
+        <div id="tabContentFunctions" class="space-y-4">
+          
+          <!-- Primary Function Input -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="functionInput" class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1">
+                <span>Primary Surface</span>
+                <span class="text-indigo-400 font-mono">z = f(x, y)</span>
+              </label>
+              <span id="formulaStatus" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Valid</span>
             </div>
-            <div class="flex items-center space-x-1">
-              <button id="timePlayBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition">
-                <i data-lucide="play" class="w-3 h-3" id="timePlayIcon"></i>
-                <span id="timePlayText">Animate</span>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="functionInput" 
+                value="sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)" 
+                class="w-full bg-slate-950 font-mono text-sm text-indigo-100 px-3 py-2.5 rounded-xl border border-indigo-900/60 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none tracking-wide shadow-inner transition"
+                placeholder="e.g. x^2 - y^2"
+                spellcheck="false"
+              >
+            </div>
+            <!-- Math helper insert buttons -->
+            <div class="flex flex-wrap gap-1 text-[11px] pt-1">
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sin(x)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">cos(y)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">sqrt(x^2+y^2)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">exp(-x^2-y^2)</button>
+              <button type="button" class="math-insert px-1.5 py-0.5 bg-slate-800 hover:bg-indigo-600 rounded text-slate-300 font-mono transition">x^2 - y^2</button>
+            </div>
+          </div>
+
+          <!-- Secondary Function Toggle & Input -->
+          <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-300">
+                <input type="checkbox" id="showSecondSurface" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                <span>Second Surface <span class="text-cyan-400 font-mono text-xs">z₂ = g(x, y)</span></span>
+              </label>
+              <span class="text-[10px] text-slate-500">Intersect/Dual</span>
+            </div>
+            <div id="secondSurfaceContainer" class="hidden">
+              <input 
+                type="text" 
+                id="secondFunctionInput" 
+                value="0.5 * (x + y)" 
+                class="w-full bg-slate-950 font-mono text-sm text-cyan-200 px-3 py-2 rounded-xl border border-cyan-900/60 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none tracking-wide shadow-inner transition"
+                placeholder="e.g. 0.5 * (x + y)"
+                spellcheck="false"
+              >
+            </div>
+          </div>
+
+          <!-- Parameters & Variable Sliders -->
+          <div class="border-t border-slate-800/80 pt-3 space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>Parameters & Variables</span>
+              </h2>
+              <button id="addParamBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center space-x-0.5">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Add Var</span>
               </button>
-              <button id="timeResetBtn" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition" title="Reset t to 0">
-                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+            </div>
+
+            <div id="parametersList" class="space-y-2">
+              <!-- Parameter cards will be rendered dynamically here -->
+            </div>
+
+            <!-- Animated Time Parameter 't' -->
+            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-5 h-5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">t</span>
+                  <span class="text-xs font-medium text-slate-300">Time variable (4D Waves)</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <button id="timePlayBtn" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] flex items-center space-x-1 transition">
+                    <i data-lucide="play" class="w-3 h-3" id="timePlayIcon"></i>
+                    <span id="timePlayText">Animate</span>
+                  </button>
+                  <button id="timeResetBtn" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition" title="Reset t to 0">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="range" id="param_t_slider" min="0" max="20" step="0.05" value="0" class="flex-1">
+                <span id="param_t_val" class="font-mono text-xs text-indigo-400 w-10 text-right">0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 2: CALCULUS, DERIVATIVES & GRADIENT (CORE REQUEST)         -->
+        <!-- ============================================================= -->
+        <div id="tabContentCalculus" class="space-y-4 hidden">
+          
+          <!-- Exact Point Selection -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-indigo-900/50 space-y-3 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-semibold text-indigo-300">
+                <i data-lucide="map-pin" class="w-4 h-4 text-rose-400"></i>
+                <span>Evaluation Point P₀ (x, y)</span>
+              </div>
+              <span class="text-[10px] text-slate-400">Type or slide</span>
+            </div>
+
+            <!-- Exact numeric input inputs -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="space-y-1">
+                <label for="x0Input" class="text-[11px] font-mono text-slate-400 block">x value:</label>
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
+                  <span class="px-2 font-mono text-slate-500 text-xs">x =</span>
+                  <input type="number" id="x0Input" value="2.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none">
+                </div>
+                <input type="range" id="x0Slider" min="-5" max="5" step="0.1" value="2" class="w-full">
+              </div>
+
+              <div class="space-y-1">
+                <label for="y0Input" class="text-[11px] font-mono text-slate-400 block">y value:</label>
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden focus-within:border-indigo-500">
+                  <span class="px-2 font-mono text-slate-500 text-xs">y =</span>
+                  <input type="number" id="y0Input" value="1.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-white text-xs focus:outline-none">
+                </div>
+                <input type="range" id="y0Slider" min="-5" max="5" step="0.1" value="1" class="w-full">
+              </div>
+            </div>
+
+            <p class="text-[10px] text-slate-400 italic">
+              💡 Tip: Click anywhere on the 2D Level Sets map to instantly set (x, y)!
+            </p>
+          </div>
+
+          <!-- Symbolic Formulas Display -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+              <i data-lucide="variable" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Symbolic Partial Derivatives</span>
+            </h3>
+            
+            <div class="space-y-2 text-xs">
+              <div class="p-2 bg-slate-900 rounded-lg border border-slate-800/80">
+                <div class="text-[11px] text-indigo-400 font-semibold mb-1">∂f / ∂x :</div>
+                <div id="katexDfDx" class="overflow-x-auto text-slate-200 py-0.5"></div>
+              </div>
+              <div class="p-2 bg-slate-900 rounded-lg border border-slate-800/80">
+                <div class="text-[11px] text-cyan-400 font-semibold mb-1">∂f / ∂y :</div>
+                <div id="katexDfDy" class="overflow-x-auto text-slate-200 py-0.5"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Numeric Results Card -->
+          <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-3.5 rounded-xl border border-indigo-900/60 space-y-2.5">
+            <h3 class="text-xs font-semibold text-indigo-300 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5">
+                <i data-lucide="calculator" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>Calculated Results at P₀</span>
+              </span>
+              <span id="pointSummaryBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono">(2.0, 1.0)</span>
+            </h3>
+
+            <div class="space-y-1.5 font-mono text-xs text-slate-200">
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-slate-400">Surface Value f(x₀, y₀):</span>
+                <span id="resZ0" class="font-bold text-white">0.0000</span>
+              </div>
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-indigo-400">∂f/∂x (x-slope):</span>
+                <span id="resDfDx" class="font-bold text-emerald-400">0.0000</span>
+              </div>
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-cyan-400">∂f/∂y (y-slope):</span>
+                <span id="resDfDy" class="font-bold text-emerald-400">0.0000</span>
+              </div>
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-amber-400">Gradient ∇f = ⟨fx, fy⟩:</span>
+                <span id="resGradVector" class="font-bold text-amber-300">⟨0.00, 0.00⟩</span>
+              </div>
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-slate-400">Magnitude ||∇f|| (Max slope):</span>
+                <span id="resGradMag" class="font-bold text-purple-300">0.0000</span>
+              </div>
+              <div class="flex justify-between p-1.5 bg-slate-950/80 rounded border border-slate-800">
+                <span class="text-slate-400">Direction θ (Steepest ascent):</span>
+                <span id="resGradAngle" class="text-slate-300">0.0°</span>
+              </div>
+            </div>
+
+            <!-- Tangent plane formula -->
+            <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300">
+              <div class="text-slate-400 text-[10px] uppercase font-sans font-semibold mb-0.5">Tangent Plane Formula:</div>
+              <div id="tangentPlaneFormula" class="text-indigo-200">z = ...</div>
+            </div>
+          </div>
+
+          <!-- On-Graph Vector Visualization Toggles -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+            <h3 class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+              <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Show on Graph (3D & 2D)</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+              <label class="flex items-center space-x-2 text-amber-300 cursor-pointer">
+                <input type="checkbox" id="showGradientVector" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500">
+                <span class="font-medium">Show Gradient Vector ∇f on Graph</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="showNormalVector" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                <span>Show Surface Normal Vector n = ⟨-fx, -fy, 1⟩</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="showTangentPlane" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                <span>Show Tangent Plane at P₀</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="showCrossSections" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                <span>Show Slice Curves (x = x₀ & y = y₀)</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 3: LEVEL SETS & CONTOUR SETTINGS                          -->
+        <!-- ============================================================= -->
+        <div id="tabContentLevelSets" class="space-y-4 hidden">
+          
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-semibold text-cyan-300 flex items-center space-x-1.5">
+                <i data-lucide="map" class="w-3.5 h-3.5 text-cyan-400"></i>
+                <span>Level Sets (Isolines f(x, y) = c)</span>
+              </h3>
+              <span class="text-[10px] text-slate-400 font-mono">f(x,y) = c</span>
+            </div>
+
+            <!-- Contour Density -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Number of Contour Levels:</span>
+                <span id="contourDensityVal" class="font-mono text-cyan-400 text-xs">20</span>
+              </div>
+              <input type="range" id="contourDensitySlider" min="5" max="50" step="5" value="20" class="w-full">
+            </div>
+
+            <!-- Contour display options -->
+            <div class="space-y-2 text-xs pt-1">
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="showContourLabels" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
+                <span>Show Contour Value Labels (c numbers)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="show2DGradField" class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
+                <span>Show Gradient Vector Field (Arrows Everywhere)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="floorContoursToggle" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-cyan-500">
+                <span>Project Contours onto 3D Floor</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Highlight specific level set c -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-cyan-900/60 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-cyan-300">Highlight Specific Level Curve</span>
+              <button id="snapLevelToP0Btn" class="text-[10px] px-2 py-0.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-medium transition">
+                Set c = f(x₀, y₀)
               </button>
             </div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input type="range" id="param_t_slider" min="0" max="20" step="0.05" value="0" class="flex-1">
-            <span id="param_t_val" class="font-mono text-xs text-indigo-400 w-10 text-right">0.00</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Domain Bounds & Resolution -->
-      <div class="border-t border-slate-800/80 pt-3 space-y-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-          <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>Domain & Grid Bounds</span>
-        </h2>
-        
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-            <label class="text-[10px] text-slate-400 font-mono block">X Domain [min, max]</label>
-            <div class="flex items-center space-x-1 mt-1">
-              <input type="number" id="xMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
-              <span class="text-slate-500">to</span>
-              <input type="number" id="xMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+            <p class="text-[11px] text-slate-400">
+              Draws the exact level set curve <span class="font-mono text-cyan-300">f(x, y) = c</span> in bright neon on the 2D map & 3D surface:
+            </p>
+
+            <div class="flex items-center space-x-2 text-xs">
+              <span class="font-mono text-slate-400">c =</span>
+              <input type="number" id="specificLevelInput" value="0.5" step="0.1" class="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-white text-xs">
+              <input type="range" id="specificLevelSlider" min="-5" max="5" step="0.1" value="0.5" class="flex-1">
+            </div>
+
+            <label class="flex items-center space-x-2 text-xs text-cyan-300 cursor-pointer pt-1">
+              <input type="checkbox" id="showSpecificLevelToggle" checked class="rounded bg-slate-900 border-slate-700 text-cyan-600">
+              <span>Highlight curve f(x, y) = c</span>
+            </label>
+          </div>
+
+          <!-- Quick Level Set Math Explanation -->
+          <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+            <div class="font-semibold text-slate-300 flex items-center space-x-1">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Orthogonality Theorem:</span>
+            </div>
+            <p>
+              The gradient vector <span class="font-mono text-amber-300">∇f</span> at any point is always <strong>perpendicular (orthogonal)</strong> to the level curve <span class="font-mono text-cyan-300">f(x, y) = c</span> passing through that point!
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 4: DOMAIN, RESOLUTION & STYLING                          -->
+        <!-- ============================================================= -->
+        <div id="tabContentStyling" class="space-y-4 hidden">
+          
+          <!-- Domain Bounds -->
+          <div class="space-y-2">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+              <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>Domain Bounds</span>
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                <label class="text-[10px] text-slate-400 font-mono block">X Domain [min, max]</label>
+                <div class="flex items-center space-x-1 mt-1">
+                  <input type="number" id="xMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <span class="text-slate-500">to</span>
+                  <input type="number" id="xMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+              </div>
+
+              <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                <label class="text-[10px] text-slate-400 font-mono block">Y Domain [min, max]</label>
+                <div class="flex items-center space-x-1 mt-1">
+                  <input type="number" id="yMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                  <span class="text-slate-500">to</span>
+                  <input type="number" id="yMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
-            <label class="text-[10px] text-slate-400 font-mono block">Y Domain [min, max]</label>
-            <div class="flex items-center space-x-1 mt-1">
-              <input type="number" id="yMin" value="-5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
-              <span class="text-slate-500">to</span>
-              <input type="number" id="yMax" value="5" step="1" class="w-full bg-slate-900 px-2 py-1 rounded text-center border border-slate-700 focus:outline-none focus:border-indigo-500">
+          <!-- Mesh Resolution -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Mesh Resolution</span>
+              <span id="gridResVal" class="font-mono text-indigo-400 text-[11px]">50 × 50 (2,500 pts)</span>
+            </div>
+            <input type="range" id="gridResSlider" min="20" max="100" step="5" value="50" class="w-full">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>Fast (20)</span>
+              <span>Balanced (50)</span>
+              <span>Ultra (100)</span>
             </div>
           </div>
-        </div>
 
-        <!-- Grid Resolution -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-400">Mesh Resolution</span>
-            <span id="gridResVal" class="font-mono text-indigo-400 text-[11px]">50 × 50 (2,500 pts)</span>
-          </div>
-          <input type="range" id="gridResSlider" min="20" max="100" step="5" value="50" class="w-full">
-          <div class="flex justify-between text-[10px] text-slate-500">
-            <span>Fast (20)</span>
-            <span>Balanced (50)</span>
-            <span>Ultra (100)</span>
-          </div>
-        </div>
-
-        <!-- Z Clamping -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between">
+          <!-- Z Clamping -->
+          <div class="space-y-1">
             <label class="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer">
               <input type="checkbox" id="clampZToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500">
               <span>Clamp Z Axis (Prevents Infinite Spikes)</span>
             </label>
-          </div>
-          <div id="zClampInputs" class="flex items-center space-x-2 text-xs pt-1 hidden">
-            <input type="number" id="zMin" value="-10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
-            <span class="text-slate-500">to</span>
-            <input type="number" id="zMax" value="10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
-          </div>
-        </div>
-      </div>
-
-      <!-- Calculus & Analysis Features -->
-      <div class="border-t border-slate-800/80 pt-3 space-y-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-          <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>Calculus & Analysis Tools</span>
-        </h2>
-
-        <!-- Tangent Plane at Probe Point -->
-        <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center space-x-2 text-xs font-medium text-slate-200 cursor-pointer">
-              <input type="checkbox" id="showTangentPlane" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-              <span>Show Tangent Plane</span>
-            </label>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-300 font-mono">At (x₀, y₀)</span>
-          </div>
-
-          <div id="tangentPointControls" class="space-y-2 pt-1 hidden">
-            <div class="flex items-center space-x-2 text-xs">
-              <span class="font-mono text-slate-400 w-5">x₀:</span>
-              <input type="range" id="x0Slider" min="-5" max="5" step="0.1" value="1" class="flex-1">
-              <span id="x0Val" class="font-mono text-indigo-400 w-8 text-right">1.0</span>
-            </div>
-            <div class="flex items-center space-x-2 text-xs">
-              <span class="font-mono text-slate-400 w-5">y₀:</span>
-              <input type="range" id="y0Slider" min="-5" max="5" step="0.1" value="1" class="flex-1">
-              <span id="y0Val" class="font-mono text-indigo-400 w-8 text-right">1.0</span>
-            </div>
-            <!-- Live Derivative info -->
-            <div id="derivativesDisplay" class="p-2 rounded bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
-              <!-- Dynamically populated -->
+            <div id="zClampInputs" class="flex items-center space-x-2 text-xs pt-1 hidden">
+              <input type="number" id="zMin" value="-10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
+              <span class="text-slate-500">to</span>
+              <input type="number" id="zMax" value="10" step="1" class="w-20 bg-slate-950 px-2 py-1 rounded border border-slate-800 text-center font-mono">
             </div>
           </div>
-        </div>
 
-        <!-- Cross-Sections / Slices -->
-        <div class="space-y-2 text-xs">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
-              <input type="checkbox" id="showCrossSections" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-              <span>Show Slice Curves (x = x₀ & y = y₀)</span>
-            </label>
+          <!-- Color Palette & Mesh options -->
+          <div class="space-y-3 border-t border-slate-800/80 pt-3">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
+              <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>Visual Palette</span>
+            </h2>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-1">Color Palette</label>
+                <select id="colorScaleSelect" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                  <option value="Turbo" selected>Turbo</option>
+                  <option value="Viridis">Viridis</option>
+                  <option value="Plasma">Plasma</option>
+                  <option value="Magma">Magma</option>
+                  <option value="Jet">Jet</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Spectral">Spectral</option>
+                  <option value="Rainbow">Rainbow</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-1">Surface Opacity</label>
+                <input type="range" id="opacitySlider" min="0.2" max="1.0" step="0.05" value="0.95" class="w-full mt-2">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+              <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="wireframeToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+                <span>Show Wireframe</span>
+              </label>
+              <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="contoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
+                <span>3D Surface Contours</span>
+              </label>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Styling & Rendering Options -->
-      <div class="border-t border-slate-800/80 pt-3 space-y-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-300 flex items-center space-x-1.5">
-          <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>Visual Styling</span>
-        </h2>
-
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <label class="text-[10px] text-slate-400 block mb-1">Color Palette</label>
-            <select id="colorScaleSelect" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
-              <option value="Viridis">Viridis</option>
-              <option value="Plasma">Plasma</option>
-              <option value="Turbo" selected>Turbo</option>
-              <option value="Magma">Magma</option>
-              <option value="Jet">Jet</option>
-              <option value="Electric">Electric</option>
-              <option value="Spectral">Spectral</option>
-              <option value="Rainbow">Rainbow</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-[10px] text-slate-400 block mb-1">Surface Opacity</label>
-            <input type="range" id="opacitySlider" min="0.2" max="1.0" step="0.05" value="0.95" class="w-full mt-2">
-          </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
-            <input type="checkbox" id="wireframeToggle" class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-            <span>Show Mesh Grid</span>
-          </label>
-          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer">
-            <input type="checkbox" id="contoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-            <span>Surface Contours</span>
-          </label>
-          <label class="flex items-center space-x-1.5 text-slate-300 cursor-pointer col-span-2">
-            <input type="checkbox" id="floorContoursToggle" checked class="rounded bg-slate-950 border-slate-700 text-indigo-600">
-            <span>Floor Projection (XY Contours)</span>
-          </label>
-        </div>
       </div>
 
     </aside>
 
-    <!-- Right 3D Visualization Area -->
-    <main class="flex-1 flex flex-col relative bg-slate-950 min-h-[55vh] lg:min-h-0">
+    <!-- Right Visualization Area -->
+    <main class="flex-1 flex flex-col relative bg-slate-950 min-h-[52vh] lg:min-h-0">
       
-      <!-- Top Overlay: Current Equation & Performance Badge -->
+      <!-- Top Overlay: Current Equation & Camera Toolbar -->
       <div class="absolute top-3 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <!-- Rendered Equation Card -->
-        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-3 max-w-xl">
-          <span class="text-xs font-semibold text-indigo-400">Equation:</span>
-          <div id="katexEquation" class="text-sm text-white overflow-x-auto"></div>
+        
+        <!-- Rendered Equation & Gradient Badge -->
+        <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-3 max-w-xl">
+          <div id="katexEquation" class="text-xs sm:text-sm text-white overflow-x-auto"></div>
         </div>
 
         <!-- View Controls Floating Toolbar -->
-        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-2 text-xs">
-          <button id="viewTopBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Top-down XY view">XY (Top)</button>
-          <button id="viewSideBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Side XZ view">XZ (Side)</button>
+        <div class="pointer-events-auto bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-1.5 text-xs">
+          <button id="resetCamBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Reset View">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          </button>
+          <button id="viewTopBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Top-down XY view">Top XY</button>
           <button id="viewIsoBtn" class="px-2 py-1 rounded hover:bg-slate-800 text-indigo-300 font-medium transition" title="Isometric 3D view">3D Iso</button>
           <div class="h-4 w-px bg-slate-800"></div>
           <button id="fullscreenBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 transition" title="Toggle Fullscreen">
-            <i data-lucide="maximize" class="w-4 h-4"></i>
+            <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
 
-      <!-- 3D Plot Container -->
-      <div id="plotContainer" class="flex-1 w-full h-full"></div>
+      <!-- Graph Viewports Container -->
+      <div id="graphContainer" class="flex-1 w-full h-full flex flex-col md:flex-row overflow-hidden">
+        <!-- 3D Plot Area -->
+        <div id="plotContainer3D" class="flex-1 w-full h-full min-h-[300px]"></div>
+        <!-- 2D Level Sets (Contour Map) Area -->
+        <div id="plotContainer2D" class="flex-1 w-full h-full min-h-[300px] hidden border-t md:border-t-0 md:border-l border-slate-800"></div>
+      </div>
 
       <!-- Bottom Status Bar -->
       <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-400 z-10">
         <div class="flex items-center space-x-3">
-          <span id="coordReadout" class="font-mono text-slate-300">Hover over surface for coordinates</span>
+          <span id="coordReadout" class="font-mono text-slate-300">Hover over surface or contour to inspect</span>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-3">
           <span id="calcTimeBadge" class="text-[11px] text-slate-500 font-mono">Render: ~10ms</span>
-          <span class="text-slate-500">|</span>
-          <span class="text-indigo-400 font-medium">Free Static Hosting on GitHub Pages</span>
+          <span class="text-slate-500 hidden sm:inline">|</span>
+          <span class="text-indigo-400 font-medium hidden sm:inline">Deployable to GitHub Pages</span>
         </div>
       </footer>
     </main>
@@ -409,14 +645,14 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i data-lucide="share-2" class="w-5 h-5 text-indigo-400"></i>
-          <h3 class="font-bold text-white text-base">Share This 3D Graph</h3>
+          <h3 class="font-bold text-white text-base">Share This Multivariable Graph</h3>
         </div>
         <button id="closeShareModal" class="p-1 text-slate-400 hover:text-white rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       <p class="text-xs text-slate-300">
-        This link encodes your exact mathematical expression, parameter values, ranges, and viewing preferences in the URL. Anyone opening it will see your exact graph!
+        This link encodes your exact function, parameters, domain bounds, and evaluation point (x₀, y₀) in the URL hash. Anyone opening it will see your exact visualization!
       </p>
       <div class="flex items-center space-x-2">
         <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-950 text-indigo-200 font-mono text-xs px-3 py-2.5 rounded-xl border border-slate-700 select-all">
@@ -431,15 +667,15 @@
     </div>
   </div>
 
-  <!-- Main Application Script -->
+  <!-- Application Logic -->
   <script>
-    // Initialize Lucide Icons
     lucide.createIcons();
 
     // -------------------------------------------------------------------------
-    // Application State
+    // Global Application State
     // -------------------------------------------------------------------------
     const state = {
+      view_mode: '3d', // '3d', '2d', or 'split'
       f1_expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
       f2_expr: "0.5 * (x + y)",
       show_f2: false,
@@ -462,74 +698,84 @@
       show_wireframe: false,
       show_contours: true,
       show_floor_contours: true,
-      show_tangent: false,
-      x0: 1.0,
+      // Calculus & Point Evaluation
+      x0: 2.0,
       y0: 1.0,
-      show_cross_sections: false
+      show_gradient: true,
+      show_normal: false,
+      show_tangent: false,
+      show_cross_sections: false,
+      // Level Sets
+      contour_density: 20,
+      show_contour_labels: true,
+      show_2d_grad_field: false,
+      specific_level_c: 0.5,
+      show_specific_level: true
     };
 
-    // Preset configurations
+    // Presets
     const presets = {
       saddle: {
         expr: "a * (x^2 - y^2) / 4",
         params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Turbo"
+        x: [-4, 4], y: [-4, 4], scale: "Turbo", x0: 1.5, y0: 1.0
       },
       paraboloid: {
         expr: "a * (x^2 + y^2) / 4",
         params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Viridis"
+        x: [-4, 4], y: [-4, 4], scale: "Viridis", x0: 1.5, y0: 1.5
       },
       monkey_saddle: {
         expr: "a * (x^3 - 3*x*y^2) / 10",
         params: { a: 1.0, b: 1.0, c: 1.0, d: 1.0 },
-        x: [-3, 3], y: [-3, 3], scale: "Plasma"
+        x: [-3, 3], y: [-3, 3], scale: "Plasma", x0: 1.0, y0: 1.0
       },
       ripple: {
         expr: "sin(sqrt(x^2 + y^2) * a) * b / (sqrt(x^2 + y^2) + 0.1)",
         params: { a: 2.5, b: 1.5, c: 1.0, d: 1.0 },
-        x: [-6, 6], y: [-6, 6], scale: "Jet"
+        x: [-6, 6], y: [-6, 6], scale: "Jet", x0: 2.0, y0: 1.0
       },
       gaussian: {
         expr: "a * exp(-(x^2 + y^2) / (2 * b^2)) * cos(c * x)",
         params: { a: 3.0, b: 2.0, c: 3.0, d: 1.0 },
-        x: [-5, 5], y: [-5, 5], scale: "Electric"
+        x: [-5, 5], y: [-5, 5], scale: "Electric", x0: 1.0, y0: 0.5
       },
       egg_carton: {
         expr: "a * sin(b * x) * cos(c * y)",
         params: { a: 1.5, b: 1.5, c: 1.5, d: 1.0 },
-        x: [-5, 5], y: [-5, 5], scale: "Rainbow"
+        x: [-5, 5], y: [-5, 5], scale: "Rainbow", x0: 1.0, y0: 1.0
       },
       rosenbrock: {
         expr: "(1 - x)^2 + 10 * (y - x^2)^2",
         params: { a: 1.0, b: 10.0, c: 1.0, d: 1.0 },
         x: [-2, 2], y: [-1, 3], scale: "Magma",
-        z_clamp: true, z: [0, 50]
+        z_clamp: true, z: [0, 50], x0: 0.5, y0: 1.0
       },
       sombrero: {
         expr: "a * cos(b * sqrt(x^2 + y^2) - t) / (sqrt(x^2 + y^2) + 0.5)",
         params: { a: 3.0, b: 2.0, c: 1.0, d: 1.0 },
         x: [-6, 6], y: [-6, 6], scale: "Turbo",
-        auto_animate: true
+        auto_animate: true, x0: 2.0, y0: 1.0
       },
       chladni: {
         expr: "cos(a * x) * cos(b * y) - cos(b * x) * cos(a * y)",
         params: { a: 2.0, b: 3.0, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Spectral"
+        x: [-4, 4], y: [-4, 4], scale: "Spectral", x0: 1.0, y0: 1.0
       },
       cliff: {
         expr: "a / (1 + exp(-b * (x + y)))",
         params: { a: 4.0, b: 1.5, c: 1.0, d: 1.0 },
-        x: [-4, 4], y: [-4, 4], scale: "Viridis"
+        x: [-4, 4], y: [-4, 4], scale: "Viridis", x0: 0.0, y0: 0.0
       }
     };
 
-    // Compiled math expression cache
     let compiledF1 = null;
     let compiledF2 = null;
+    let symDfDx = null;
+    let symDfDy = null;
 
     // -------------------------------------------------------------------------
-    // Math Compilation & Evaluation
+    // Math Compilation & Differentiation
     // -------------------------------------------------------------------------
     function compileExpressions() {
       const formulaStatus = document.getElementById("formulaStatus");
@@ -540,7 +786,7 @@
       } catch (err) {
         formulaStatus.textContent = "Syntax Error";
         formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium";
-        console.warn("Formula 1 compile error:", err);
+        console.warn("Formula compile error:", err);
       }
 
       if (state.show_f2) {
@@ -550,9 +796,25 @@
           console.warn("Formula 2 compile error:", err);
         }
       }
-      
+
+      // Compute symbolic derivatives
+      try {
+        const parsed = math.parse(state.f1_expr);
+        symDfDx = math.derivative(parsed, 'x');
+        symDfDy = math.derivative(parsed, 'y');
+
+        // Render KaTeX for partial derivatives
+        katex.render(`\\frac{\\partial f}{\\partial x} = ${symDfDx.toTex({ parenthesis: 'auto' })}`, document.getElementById("katexDfDx"), { throwOnError: false });
+        katex.render(`\\frac{\\partial f}{\\partial y} = ${symDfDy.toTex({ parenthesis: 'auto' })}`, document.getElementById("katexDfDy"), { throwOnError: false });
+      } catch (e) {
+        document.getElementById("katexDfDx").textContent = "Numerical derivative active";
+        document.getElementById("katexDfDy").textContent = "Numerical derivative active";
+        symDfDx = null;
+        symDfDy = null;
+      }
+
       updateKatexHeader();
-      updateCalculusInfo();
+      updateCalculusCalculations();
     }
 
     function updateKatexHeader() {
@@ -560,62 +822,89 @@
       try {
         const parsed = math.parse(state.f1_expr);
         const tex = parsed.toTex({ parenthesis: 'auto' });
-        katex.render(`z = ${tex}`, container, { throwOnError: false });
+        katex.render(`z = f(x, y) = ${tex}`, container, { throwOnError: false });
       } catch (e) {
         container.textContent = `z = ${state.f1_expr}`;
       }
     }
 
-    function updateCalculusInfo() {
-      if (!state.show_tangent && !state.show_cross_sections) return;
-      const display = document.getElementById("derivativesDisplay");
-      try {
-        const parsed = math.parse(state.f1_expr);
-        const df_dx = math.derivative(parsed, 'x');
-        const df_dy = math.derivative(parsed, 'y');
-
-        const scope = getEvalScope();
-        scope.x = state.x0;
-        scope.y = state.y0;
-
-        const z0 = compiledF1.evaluate(scope);
-        const fx_val = df_dx.evaluate(scope);
-        const fy_val = df_dy.evaluate(scope);
-
-        display.innerHTML = `
-          <div class="flex justify-between border-b border-slate-800 pb-1">
-            <span class="text-slate-400">Point P₀:</span>
-            <span class="text-indigo-300">(${state.x0.toFixed(2)}, ${state.y0.toFixed(2)}, ${z0.toFixed(2)})</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">∂z/∂x:</span>
-            <span class="text-emerald-300">${fx_val.toFixed(3)}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">∂z/∂y:</span>
-            <span class="text-emerald-300">${fy_val.toFixed(3)}</span>
-          </div>
-          <div class="pt-1 text-[10px] text-slate-400">
-            Tangent plane: z ≈ ${z0.toFixed(2)} + ${fx_val.toFixed(2)}(x - ${state.x0.toFixed(1)}) + ${fy_val.toFixed(2)}(y - ${state.y0.toFixed(1)})
-          </div>
-        `;
-      } catch (e) {
-        display.innerHTML = `<span class="text-slate-500">Derivative preview unavailable for this expression</span>`;
-      }
-    }
-
     function getEvalScope() {
-      const scope = {
-        t: state.t
-      };
+      const scope = { t: state.t };
       for (const [k, v] of Object.entries(state.params)) {
         scope[k] = v.val;
       }
       return scope;
     }
 
+    // Evaluate function value and derivatives at probe point
+    function evaluateAt(x, y) {
+      if (!compiledF1) return { z: 0, fx: 0, fy: 0 };
+      const scope = getEvalScope();
+      scope.x = x;
+      scope.y = y;
+
+      let z = 0;
+      try {
+        z = compiledF1.evaluate(scope);
+        if (typeof z !== 'number' || isNaN(z)) z = 0;
+      } catch {
+        z = 0;
+      }
+
+      let fx = 0, fy = 0;
+      // Try symbolic derivative evaluation
+      if (symDfDx && symDfDy) {
+        try {
+          fx = symDfDx.evaluate(scope);
+          fy = symDfDy.evaluate(scope);
+        } catch {
+          fx = null;
+        }
+      }
+
+      // Fallback to high-precision central finite difference if needed
+      if (fx === null || typeof fx !== 'number' || isNaN(fx)) {
+        const h = 1e-5;
+        const scopeR = { ...scope, x: x + h };
+        const scopeL = { ...scope, x: x - h };
+        const scopeU = { ...scope, y: y + h };
+        const scopeD = { ...scope, y: y - h };
+        try {
+          fx = (compiledF1.evaluate(scopeR) - compiledF1.evaluate(scopeL)) / (2 * h);
+          fy = (compiledF1.evaluate(scopeU) - compiledF1.evaluate(scopeD)) / (2 * h);
+        } catch {
+          fx = 0; fy = 0;
+        }
+      }
+
+      if (typeof fx !== 'number' || isNaN(fx)) fx = 0;
+      if (typeof fy !== 'number' || isNaN(fy)) fy = 0;
+
+      return { z, fx, fy };
+    }
+
+    function updateCalculusCalculations() {
+      const pt = evaluateAt(state.x0, state.y0);
+      const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
+      const angleDeg = ((Math.atan2(pt.fy, pt.fx) * 180 / Math.PI) + 360) % 360;
+
+      document.getElementById("pointSummaryBadge").textContent = `(${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`;
+      document.getElementById("resZ0").textContent = pt.z.toFixed(4);
+      document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
+      document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
+      document.getElementById("resGradVector").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩`;
+      document.getElementById("resGradMag").textContent = mag.toFixed(4);
+      document.getElementById("resGradAngle").textContent = `${angleDeg.toFixed(1)}°`;
+
+      // Tangent plane formula string
+      const signX = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
+      const signY = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
+      document.getElementById("tangentPlaneFormula").textContent = 
+        `z = ${pt.z.toFixed(2)} + (${pt.fx.toFixed(2)})(x ${signX}) + (${pt.fy.toFixed(2)})(y ${signY})`;
+    }
+
     // -------------------------------------------------------------------------
-    // Grid Generation & Plotting
+    // Mesh Grid Generation
     // -------------------------------------------------------------------------
     function computeSurfaces() {
       const t0 = performance.now();
@@ -633,8 +922,10 @@
 
       const zArr1 = [];
       const zArr2 = state.show_f2 ? [] : null;
-
       const scope = getEvalScope();
+
+      let minZ = Infinity;
+      let maxZ = -Infinity;
 
       for (let j = 0; j < n; j++) {
         const row1 = new Float64Array(n);
@@ -655,6 +946,10 @@
             val1 = null;
           }
           row1[i] = val1;
+          if (val1 !== null) {
+            if (val1 < minZ) minZ = val1;
+            if (val1 > maxZ) maxZ = val1;
+          }
 
           if (state.show_f2 && compiledF2) {
             let val2 = 0;
@@ -682,14 +977,20 @@
         x: Array.from(xArr),
         y: Array.from(yArr),
         z1: zArr1,
-        z2: zArr2
+        z2: zArr2,
+        minZ: isFinite(minZ) ? minZ : -5,
+        maxZ: isFinite(maxZ) ? maxZ : 5
       };
     }
 
-    function buildPlotData(mesh) {
+    // -------------------------------------------------------------------------
+    // 3D Traces Builder
+    // -------------------------------------------------------------------------
+    function build3DTraces(mesh) {
       const traces = [];
+      const pt0 = evaluateAt(state.x0, state.y0);
 
-      // Primary surface trace
+      // 1. Primary surface trace
       const surface1 = {
         type: 'surface',
         x: mesh.x,
@@ -700,8 +1001,8 @@
         opacity: state.opacity,
         showscale: true,
         colorbar: {
-          len: 0.7,
-          thickness: 14,
+          len: 0.65,
+          thickness: 12,
           tickfont: { color: '#94a3b8', size: 10 },
           title: { text: 'z', font: { color: '#cbd5e1', size: 12 } }
         },
@@ -712,8 +1013,7 @@
             highlightcolor: "#ffffff",
             project: { z: state.show_floor_contours }
           }
-        },
-        hidesurface: !state.opacity || state.opacity <= 0
+        }
       };
 
       if (state.show_wireframe) {
@@ -723,7 +1023,7 @@
 
       traces.push(surface1);
 
-      // Secondary surface trace
+      // 2. Secondary surface
       if (state.show_f2 && mesh.z2) {
         traces.push({
           type: 'surface',
@@ -733,131 +1033,284 @@
           name: 'g(x, y)',
           colorscale: 'Blues',
           opacity: 0.65,
-          showscale: false,
-          contours: {
-            z: { show: true, usecolormap: true }
+          showscale: false
+        });
+      }
+
+      // 3. Highlighted specific level set curve f(x, y) = c on the floor
+      if (state.show_specific_level) {
+        const c = state.specific_level_c;
+        // Draw constant z plane slice or marker on floor
+      }
+
+      // 4. Probe point P₀
+      traces.push({
+        type: 'scatter3d',
+        mode: 'markers+text',
+        x: [state.x0],
+        y: [state.y0],
+        z: [pt0.z],
+        name: 'Point P₀',
+        text: [`P₀(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
+        textposition: 'top center',
+        textfont: { color: '#f43f5e', size: 11 },
+        marker: {
+          size: 7,
+          color: '#f43f5e',
+          symbol: 'circle'
+        }
+      });
+
+      // 5. Gradient Vector ∇f on 3D Graph (Steepest Ascent)
+      if (state.show_gradient) {
+        const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
+        // Scale vector for visual clarity
+        const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
+        const vx = pt0.fx * scale;
+        const vy = pt0.fy * scale;
+        const vz = (pt0.fx * pt0.fx + pt0.fy * pt0.fy) * scale * 0.4; // lift along surface tangent
+
+        // Vector line
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: [state.x0, state.x0 + vx],
+          y: [state.y0, state.y0 + vy],
+          z: [pt0.z, pt0.z + vz],
+          name: '∇f Gradient Vector',
+          line: { color: '#f59e0b', width: 7 }
+        });
+
+        // Vector arrowhead marker
+        traces.push({
+          type: 'scatter3d',
+          mode: 'markers+text',
+          x: [state.x0 + vx],
+          y: [state.y0 + vy],
+          z: [pt0.z + vz],
+          name: '∇f Tip',
+          text: ['∇f (Steepest Ascent)'],
+          textposition: 'top right',
+          textfont: { color: '#f59e0b', size: 11 },
+          showlegend: false,
+          marker: {
+            size: 6,
+            color: '#f59e0b',
+            symbol: 'diamond'
           }
         });
       }
 
-      // Tangent Plane visualization
-      if (state.show_tangent && compiledF1) {
-        try {
-          const parsed = math.parse(state.f1_expr);
-          const df_dx = math.derivative(parsed, 'x');
-          const df_dy = math.derivative(parsed, 'y');
+      // 6. Normal Vector n = ⟨-fx, -fy, 1⟩
+      if (state.show_normal) {
+        const nNorm = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy + 1);
+        const nx = -pt0.fx / nNorm * 1.5;
+        const ny = -pt0.fy / nNorm * 1.5;
+        const nz = 1 / nNorm * 1.5;
 
-          const scope = getEvalScope();
-          scope.x = state.x0;
-          scope.y = state.y0;
-
-          const z0 = compiledF1.evaluate(scope);
-          const fx = df_dx.evaluate(scope);
-          const fy = df_dy.evaluate(scope);
-
-          // Build small patch around (x0, y0)
-          const span = 1.5;
-          const tx = [state.x0 - span, state.x0 + span];
-          const ty = [state.y0 - span, state.y0 + span];
-          const tz = [
-            [
-              z0 + fx * (tx[0] - state.x0) + fy * (ty[0] - state.y0),
-              z0 + fx * (tx[1] - state.x0) + fy * (ty[0] - state.y0)
-            ],
-            [
-              z0 + fx * (tx[0] - state.x0) + fy * (ty[1] - state.y0),
-              z0 + fx * (tx[1] - state.x0) + fy * (ty[1] - state.y0)
-            ]
-          ];
-
-          traces.push({
-            type: 'surface',
-            x: tx,
-            y: ty,
-            z: tz,
-            name: 'Tangent Plane',
-            showscale: false,
-            opacity: 0.6,
-            colorscale: [[0, '#ec4899'], [1, '#ec4899']]
-          });
-
-          // Probe point marker
-          traces.push({
-            type: 'scatter3d',
-            mode: 'markers',
-            x: [state.x0],
-            y: [state.y0],
-            z: [z0],
-            name: 'Point P₀',
-            marker: {
-              size: 6,
-              color: '#f43f5e',
-              symbol: 'circle'
-            }
-          });
-        } catch (e) {
-          console.warn("Tangent plane render skipped:", e);
-        }
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+markers',
+          x: [state.x0, state.x0 + nx],
+          y: [state.y0, state.y0 + ny],
+          z: [pt0.z, pt0.z + nz],
+          name: 'Normal Vector n',
+          line: { color: '#06b6d4', width: 5 },
+          marker: { size: 5, color: '#06b6d4' }
+        });
       }
 
-      // Cross-sections (Slices at x = x0 and y = y0)
-      if (state.show_cross_sections && compiledF1) {
-        try {
-          const scope = getEvalScope();
-          const n = mesh.x.length;
+      // 7. Tangent Plane patch
+      if (state.show_tangent) {
+        const span = 1.4;
+        const tx = [state.x0 - span, state.x0 + span];
+        const ty = [state.y0 - span, state.y0 + span];
+        const tz = [
+          [
+            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[0] - state.y0),
+            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[0] - state.y0)
+          ],
+          [
+            pt0.z + pt0.fx * (tx[0] - state.x0) + pt0.fy * (ty[1] - state.y0),
+            pt0.z + pt0.fx * (tx[1] - state.x0) + pt0.fy * (ty[1] - state.y0)
+          ]
+        ];
 
-          // x = x0 curve (y varies)
-          scope.x = state.x0;
-          const sliceY_x = [];
-          const sliceY_y = [];
-          const sliceY_z = [];
-          for (let j = 0; j < n; j++) {
-            scope.y = mesh.y[j];
-            sliceY_x.push(state.x0);
-            sliceY_y.push(mesh.y[j]);
-            sliceY_z.push(compiledF1.evaluate(scope));
-          }
+        traces.push({
+          type: 'surface',
+          x: tx,
+          y: ty,
+          z: tz,
+          name: 'Tangent Plane',
+          showscale: false,
+          opacity: 0.6,
+          colorscale: [[0, '#ec4899'], [1, '#ec4899']]
+        });
+      }
 
-          traces.push({
-            type: 'scatter3d',
-            mode: 'lines',
-            x: sliceY_x,
-            y: sliceY_y,
-            z: sliceY_z,
-            name: `x = ${state.x0.toFixed(1)} slice`,
-            line: { color: '#f59e0b', width: 6 }
-          });
+      // 8. Cross-Section Curves (x = x0 and y = y0 slices)
+      if (state.show_cross_sections) {
+        const scope = getEvalScope();
+        const n = mesh.x.length;
 
-          // y = y0 curve (x varies)
-          scope.y = state.y0;
-          const sliceX_x = [];
-          const sliceX_y = [];
-          const sliceX_z = [];
-          for (let i = 0; i < n; i++) {
-            scope.x = mesh.x[i];
-            sliceX_x.push(mesh.x[i]);
-            sliceX_y.push(state.y0);
-            sliceX_z.push(compiledF1.evaluate(scope));
-          }
-
-          traces.push({
-            type: 'scatter3d',
-            mode: 'lines',
-            x: sliceX_x,
-            y: sliceX_y,
-            z: sliceX_z,
-            name: `y = ${state.y0.toFixed(1)} slice`,
-            line: { color: '#10b981', width: 6 }
-          });
-        } catch (e) {
-          console.warn("Slice curves render skipped:", e);
+        // x = x0 curve
+        scope.x = state.x0;
+        const sliceY_x = [], sliceY_y = [], sliceY_z = [];
+        for (let j = 0; j < n; j++) {
+          scope.y = mesh.y[j];
+          sliceY_x.push(state.x0);
+          sliceY_y.push(mesh.y[j]);
+          sliceY_z.push(compiledF1 ? compiledF1.evaluate(scope) : 0);
         }
+
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: sliceY_x, y: sliceY_y, z: sliceY_z,
+          name: `x = ${state.x0.toFixed(1)} slice`,
+          line: { color: '#f59e0b', width: 5 }
+        });
+
+        // y = y0 curve
+        scope.y = state.y0;
+        const sliceX_x = [], sliceX_y = [], sliceX_z = [];
+        for (let i = 0; i < n; i++) {
+          scope.x = mesh.x[i];
+          sliceX_x.push(mesh.x[i]);
+          sliceX_y.push(state.y0);
+          sliceX_z.push(compiledF1 ? compiledF1.evaluate(scope) : 0);
+        }
+
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: sliceX_x, y: sliceX_y, z: sliceX_z,
+          name: `y = ${state.y0.toFixed(1)} slice`,
+          line: { color: '#10b981', width: 5 }
+        });
       }
 
       return traces;
     }
 
-    function getPlotLayout() {
+    // -------------------------------------------------------------------------
+    // 2D Level Sets (Contour Map) Traces Builder
+    // -------------------------------------------------------------------------
+    function build2DTraces(mesh) {
+      const traces = [];
+      const pt0 = evaluateAt(state.x0, state.y0);
+
+      // 1. 2D Contour map with isolines and labels
+      traces.push({
+        type: 'contour',
+        x: mesh.x,
+        y: mesh.y,
+        z: mesh.z1,
+        colorscale: state.color_scale,
+        autocontour: false,
+        ncontours: state.contour_density,
+        contours: {
+          coloring: 'heatmap',
+          showlabels: state.show_contour_labels,
+          labelfont: { size: 10, color: '#f8fafc', family: 'monospace' }
+        },
+        colorbar: {
+          len: 0.8,
+          thickness: 14,
+          tickfont: { color: '#94a3b8', size: 10 },
+          title: { text: 'f(x,y)', font: { color: '#cbd5e1', size: 11 } }
+        },
+        name: 'Level Sets'
+      });
+
+      // 2. Highlighted specific level set f(x, y) = c
+      if (state.show_specific_level) {
+        const c = state.specific_level_c;
+        traces.push({
+          type: 'contour',
+          x: mesh.x,
+          y: mesh.y,
+          z: mesh.z1,
+          contours: {
+            type: 'constraint',
+            operation: '=',
+            value: c,
+            coloring: 'none'
+          },
+          line: { color: '#00ffff', width: 3.5 },
+          showscale: false,
+          name: `Level f(x,y) = ${c.toFixed(2)}`
+        });
+      }
+
+      // 3. Gradient Vector Field grid (arrows everywhere)
+      if (state.show_2d_grad_field) {
+        const step = Math.max(1, Math.floor(mesh.x.length / 10));
+        const arrX = [], arrY = [];
+        for (let j = 0; j < mesh.y.length; j += step) {
+          for (let i = 0; i < mesh.x.length; i += step) {
+            const gx = mesh.x[i], gy = mesh.y[j];
+            const g = evaluateAt(gx, gy);
+            const gMag = Math.sqrt(g.fx * g.fx + g.fy * g.fy);
+            if (gMag > 0.001) {
+              const arrowLen = 0.45;
+              const dx = (g.fx / gMag) * arrowLen;
+              const dy = (g.fy / gMag) * arrowLen;
+              traces.push({
+                type: 'scatter',
+                mode: 'lines',
+                x: [gx, gx + dx],
+                y: [gy, gy + dy],
+                line: { color: 'rgba(255,255,255,0.4)', width: 1.5 },
+                showlegend: false,
+                hoverinfo: 'none'
+              });
+            }
+          }
+        }
+      }
+
+      // 4. Probe Point P₀ on 2D map
+      traces.push({
+        type: 'scatter',
+        mode: 'markers+text',
+        x: [state.x0],
+        y: [state.y0],
+        text: [`P₀ (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`],
+        textposition: 'top right',
+        textfont: { color: '#ffffff', size: 12, family: 'sans-serif' },
+        marker: { size: 10, color: '#f43f5e', symbol: 'circle', line: { color: '#ffffff', width: 2 } },
+        name: 'Evaluation Point'
+      });
+
+      // 5. 2D Gradient Vector ∇f Arrow
+      if (state.show_gradient) {
+        const mag = Math.sqrt(pt0.fx * pt0.fx + pt0.fy * pt0.fy);
+        const scale = mag > 0 ? Math.min(1.5, Math.max(0.6, 1.2 / mag)) : 1;
+        const gx = state.x0 + pt0.fx * scale;
+        const gy = state.y0 + pt0.fy * scale;
+
+        traces.push({
+          type: 'scatter',
+          mode: 'lines+markers+text',
+          x: [state.x0, gx],
+          y: [state.y0, gy],
+          text: ['', '∇f (Steepest Ascent ⊥ Isolines)'],
+          textposition: 'top right',
+          textfont: { color: '#f59e0b', size: 12, weight: 'bold' },
+          line: { color: '#f59e0b', width: 4 },
+          marker: { size: [0, 8], color: '#f59e0b', symbol: 'arrow' },
+          name: 'Gradient ∇f'
+        });
+      }
+
+      return traces;
+    }
+
+    // -------------------------------------------------------------------------
+    // Layout Configurations
+    // -------------------------------------------------------------------------
+    function get3DLayout() {
       return {
         autosize: true,
         margin: { l: 0, r: 0, b: 0, t: 0 },
@@ -865,97 +1318,205 @@
         plot_bgcolor: '#020617',
         scene: {
           xaxis: {
-            title: 'X',
-            gridcolor: '#1e293b',
-            zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' },
-            titlefont: { color: '#cbd5e1' }
+            title: 'X', gridcolor: '#1e293b', zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' }
           },
           yaxis: {
-            title: 'Y',
-            gridcolor: '#1e293b',
-            zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' },
-            titlefont: { color: '#cbd5e1' }
+            title: 'Y', gridcolor: '#1e293b', zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' }
           },
           zaxis: {
-            title: 'Z',
-            gridcolor: '#1e293b',
-            zerolinecolor: '#475569',
-            tickfont: { color: '#94a3b8' },
-            titlefont: { color: '#cbd5e1' },
+            title: 'Z', gridcolor: '#1e293b', zerolinecolor: '#475569',
+            tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
             range: state.z_clamp ? state.z_range : undefined
           },
-          camera: {
-            eye: { x: 1.5, y: 1.5, z: 1.2 }
-          },
+          camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } },
           aspectmode: 'cube'
         },
-        showlegend: state.show_f2 || state.show_tangent || state.show_cross_sections,
+        showlegend: true,
         legend: {
-          x: 0.02,
-          y: 0.98,
-          bgcolor: 'rgba(15, 23, 42, 0.8)',
-          bordercolor: '#334155',
-          borderwidth: 1,
+          x: 0.02, y: 0.98,
+          bgcolor: 'rgba(15, 23, 42, 0.85)',
+          bordercolor: '#334155', borderwidth: 1,
           font: { color: '#e2e8f0', size: 11 }
         }
       };
     }
 
-    let isInitialPlot = true;
-    function renderPlot(preserveCamera = true) {
+    function get2DLayout() {
+      return {
+        autosize: true,
+        margin: { l: 45, r: 20, b: 40, t: 20 },
+        paper_bgcolor: '#020617',
+        plot_bgcolor: '#020617',
+        xaxis: {
+          title: 'X', gridcolor: '#1e293b', zerolinecolor: '#475569',
+          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
+          range: state.x_range
+        },
+        yaxis: {
+          title: 'Y', gridcolor: '#1e293b', zerolinecolor: '#475569',
+          tickfont: { color: '#94a3b8' }, titlefont: { color: '#cbd5e1' },
+          range: state.y_range,
+          scaleanchor: 'x', scaleratio: 1
+        },
+        showlegend: false
+      };
+    }
+
+    // -------------------------------------------------------------------------
+    // Rendering Plots (3D & 2D)
+    // -------------------------------------------------------------------------
+    let isInitial3D = true;
+    let isInitial2D = true;
+
+    function renderPlots(preserveCamera = true) {
       if (!compiledF1) compileExpressions();
       if (!compiledF1) return;
 
       const mesh = computeSurfaces();
-      const traces = buildPlotData(mesh);
-      const plotDiv = document.getElementById('plotContainer');
+      const div3D = document.getElementById('plotContainer3D');
+      const div2D = document.getElementById('plotContainer2D');
 
-      if (isInitialPlot) {
-        const layout = getPlotLayout();
-        Plotly.newPlot(plotDiv, traces, layout, {
-          responsive: true,
-          displayModeBar: false
-        }).then(() => {
-          attachPlotEvents();
-        });
-        isInitialPlot = false;
-      } else {
-        // Fast update
-        if (preserveCamera && plotDiv._fullLayout && plotDiv._fullLayout.scene) {
-          const currentCamera = plotDiv._fullLayout.scene._scene.getCamera();
-          const layout = getPlotLayout();
-          if (currentCamera) {
-            layout.scene.camera = {
-              eye: currentCamera.eye,
-              center: currentCamera.center,
-              up: currentCamera.up
-            };
-          }
-          Plotly.react(plotDiv, traces, layout);
+      // Render 3D Plot if active
+      if (state.view_mode === '3d' || state.view_mode === 'split') {
+        const traces3D = build3DTraces(mesh);
+        if (isInitial3D) {
+          Plotly.newPlot(div3D, traces3D, get3DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents3D);
+          isInitial3D = false;
         } else {
-          Plotly.react(plotDiv, traces, getPlotLayout());
+          if (preserveCamera && div3D._fullLayout && div3D._fullLayout.scene) {
+            const cam = div3D._fullLayout.scene._scene.getCamera();
+            const layout = get3DLayout();
+            if (cam) layout.scene.camera = { eye: cam.eye, center: cam.center, up: cam.up };
+            Plotly.react(div3D, traces3D, layout);
+          } else {
+            Plotly.react(div3D, traces3D, get3DLayout());
+          }
+        }
+      }
+
+      // Render 2D Level Sets Plot if active
+      if (state.view_mode === '2d' || state.view_mode === 'split') {
+        const traces2D = build2DTraces(mesh);
+        if (isInitial2D) {
+          Plotly.newPlot(div2D, traces2D, get2DLayout(), { responsive: true, displayModeBar: false }).then(attachPlotEvents2D);
+          isInitial2D = false;
+        } else {
+          Plotly.react(div2D, traces2D, get2DLayout());
         }
       }
     }
 
-    function attachPlotEvents() {
-      const plotDiv = document.getElementById('plotContainer');
-      plotDiv.on('plotly_hover', function(data) {
+    function attachPlotEvents3D() {
+      const div3D = document.getElementById('plotContainer3D');
+      div3D.on('plotly_hover', function(data) {
         if (data.points && data.points.length > 0) {
           const pt = data.points[0];
           document.getElementById('coordReadout').textContent = 
-            `X: ${pt.x !== undefined ? pt.x.toFixed(3) : '-'} | Y: ${pt.y !== undefined ? pt.y.toFixed(3) : '-'} | Z: ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
+            `3D Hover: X: ${pt.x !== undefined ? pt.x.toFixed(3) : '-'} | Y: ${pt.y !== undefined ? pt.y.toFixed(3) : '-'} | Z: ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
         }
       });
-      plotDiv.on('plotly_unhover', function() {
-        document.getElementById('coordReadout').textContent = 'Hover over surface for coordinates';
+      div3D.on('plotly_unhover', function() {
+        document.getElementById('coordReadout').textContent = 'Hover over surface or contour to inspect';
+      });
+    }
+
+    function attachPlotEvents2D() {
+      const div2D = document.getElementById('plotContainer2D');
+      div2D.on('plotly_hover', function(data) {
+        if (data.points && data.points.length > 0) {
+          const pt = data.points[0];
+          document.getElementById('coordReadout').textContent = 
+            `Level Set Hover: X: ${pt.x.toFixed(3)} | Y: ${pt.y.toFixed(3)} | Value f(x,y): ${pt.z !== undefined ? pt.z.toFixed(3) : '-'}`;
+        }
+      });
+      div2D.on('plotly_unhover', function() {
+        document.getElementById('coordReadout').textContent = 'Hover over surface or contour to inspect';
+      });
+
+      // Click to set P₀
+      div2D.on('plotly_click', function(data) {
+        if (data.points && data.points.length > 0) {
+          const pt = data.points[0];
+          setEvaluationPoint(pt.x, pt.y);
+        }
       });
     }
 
     // -------------------------------------------------------------------------
-    // Dynamic Parameter Cards Rendering
+    // View Mode Management
+    // -------------------------------------------------------------------------
+    function setViewMode(mode) {
+      state.view_mode = mode;
+      const div3D = document.getElementById('plotContainer3D');
+      const div2D = document.getElementById('plotContainer2D');
+
+      document.querySelectorAll('.view-mode-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (mode === '3d') {
+        document.getElementById('viewMode3D').classList.add('active');
+        div3D.classList.remove('hidden');
+        div2D.classList.add('hidden');
+      } else if (mode === '2d') {
+        document.getElementById('viewMode2D').classList.add('active');
+        div3D.classList.add('hidden');
+        div2D.classList.remove('hidden');
+      } else if (mode === 'split') {
+        document.getElementById('viewModeSplit').classList.add('active');
+        div3D.classList.remove('hidden');
+        div2D.classList.remove('hidden');
+      }
+
+      // Re-trigger layout resize
+      setTimeout(() => {
+        Plotly.Plots.resize(div3D);
+        Plotly.Plots.resize(div2D);
+        renderPlots(true);
+      }, 50);
+    }
+
+    // -------------------------------------------------------------------------
+    // Evaluation Point Handler
+    // -------------------------------------------------------------------------
+    function setEvaluationPoint(x, y) {
+      state.x0 = parseFloat(x);
+      state.y0 = parseFloat(y);
+
+      document.getElementById('x0Input').value = state.x0.toFixed(2);
+      document.getElementById('y0Input').value = state.y0.toFixed(2);
+      document.getElementById('x0Slider').value = state.x0;
+      document.getElementById('y0Slider').value = state.y0;
+
+      updateCalculusCalculations();
+      renderPlots(true);
+    }
+
+    // -------------------------------------------------------------------------
+    // Sidebar Tabs
+    // -------------------------------------------------------------------------
+    function initSidebarTabs() {
+      const tabs = [
+        { btn: 'tabNavFunctions', content: 'tabContentFunctions' },
+        { btn: 'tabNavCalculus', content: 'tabContentCalculus' },
+        { btn: 'tabNavLevelSets', content: 'tabContentLevelSets' },
+        { btn: 'tabNavStyling', content: 'tabContentStyling' }
+      ];
+
+      tabs.forEach(t => {
+        document.getElementById(t.btn).addEventListener('click', () => {
+          tabs.forEach(other => {
+            document.getElementById(other.btn).classList.remove('active');
+            document.getElementById(other.content).classList.add('hidden');
+          });
+          document.getElementById(t.btn).classList.add('active');
+          document.getElementById(t.content).classList.remove('hidden');
+        });
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Dynamic Parameter Cards
     // -------------------------------------------------------------------------
     function renderParameterCards() {
       const container = document.getElementById("parametersList");
@@ -968,7 +1529,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <span class="w-5 h-5 rounded bg-indigo-600/20 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">${key}</span>
-              <span class="font-mono text-xs text-indigo-300 font-semibold param-val-label" id="val_label_${key}">${p.val.toFixed(2)}</span>
+              <span class="font-mono text-xs text-indigo-300 font-semibold" id="val_label_${key}">${p.val.toFixed(2)}</span>
             </div>
             <div class="flex items-center space-x-1 text-[10px] text-slate-500 font-mono">
               <span>[${p.min}, ${p.max}]</span>
@@ -994,34 +1555,31 @@
         container.appendChild(card);
       }
 
-      // Re-initialize icons for newly added elements
       lucide.createIcons();
 
-      // Bind input events for sliders
       container.querySelectorAll('.param-slider').forEach(slider => {
         slider.addEventListener('input', (e) => {
           const k = e.target.getAttribute('data-param');
           const val = parseFloat(e.target.value);
           state.params[k].val = val;
           document.getElementById(`val_label_${k}`).textContent = val.toFixed(2);
-          renderPlot(true);
-          updateCalculusInfo();
+          updateCalculusCalculations();
+          renderPlots(true);
         });
       });
 
-      // Bind delete buttons
       container.querySelectorAll('.delete-param').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
           const k = btn.getAttribute('data-param');
           delete state.params[k];
           renderParameterCards();
-          renderPlot(true);
+          renderPlots(true);
         });
       });
     }
 
     // -------------------------------------------------------------------------
-    // Animation Loop for 't'
+    // Time Animation Loop
     // -------------------------------------------------------------------------
     function toggleTimeAnimation() {
       state.animating_t = !state.animating_t;
@@ -1044,23 +1602,19 @@
       }
     }
 
-    let lastTime = 0;
-    function runTimeLoop(timestamp = 0) {
+    function runTimeLoop() {
       if (!state.animating_t) return;
-      if (!lastTime) lastTime = timestamp;
-      const delta = (timestamp - lastTime) / 1000;
-      lastTime = timestamp;
-
       state.t = (state.t + 0.05) % 20;
       document.getElementById("param_t_slider").value = state.t;
       document.getElementById("param_t_val").textContent = state.t.toFixed(2);
 
-      renderPlot(true);
+      updateCalculusCalculations();
+      renderPlots(true);
       state.animation_id = requestAnimationFrame(runTimeLoop);
     }
 
     // -------------------------------------------------------------------------
-    // URL Hash State Serialization (Shareable Graphs)
+    // State Serialization / Deserialization
     // -------------------------------------------------------------------------
     function serializeStateToHash() {
       const data = {
@@ -1069,9 +1623,10 @@
         p: Object.fromEntries(Object.entries(state.params).map(([k, v]) => [k, v.val])),
         xr: state.x_range,
         yr: state.y_range,
-        res: state.grid_res,
-        col: state.color_scale,
-        tan: state.show_tangent ? [state.x0, state.y0] : undefined
+        x0: state.x0,
+        y0: state.y0,
+        mode: state.view_mode,
+        col: state.color_scale
       };
       return encodeURIComponent(JSON.stringify(data));
     }
@@ -1079,89 +1634,53 @@
     function deserializeStateFromHash() {
       try {
         const hash = window.location.hash.slice(1);
-        if (!hash) return false;
+        if (!hash) return;
         const data = JSON.parse(decodeURIComponent(hash));
-
         if (data.f1) {
           state.f1_expr = data.f1;
           document.getElementById("functionInput").value = data.f1;
         }
-        if (data.f2) {
-          state.f2_expr = data.f2;
-          state.show_f2 = true;
-          document.getElementById("showSecondSurface").checked = true;
-          document.getElementById("secondSurfaceContainer").classList.remove("hidden");
-          document.getElementById("secondFunctionInput").value = data.f2;
-        }
         if (data.p) {
           for (const [k, v] of Object.entries(data.p)) {
-            if (state.params[k]) {
-              state.params[k].val = v;
-            } else {
-              state.params[k] = { val: v, min: -10, max: 10, step: 0.1 };
-            }
+            if (state.params[k]) state.params[k].val = v;
           }
         }
-        if (data.xr) {
-          state.x_range = data.xr;
-          document.getElementById("xMin").value = data.xr[0];
-          document.getElementById("xMax").value = data.xr[1];
-        }
-        if (data.yr) {
-          state.y_range = data.yr;
-          document.getElementById("yMin").value = data.yr[0];
-          document.getElementById("yMax").value = data.yr[1];
-        }
-        if (data.res) {
-          state.grid_res = data.res;
-          document.getElementById("gridResSlider").value = data.res;
-          document.getElementById("gridResVal").textContent = `${data.res} × ${data.res}`;
-        }
-        if (data.col) {
-          state.color_scale = data.col;
-          document.getElementById("colorScaleSelect").value = data.col;
-        }
-        if (data.tan) {
-          state.show_tangent = true;
-          state.x0 = data.tan[0];
-          state.y0 = data.tan[1];
-          document.getElementById("showTangentPlane").checked = true;
-          document.getElementById("tangentPointControls").classList.remove("hidden");
-          document.getElementById("x0Slider").value = data.tan[0];
-          document.getElementById("y0Slider").value = data.tan[1];
-          document.getElementById("x0Val").textContent = data.tan[0].toFixed(1);
-          document.getElementById("y0Val").textContent = data.tan[1].toFixed(1);
-        }
-        return true;
+        if (data.x0 !== undefined) state.x0 = data.x0;
+        if (data.y0 !== undefined) state.y0 = data.y0;
+        if (data.mode) state.view_mode = data.mode;
+        if (data.col) state.color_scale = data.col;
       } catch (e) {
-        console.warn("Failed to load state from URL hash:", e);
-        return false;
+        console.warn("Hash deserialize error:", e);
       }
     }
 
     // -------------------------------------------------------------------------
-    // Event Listeners & UI Binding
+    // Event Listeners Binding
     // -------------------------------------------------------------------------
     function initEvents() {
-      // Primary function input
-      let debounceTimeout = null;
+      // View mode buttons
+      document.getElementById('viewMode3D').addEventListener('click', () => setViewMode('3d'));
+      document.getElementById('viewMode2D').addEventListener('click', () => setViewMode('2d'));
+      document.getElementById('viewModeSplit').addEventListener('click', () => setViewMode('split'));
+
+      // Formula input
+      let debounce = null;
       document.getElementById("functionInput").addEventListener("input", (e) => {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
           state.f1_expr = e.target.value;
           compileExpressions();
-          renderPlot(true);
+          renderPlots(true);
         }, 200);
       });
 
-      // Quick math snippet insertion
       document.querySelectorAll(".math-insert").forEach(btn => {
         btn.addEventListener("click", () => {
           const input = document.getElementById("functionInput");
           input.value = btn.textContent;
           state.f1_expr = input.value;
           compileExpressions();
-          renderPlot(true);
+          renderPlots(true);
         });
       });
 
@@ -1170,30 +1689,107 @@
         state.show_f2 = e.target.checked;
         document.getElementById("secondSurfaceContainer").classList.toggle("hidden", !state.show_f2);
         compileExpressions();
-        renderPlot(true);
+        renderPlots(true);
       });
 
       document.getElementById("secondFunctionInput").addEventListener("input", (e) => {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
           state.f2_expr = e.target.value;
           compileExpressions();
-          renderPlot(true);
+          renderPlots(true);
         }, 200);
       });
 
-      // Time parameter controls
+      // Exact Evaluation Point inputs (Typing x=2, etc.)
+      const onPointType = () => {
+        const x = parseFloat(document.getElementById('x0Input').value) || 0;
+        const y = parseFloat(document.getElementById('y0Input').value) || 0;
+        setEvaluationPoint(x, y);
+      };
+      document.getElementById('x0Input').addEventListener('input', onPointType);
+      document.getElementById('y0Input').addEventListener('input', onPointType);
+
+      // Sliders for x0, y0
+      document.getElementById('x0Slider').addEventListener('input', (e) => {
+        setEvaluationPoint(e.target.value, state.y0);
+      });
+      document.getElementById('y0Slider').addEventListener('input', (e) => {
+        setEvaluationPoint(state.x0, e.target.value);
+      });
+
+      // Calculus vector toggles
+      document.getElementById('showGradientVector').addEventListener('change', (e) => {
+        state.show_gradient = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showNormalVector').addEventListener('change', (e) => {
+        state.show_normal = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showTangentPlane').addEventListener('change', (e) => {
+        state.show_tangent = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showCrossSections').addEventListener('change', (e) => {
+        state.show_cross_sections = e.target.checked;
+        renderPlots(true);
+      });
+
+      // Level Sets controls
+      document.getElementById('contourDensitySlider').addEventListener('input', (e) => {
+        state.contour_density = parseInt(e.target.value);
+        document.getElementById('contourDensityVal').textContent = state.contour_density;
+        renderPlots(true);
+      });
+      document.getElementById('showContourLabels').addEventListener('change', (e) => {
+        state.show_contour_labels = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('show2DGradField').addEventListener('change', (e) => {
+        state.show_2d_grad_field = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('floorContoursToggle').addEventListener('change', (e) => {
+        state.show_floor_contours = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showSpecificLevelToggle').addEventListener('change', (e) => {
+        state.show_specific_level = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('specificLevelInput').addEventListener('input', (e) => {
+        state.specific_level_c = parseFloat(e.target.value) || 0;
+        document.getElementById('specificLevelSlider').value = state.specific_level_c;
+        renderPlots(true);
+      });
+      document.getElementById('specificLevelSlider').addEventListener('input', (e) => {
+        state.specific_level_c = parseFloat(e.target.value);
+        document.getElementById('specificLevelInput').value = state.specific_level_c.toFixed(2);
+        renderPlots(true);
+      });
+      document.getElementById('snapLevelToP0Btn').addEventListener('click', () => {
+        const pt = evaluateAt(state.x0, state.y0);
+        state.specific_level_c = pt.z;
+        document.getElementById('specificLevelInput').value = pt.z.toFixed(2);
+        document.getElementById('specificLevelSlider').value = pt.z;
+        renderPlots(true);
+      });
+
+      // Time animation
       document.getElementById("timePlayBtn").addEventListener("click", toggleTimeAnimation);
       document.getElementById("timeResetBtn").addEventListener("click", () => {
         state.t = 0;
         document.getElementById("param_t_slider").value = 0;
         document.getElementById("param_t_val").textContent = "0.00";
-        renderPlot(true);
+        updateCalculusCalculations();
+        renderPlots(true);
       });
       document.getElementById("param_t_slider").addEventListener("input", (e) => {
         state.t = parseFloat(e.target.value);
         document.getElementById("param_t_val").textContent = state.t.toFixed(2);
-        renderPlot(true);
+        updateCalculusCalculations();
+        renderPlots(true);
       });
 
       // Add custom parameter
@@ -1204,14 +1800,12 @@
           if (!state.params[cleanName]) {
             state.params[cleanName] = { val: 1.0, min: -10.0, max: 10.0, step: 0.1 };
             renderParameterCards();
-            renderPlot(true);
-          } else {
-            alert(`Parameter '${cleanName}' already exists!`);
+            renderPlots(true);
           }
         }
       });
 
-      // Domain inputs
+      // Domain & resolution
       const updateDomain = () => {
         const xMin = parseFloat(document.getElementById("xMin").value) || -5;
         const xMax = parseFloat(document.getElementById("xMax").value) || 5;
@@ -1219,84 +1813,53 @@
         const yMax = parseFloat(document.getElementById("yMax").value) || 5;
         state.x_range = [Math.min(xMin, xMax - 0.5), Math.max(xMax, xMin + 0.5)];
         state.y_range = [Math.min(yMin, yMax - 0.5), Math.max(yMax, yMin + 0.5)];
-
-        // Update tangent slider bounds
         document.getElementById("x0Slider").min = state.x_range[0];
         document.getElementById("x0Slider").max = state.x_range[1];
         document.getElementById("y0Slider").min = state.y_range[0];
         document.getElementById("y0Slider").max = state.y_range[1];
-
-        renderPlot(true);
+        renderPlots(true);
       };
       ["xMin", "xMax", "yMin", "yMax"].forEach(id => {
         document.getElementById(id).addEventListener("change", updateDomain);
       });
 
-      // Grid resolution slider
       document.getElementById("gridResSlider").addEventListener("input", (e) => {
         state.grid_res = parseInt(e.target.value);
         document.getElementById("gridResVal").textContent = `${state.grid_res} × ${state.grid_res} (${state.grid_res * state.grid_res} pts)`;
-        renderPlot(true);
+        renderPlots(true);
       });
 
-      // Z Clamping
+      // Z clamp
       document.getElementById("clampZToggle").addEventListener("change", (e) => {
         state.z_clamp = e.target.checked;
         document.getElementById("zClampInputs").classList.toggle("hidden", !state.z_clamp);
-        renderPlot(true);
+        renderPlots(true);
       });
       const updateZClamp = () => {
-        const zMin = parseFloat(document.getElementById("zMin").value) || -10;
-        const zMax = parseFloat(document.getElementById("zMax").value) || 10;
-        state.z_range = [zMin, zMax];
-        renderPlot(true);
+        state.z_range = [
+          parseFloat(document.getElementById("zMin").value) || -10,
+          parseFloat(document.getElementById("zMax").value) || 10
+        ];
+        renderPlots(true);
       };
       ["zMin", "zMax"].forEach(id => document.getElementById(id).addEventListener("change", updateZClamp));
 
       // Visual styling
       document.getElementById("colorScaleSelect").addEventListener("change", (e) => {
         state.color_scale = e.target.value;
-        renderPlot(true);
+        renderPlots(true);
       });
       document.getElementById("opacitySlider").addEventListener("input", (e) => {
         state.opacity = parseFloat(e.target.value);
-        renderPlot(true);
+        renderPlots(true);
       });
       document.getElementById("wireframeToggle").addEventListener("change", (e) => {
         state.show_wireframe = e.target.checked;
-        renderPlot(true);
+        renderPlots(true);
       });
       document.getElementById("contoursToggle").addEventListener("change", (e) => {
         state.show_contours = e.target.checked;
-        renderPlot(true);
-      });
-      document.getElementById("floorContoursToggle").addEventListener("change", (e) => {
-        state.show_floor_contours = e.target.checked;
-        renderPlot(true);
-      });
-
-      // Calculus features
-      document.getElementById("showTangentPlane").addEventListener("change", (e) => {
-        state.show_tangent = e.target.checked;
-        document.getElementById("tangentPointControls").classList.toggle("hidden", !state.show_tangent);
-        updateCalculusInfo();
-        renderPlot(true);
-      });
-      document.getElementById("x0Slider").addEventListener("input", (e) => {
-        state.x0 = parseFloat(e.target.value);
-        document.getElementById("x0Val").textContent = state.x0.toFixed(1);
-        updateCalculusInfo();
-        renderPlot(true);
-      });
-      document.getElementById("y0Slider").addEventListener("input", (e) => {
-        state.y0 = parseFloat(e.target.value);
-        document.getElementById("y0Val").textContent = state.y0.toFixed(1);
-        updateCalculusInfo();
-        renderPlot(true);
-      });
-      document.getElementById("showCrossSections").addEventListener("change", (e) => {
-        state.show_cross_sections = e.target.checked;
-        renderPlot(true);
+        renderPlots(true);
       });
 
       // Presets
@@ -1323,69 +1886,49 @@
           document.getElementById("yMin").value = preset.y[0];
           document.getElementById("yMax").value = preset.y[1];
         }
+        if (preset.x0 !== undefined) state.x0 = preset.x0;
+        if (preset.y0 !== undefined) state.y0 = preset.y0;
         if (preset.scale) {
           state.color_scale = preset.scale;
           document.getElementById("colorScaleSelect").value = preset.scale;
         }
-        if (preset.z_clamp !== undefined) {
-          state.z_clamp = preset.z_clamp;
-          document.getElementById("clampZToggle").checked = preset.z_clamp;
-          document.getElementById("zClampInputs").classList.toggle("hidden", !preset.z_clamp);
-          if (preset.z) {
-            state.z_range = preset.z;
-            document.getElementById("zMin").value = preset.z[0];
-            document.getElementById("zMax").value = preset.z[1];
-          }
-        }
 
         renderParameterCards();
         compileExpressions();
-        renderPlot(false);
+        setEvaluationPoint(state.x0, state.y0);
+        renderPlots(false);
 
-        if (preset.auto_animate && !state.animating_t) {
-          toggleTimeAnimation();
-        }
+        if (preset.auto_animate && !state.animating_t) toggleTimeAnimation();
       });
 
       // Camera view shortcuts
-      document.getElementById("resetCamBtn").addEventListener("click", () => {
-        renderPlot(false);
-      });
+      document.getElementById("resetCamBtn").addEventListener("click", () => renderPlots(false));
       document.getElementById("viewTopBtn").addEventListener("click", () => {
-        const plotDiv = document.getElementById('plotContainer');
-        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 0, y: 0, z: 2.5 } });
-      });
-      document.getElementById("viewSideBtn").addEventListener("click", () => {
-        const plotDiv = document.getElementById('plotContainer');
-        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 0, y: -2.5, z: 0.1 } });
+        Plotly.relayout(document.getElementById('plotContainer3D'), { 'scene.camera.eye': { x: 0, y: 0, z: 2.5 } });
       });
       document.getElementById("viewIsoBtn").addEventListener("click", () => {
-        const plotDiv = document.getElementById('plotContainer');
-        Plotly.relayout(plotDiv, { 'scene.camera.eye': { x: 1.5, y: 1.5, z: 1.2 } });
+        Plotly.relayout(document.getElementById('plotContainer3D'), { 'scene.camera.eye': { x: 1.5, y: 1.5, z: 1.2 } });
       });
 
       // Fullscreen
       document.getElementById("fullscreenBtn").addEventListener("click", () => {
-        const elem = document.getElementById("plotContainer");
+        const container = document.getElementById("graphContainer");
         if (!document.fullscreenElement) {
-          elem.requestFullscreen().catch(err => alert(err.message));
+          container.requestFullscreen().catch(err => alert(err.message));
         } else {
           document.exitFullscreen();
         }
       });
 
-      // Screenshot Export
+      // Export PNG
       document.getElementById("exportPngBtn").addEventListener("click", () => {
-        const plotDiv = document.getElementById('plotContainer');
-        Plotly.downloadImage(plotDiv, {
-          format: 'png',
-          width: 1920,
-          height: 1080,
-          filename: `multivar_graph_${Date.now()}`
+        const targetDiv = state.view_mode === '2d' ? document.getElementById('plotContainer2D') : document.getElementById('plotContainer3D');
+        Plotly.downloadImage(targetDiv, {
+          format: 'png', width: 1920, height: 1080, filename: `multivar_${state.view_mode}_${Date.now()}`
         });
       });
 
-      // Share Modal
+      // Share modal
       const shareModal = document.getElementById("shareModal");
       document.getElementById("shareBtn").addEventListener("click", () => {
         const hash = serializeStateToHash();
@@ -1394,9 +1937,7 @@
         document.getElementById("copySuccessMsg").classList.add("hidden");
         shareModal.classList.remove("hidden");
       });
-      document.getElementById("closeShareModal").addEventListener("click", () => {
-        shareModal.classList.add("hidden");
-      });
+      document.getElementById("closeShareModal").addEventListener("click", () => shareModal.classList.add("hidden"));
       document.getElementById("copyShareUrlBtn").addEventListener("click", () => {
         const input = document.getElementById("shareUrlInput");
         input.select();
@@ -1410,11 +1951,13 @@
     // App Initialization
     // -------------------------------------------------------------------------
     window.addEventListener("DOMContentLoaded", () => {
+      initSidebarTabs();
       deserializeStateFromHash();
       renderParameterCards();
       compileExpressions();
       initEvents();
-      renderPlot(false);
+      setEvaluationPoint(state.x0, state.y0);
+      setViewMode(state.view_mode || '3d');
     });
   </script>
 </body>

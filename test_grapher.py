@@ -1,5 +1,5 @@
 """
-Verification test suite for MultivarGrapher 3D.
+Verification test suite for MultivarGrapher 3D & Level Sets.
 """
 
 import os
@@ -28,14 +28,19 @@ def test_index_html_structure():
         "mathjs",
         "katex",
         "functionInput",
-        "parametersList",
-        "plotContainer",
-        "showTangentPlane",
-        "presetSelect",
-        "shareBtn"
+        "x0Input",
+        "y0Input",
+        "showGradientVector",
+        "showNormalVector",
+        "plotContainer3D",
+        "plotContainer2D",
+        "viewMode2D",
+        "viewModeSplit",
+        "tabNavLevelSets",
+        "tabNavCalculus"
     ]
     for s in required_strings:
-        assert s in content, f"Missing required element/library in index.html: {s}"
+        assert s in content, f"Missing required element/feature in index.html: {s}"
     print("[OK] index.html integrity passed!")
 
 def test_python_plotter():
@@ -52,7 +57,6 @@ def test_python_plotter():
     exported_plot = BASE_DIR / "multivar_plot.html"
     assert exported_plot.exists(), "multivar_plot.html was not generated!"
     print("[OK] Python plotter generated plot successfully!")
-    # Clean up generated test artifact
     exported_plot.unlink(missing_ok=True)
 
 def test_deploy_help():
@@ -73,7 +77,7 @@ if __name__ == "__main__":
         test_index_html_structure()
         test_deploy_help()
         test_python_plotter()
-        print("\n[SUCCESS] ALL TESTS PASSED SUCCESSFULLY!")
+        print("\n[SUCCESS] ALL VERIFICATION TESTS PASSED SUCCESSFULLY!")
     except Exception as e:
         print(f"\n[ERROR] Test failed: {e}")
         sys.exit(1)
