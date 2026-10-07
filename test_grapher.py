@@ -46,7 +46,15 @@ def test_index_html_structure():
         "plotContainer2D",
         "plotContainer3D",
         "zoomInBtn",
-        "zoomOutBtn"
+        "zoomOutBtn",
+        "themeToggleBtn",
+        "mobileViewGraphBtn",
+        "mobileViewControlsBtn",
+        "toggleAiChatBtn",
+        "aiChatWindow",
+        "aiChatMessages",
+        "aiChatInput",
+        "aiChatSendBtn"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"

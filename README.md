@@ -39,6 +39,17 @@ Hosted 100% free with **zero backend server** on **GitHub Pages**:
 - **Default Aesthetic**: Elegant modern purple-and-white glassmorphism design with violet accents.
 - **Dark Mode**: Interactive header toggle (persisted via `localStorage`) switching both interface elements and Plotly canvas coordinate grids between light and dark themes.
 
+### 7. 📱 Mobile & Smartphone Full Compatibility
+- **Dedicated Mobile Viewport**: Mobile segmented switch (`[📊 График / Plot]` vs `[⚙️ Параметры / Controls]`) providing a 100% full-height graph viewing experience on phones.
+- **Touch Navigation**: Fluid pinch-to-zoom, touch pan, surface rotation, and tap-friendly on-screen zoom toolbar (`[+]`, `[-]`, `[Pan]`, `[Reset]`).
+- **Responsive Controls**: Full-screen parameter workspace with large touch sliders, inputs, and a 1-tap "👉 Show Graph" button.
+
+### 8. 🤖 AI Calculus Tutor Chatbot (Live Graph Context)
+- **Live Graph Context Awareness**: Automatically parses and extracts your current function $f(x_1, x_2)$, evaluation point $\mathbf{a}$, gradient $\nabla f(\mathbf{a})$, derivative matrix $Df(\mathbf{a})$, affine approximation $g(\mathbf{x})$, level set $c$, and Hessian determinant $D$.
+- **Instant Client-Side Math Intelligence Engine**: Zero configuration, 100% free offline calculus expert with rich KaTeX math equation rendering in chat. Explains gradients, tangent planes, $90^\circ$ orthogonality proofs, and classifies critical points (local minimum, maximum, saddle point).
+- **Optional Google Gemini API Integration**: Enter your Google Gemini API key in chat settings to enable open-ended reasoning powered by Gemini 2.5 Flash!
+- **Quick Prompt Chips**: 1-tap suggested questions for instant explanations of current parameters.
+
 ---
 
 ## 🚀 Run Locally
