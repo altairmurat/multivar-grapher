@@ -3128,20 +3128,26 @@
     };
 
     function extractAndApplyGraphAction(rawText) {
+      if (!rawText) return { cleanText: '', action: null };
       let cleanText = rawText;
       let matchedAction = null;
 
-      const actionBlockRegex = /```graph_action\s*([\s\S]*?)```/i;
-      const match = rawText.match(actionBlockRegex);
+      // 1. Try to find ```graph_action ... ```
+      const actionBlockRegex = /```graph_action\s*([\s\S]*?)(?:```|$)/i;
+      const match = cleanText.match(actionBlockRegex);
       if (match) {
         try {
-          matchedAction = JSON.parse(match[1].trim());
+          const rawJson = match[1].trim().replace(/```$/, '').trim();
+          matchedAction = JSON.parse(rawJson);
         } catch (e) {
           console.warn("Failed to parse graph_action block:", e);
         }
-      } else {
-        const jsonBlockRegex = /```json\s*(\{[\s\S]*?"action"\s*:\s*"update_graph"[\s\S]*?\})```/i;
-        const jsonMatch = rawText.match(jsonBlockRegex);
+      }
+
+      // 2. If not found, try to find ```json with action/f/point_a
+      if (!matchedAction) {
+        const jsonBlockRegex = /```(?:json)?\s*(\{[\s\S]*?(?:"action"\s*:\s*"update_graph"|"f"\s*:|"point_a"\s*:)[\s\S]*?\})(?:```|$)/i;
+        const jsonMatch = cleanText.match(jsonBlockRegex);
         if (jsonMatch) {
           try {
             matchedAction = JSON.parse(jsonMatch[1].trim());
@@ -3149,12 +3155,29 @@
         }
       }
 
+      // 3. If not found, try to find raw JSON at the end
+      if (!matchedAction) {
+        const rawJsonRegex = /(\{[\s\r\n]*"(?:action|f|point_a)"[\s\S]*?\})\s*$/i;
+        const rawMatch = cleanText.match(rawJsonRegex);
+        if (rawMatch) {
+          try {
+            matchedAction = JSON.parse(rawMatch[1].trim());
+          } catch (e) {}
+        }
+      }
+
+      // Apply the action automatically to inputs and live graph
       if (matchedAction) {
         applyGraphAction(matchedAction);
-        const encoded = encodeURIComponent(JSON.stringify(matchedAction));
-        const badgeHtml = `\n\n<div class="mt-2.5 p-3 rounded-xl bg-violet-100/90 dark:bg-purple-900/60 border border-violet-300 dark:border-purple-700 space-y-1.5 shadow-sm text-xs"><div class="flex items-center justify-between"><span class="font-bold text-violet-900 dark:text-cyan-300 flex items-center space-x-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i><span>⚡ Graph Parameters Auto-Applied!</span></span><button onclick="reapplyAiAction('${encoded}')" class="px-2 py-0.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-[10px] font-bold transition">Re-apply</button></div><div class="text-[11px] text-slate-700 dark:text-purple-200 font-mono"><strong>f:</strong> ${matchedAction.f || state.f_expr_raw} | <strong>a:</strong> (${matchedAction.point_a ? matchedAction.point_a.join(', ') : `${state.x0}, ${state.y0}`}) | <strong>c:</strong> ${matchedAction.c !== undefined ? matchedAction.c : state.level_c}</div></div>`;
-        cleanText = rawText.replace(actionBlockRegex, '').replace(/```json\s*(\{[\s\S]*?"action"\s*:\s*"update_graph"[\s\S]*?\})```/i, '') + badgeHtml;
       }
+
+      // Completely hide and strip all code blocks, action json, and raw tags from visible chat text
+      cleanText = cleanText
+        .replace(/```graph_action[\s\S]*?(?:```|$)/gi, '')
+        .replace(/```(?:json)?\s*\{[\s\S]*?(?:"action"|"update_graph"|"point_a"|"f"\s*:)[\s\S]*?\}(?:```|$)/gi, '')
+        .replace(/```(?:json)?\s*\{[\s\S]*?$/gi, '')
+        .replace(/<div[\s\S]*?(?:<\/div>|$)/gi, '')
+        .trim();
 
       return { cleanText, action: matchedAction };
     }
