@@ -161,9 +161,6 @@
       <button id="exportPngBtn" title="Export High-Res PNG" class="hidden xs:flex p-1.5 sm:p-2 bg-white dark:bg-purple-950 hover:bg-violet-50 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 rounded-lg border border-violet-200 dark:border-purple-800 shadow-sm transition items-center">
         <i data-lucide="camera" class="w-3.5 h-3.5"></i>
       </button>
-      <a href="https://github.com/altairmurat/multivar-grapher" target="_blank" title="Repository on GitHub" class="p-1.5 sm:p-2 bg-white dark:bg-purple-950 hover:bg-violet-50 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 rounded-lg border border-violet-200 dark:border-purple-800 shadow-sm transition flex items-center">
-        <i data-lucide="github" class="w-3.5 h-3.5"></i>
-      </a>
     </div>
   </header>
 
@@ -844,8 +841,14 @@
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
+        <div id="renderConnectedBadge" class="hidden p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+          <div>
+            <strong>Render Backend Active:</strong> GEMINI_API_KEY is configured on the server. You do not need to enter any API key!
+          </div>
+        </div>
         <p class="text-[11px] text-slate-600 dark:text-slate-300">
-          Target model: <strong class="text-violet-700 dark:text-cyan-300 font-mono">gemini-3.5-flash-lite</strong>. Answers are in English. Without an API key, the built-in offline math engine answers instantly.
+          Target model: <strong class="text-violet-700 dark:text-cyan-300 font-mono">gemini-3.5-flash-lite</strong>. Answers are in English. When deployed on Render, the server key is used automatically. Without a server key or manual key, the built-in offline math engine answers instantly.
         </p>
         <div class="space-y-1.5">
           <label class="text-[11px] font-bold text-slate-700 dark:text-purple-200 block">
@@ -1080,6 +1083,127 @@
       } else {
         html.classList.remove('dark');
         html.classList.add('light');
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // URL Hash State Persistence & Sharing
+    // -------------------------------------------------------------------------
+    function loadStateFromHash() {
+      try {
+        const hash = window.location.hash;
+        if (!hash || hash.length <= 1) return false;
+        let raw = hash.startsWith('#') ? hash.slice(1) : hash;
+        if (!raw) return false;
+
+        let jsonStr = raw;
+        try {
+          jsonStr = decodeURIComponent(raw);
+        } catch (e) {
+          jsonStr = raw;
+        }
+
+        const data = JSON.parse(jsonStr);
+        if (!data || typeof data !== 'object') return false;
+
+        // Function expression
+        if (data.f) {
+          state.f_expr_raw = String(data.f);
+          const fInp = document.getElementById("functionInput");
+          if (fInp) fInp.value = state.f_expr_raw;
+        }
+
+        // Level set c and radius r
+        if (data.c !== undefined && !isNaN(Number(data.c))) {
+          state.level_c = parseFloat(data.c);
+          const cVal = document.getElementById("levelValueC");
+          const cSld = document.getElementById("levelSliderC");
+          if (cVal) cVal.value = state.level_c.toFixed(1);
+          if (cSld) cSld.value = state.level_c;
+        }
+        if (data.r !== undefined && !isNaN(Number(data.r))) {
+          state.radius_r = parseFloat(data.r);
+          const rVal = document.getElementById("radiusInputR");
+          if (rVal) rVal.value = state.radius_r.toFixed(2);
+        }
+
+        // Evaluation point a (x0, y0)
+        if (data.x0 !== undefined && !isNaN(Number(data.x0))) {
+          state.x0 = parseFloat(data.x0);
+          const x0Inp = document.getElementById("x0Input");
+          const x0Sld = document.getElementById("x0Slider");
+          if (x0Inp) x0Inp.value = state.x0.toFixed(2);
+          if (x0Sld) x0Sld.value = state.x0;
+        }
+        if (data.y0 !== undefined && !isNaN(Number(data.y0))) {
+          state.y0 = parseFloat(data.y0);
+          const y0Inp = document.getElementById("y0Input");
+          const y0Sld = document.getElementById("y0Slider");
+          if (y0Inp) y0Inp.value = state.y0.toFixed(2);
+          if (y0Sld) y0Sld.value = state.y0;
+        }
+
+        // View mode (2d, 3d, split)
+        if (data.mode && ['2d', '3d', 'split'].includes(data.mode)) {
+          state.view_mode = data.mode;
+        }
+
+        // Domain range
+        if (Array.isArray(data.xr) && data.xr.length === 2) {
+          state.x_range = [parseFloat(data.xr[0]), parseFloat(data.xr[1])];
+        }
+        if (Array.isArray(data.yr) && data.yr.length === 2) {
+          state.y_range = [parseFloat(data.yr[0]), parseFloat(data.yr[1])];
+        }
+
+        // Theme
+        if (data.theme && (data.theme === 'dark' || data.theme === 'light')) {
+          state.theme = data.theme;
+          applyTheme();
+        }
+
+        // Notation (x1x2 vs xy)
+        if (data.notation && ['x1x2', 'xy'].includes(data.notation)) {
+          state.notation = data.notation;
+          const nXY = document.getElementById('notationXY');
+          const nX1X2 = document.getElementById('notationX1X2');
+          if (state.notation === 'xy' && nXY) {
+            nXY.click();
+          } else if (nX1X2) {
+            nX1X2.click();
+          }
+        }
+
+        // Parameters (a, b, c, d)
+        if (data.params && typeof data.params === 'object') {
+          ['a', 'b', 'c', 'd'].forEach(p => {
+            if (data.params[p] !== undefined && state.params[p]) {
+              const val = parseFloat(data.params[p]);
+              state.params[p].val = val;
+              const valEl = document.getElementById(`param_${p}_val`);
+              const sldEl = document.getElementById(`param_${p}_slider`);
+              if (valEl) valEl.textContent = val.toFixed(1);
+              if (sldEl) sldEl.value = val;
+            }
+          });
+        }
+
+        // Geometric Toggles
+        if (data.toggles && typeof data.toggles === 'object') {
+          const t = data.toggles;
+          if (t.norm !== undefined) { state.show_normal_line = Boolean(t.norm); const el = document.getElementById('showNormalLine'); if (el) el.checked = state.show_normal_line; }
+          if (t.tang !== undefined) { state.show_tangent_line = Boolean(t.tang); const el = document.getElementById('showTangentLine'); if (el) el.checked = state.show_tangent_line; }
+          if (t.grad !== undefined) { state.show_gradient = Boolean(t.grad); const el = document.getElementById('showGradientVector'); if (el) el.checked = state.show_gradient; }
+          if (t.norm3d !== undefined) { state.show_3d_normal_line = Boolean(t.norm3d); const el = document.getElementById('show3DNormalLine'); if (el) el.checked = state.show_3d_normal_line; }
+          if (t.affine !== undefined) { state.show_affine_plane = Boolean(t.affine); const el = document.getElementById('showAffinePlane'); if (el) el.checked = state.show_affine_plane; }
+          if (t.angle !== undefined) { state.show_right_angle = Boolean(t.angle); const el = document.getElementById('showRightAngleMarker'); if (el) el.checked = state.show_right_angle; }
+          if (t.contours !== undefined) { state.show_all_contours = Boolean(t.contours); const el = document.getElementById('showAllContourLines'); if (el) el.checked = state.show_all_contours; }
+        }
+
+        return true;
+      } catch (err) {
+        console.warn("Could not load state from URL hash:", err);
+        return false;
       }
     }
 
@@ -2161,12 +2285,41 @@
       const shareModal = document.getElementById("shareModal");
       document.getElementById("shareBtn").addEventListener("click", () => {
         const data = {
-          f: state.f_expr_raw, c: state.level_c, r: state.radius_r,
-          x0: state.x0, y0: state.y0, mode: state.view_mode,
-          xr: state.x_range, yr: state.y_range, theme: state.theme
+          f: state.f_expr_raw,
+          c: state.level_c,
+          r: state.radius_r,
+          x0: state.x0,
+          y0: state.y0,
+          mode: state.view_mode,
+          xr: state.x_range,
+          yr: state.y_range,
+          theme: state.theme,
+          notation: state.notation,
+          params: {
+            a: state.params.a.val,
+            b: state.params.b.val,
+            c: state.params.c.val,
+            d: state.params.d.val
+          },
+          toggles: {
+            norm: state.show_normal_line,
+            tang: state.show_tangent_line,
+            grad: state.show_gradient,
+            norm3d: state.show_3d_normal_line,
+            affine: state.show_affine_plane,
+            angle: state.show_right_angle,
+            contours: state.show_all_contours
+          }
         };
         const hash = encodeURIComponent(JSON.stringify(data));
-        const shareUrl = `${window.location.origin}${window.location.pathname}#${hash}`;
+        // Update URL hash without causing full reload
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', '#' + hash);
+        } else {
+          window.location.hash = hash;
+        }
+        const baseHref = window.location.href.split('#')[0];
+        const shareUrl = `${baseHref}#${hash}`;
         document.getElementById("shareUrlInput").value = shareUrl;
         document.getElementById("copySuccessMsg").classList.add("hidden");
         shareModal.classList.remove("hidden");
@@ -2527,10 +2680,52 @@ Here is the real-time mathematical snapshot from the graph:
 - "How do I interpret the level set c?"`;
     }
 
+    async function checkBackendAiStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.has_gemini_key) {
+            const statusEl = document.getElementById("aiHeaderStatus");
+            if (statusEl) statusEl.textContent = `${data.model || 'gemini-3.5-flash-lite'} 🟢 (Render)`;
+            const badge = document.getElementById("renderConnectedBadge");
+            if (badge) badge.classList.remove("hidden");
+            return true;
+          }
+        }
+      } catch (e) {
+        // Static server / GitHub Pages
+      }
+      return false;
+    }
+
     async function askAiAssistant(userQuestion) {
       const ctx = getLiveGraphContext();
-      const apiKey = localStorage.getItem('multivar_gemini_key') || '';
 
+      // 1. Try Render Backend proxy first (uses server-configured GEMINI_API_KEY)
+      try {
+        const backendRes = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userQuestion,
+            context: ctx
+          })
+        });
+        if (backendRes.ok) {
+          const backendData = await backendRes.json();
+          if (backendData && backendData.reply) {
+            const statusEl = document.getElementById("aiHeaderStatus");
+            if (statusEl) statusEl.textContent = `${backendData.model || 'gemini-3.5-flash-lite'} 🟢 (Render)`;
+            return backendData.reply;
+          }
+        }
+      } catch (err) {
+        // Backend not available (e.g. static GitHub Pages)
+      }
+
+      // 2. Client-side API key if user provided in local settings
+      const apiKey = localStorage.getItem('multivar_gemini_key') || '';
       if (!apiKey) {
         return new Promise(resolve => {
           setTimeout(() => {
@@ -2812,13 +3007,25 @@ Instructions:
     window.addEventListener("DOMContentLoaded", () => {
       initTheme();
       initSidebarTabs();
-      compileExpressions();
       initEvents();
       initMobileLayout();
       initAiChat();
+      checkBackendAiStatus();
+      loadStateFromHash();
+      compileExpressions();
       syncDomainInputs();
       setEvaluationPoint(state.x0, state.y0);
       setViewMode(state.view_mode);
+    });
+
+    window.addEventListener("hashchange", () => {
+      if (loadStateFromHash()) {
+        compileExpressions();
+        syncDomainInputs();
+        setEvaluationPoint(state.x0, state.y0);
+        setViewMode(state.view_mode);
+        renderPlots(false);
+      }
     });
   </script>
 </body>

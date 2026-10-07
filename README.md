@@ -2,8 +2,8 @@
 
 An advanced interactive multivariable calculus suite built with **Plotly.js**, **Math.js**, and **KaTeX**.
 
-Hosted 100% free with **zero backend server** on **GitHub Pages**:
-👉 **[Open Live App: https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)**
+- 🌐 **Render Web Service** (Auto Gemini AI with `GEMINI_API_KEY`): Ready to deploy with `render.yaml`!
+- 🌐 **GitHub Pages (Static 100% Free)**: [https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)
 
 ---
 
@@ -29,38 +29,54 @@ Hosted 100% free with **zero backend server** on **GitHub Pages**:
 ### 4. 🔢 Derivative Matrix $\mathbf{D}f$ $[1 \times n]$
 - View both symbolic and numeric evaluations of the total derivative row matrix $\mathbf{D}f(\mathbf{a}) = [ \frac{\partial f}{\partial x_1} \;\; \frac{\partial f}{\partial x_2} ]$ and gradient column vector $\nabla f = (\mathbf{D}f)^T$.
 
-### 5. 🔍 Smooth Interactive Navigation
-- **Scroll Zoom**: Zoom in and out effortlessly using the mouse wheel or touchpad pinch gestures.
-- **Pan Mode**: Click and drag smoothly across the canvas.
-- **On-Screen Zoom Buttons**: Dedicated `[+]`, `[-]`, and `[⟲ Reset]` buttons.
-- **Seamless Boundary Buffer**: Auto-regenerates the mesh grid as you zoom or pan, preventing boundary cutoffs.
+### 5. 🔗 URL Hash State Sharing & Instant Restoration
+- Clicking **Share** serializes the entire state (function formula, level set $c$, radius $r$, evaluation point $\mathbf{a}$, domain ranges, toggles, notation, and theme) into the URL hash `#...`.
+- Opening or sharing the link instantly restores the exact mathematical configuration and recalculates all derivatives and graphs without resetting to defaults.
 
-### 6. 🎨 Modern Purple-and-White UI & Dark Mode Toggle
-- **Default Aesthetic**: Elegant modern purple-and-white glassmorphism design with violet accents.
-- **Dark Mode**: Interactive header toggle (persisted via `localStorage`) switching both interface elements and Plotly canvas coordinate grids between light and dark themes.
-
-### 7. 📱 Mobile & Smartphone Full Compatibility
-- **Dedicated Mobile Viewport**: Mobile segmented switch (`[📊 График / Plot]` vs `[⚙️ Параметры / Controls]`) providing a 100% full-height graph viewing experience on phones.
+### 6. 📱 Mobile & Smartphone Full Compatibility
+- **Dedicated Mobile Viewport**: Mobile segmented switch (`[📊 График]` vs `[⚙️ Параметры]`) providing a 100% full-height graph viewing experience on phones.
 - **Touch Navigation**: Fluid pinch-to-zoom, touch pan, surface rotation, and tap-friendly on-screen zoom toolbar (`[+]`, `[-]`, `[Pan]`, `[Reset]`).
 - **Responsive Controls**: Full-screen parameter workspace with large touch sliders, inputs, and a 1-tap "👉 Show Graph" button.
 
-### 8. 🤖 AI Calculus Tutor Chatbot (Live Graph Context)
+### 7. 🤖 AI Calculus Tutor Chatbot (`gemini-3.5-flash-lite`)
 - **Live Graph Context Awareness**: Automatically parses and extracts your current function $f(x_1, x_2)$, evaluation point $\mathbf{a}$, gradient $\nabla f(\mathbf{a})$, derivative matrix $Df(\mathbf{a})$, affine approximation $g(\mathbf{x})$, level set $c$, and Hessian determinant $D$.
-- **Instant Client-Side Math Intelligence Engine**: Zero configuration, 100% free offline calculus expert with rich KaTeX math equation rendering in chat. Explains gradients, tangent planes, $90^\circ$ orthogonality proofs, and classifies critical points (local minimum, maximum, saddle point).
-- **Optional Google Gemini API Integration**: Enter your Google Gemini API key in chat settings to enable open-ended reasoning powered by Gemini 2.5 Flash!
-- **Quick Prompt Chips**: 1-tap suggested questions for instant explanations of current parameters.
+- **Render Backend Proxy (No Client API Key Needed)**: When deployed on Render with `GEMINI_API_KEY`, the server proxy handles queries automatically using `gemini-3.5-flash-lite` strictly in English.
+- **Offline Math Intelligence Fallback**: 100% free offline calculus engine with rich KaTeX math equation rendering in chat.
 
 ---
 
-## 🚀 Run Locally
+## 🚀 Deployment
 
-```powershell
+### Option A: Render Deployment (Recommended for AI Key Setup)
+
+1. Push your repository to GitHub:
+   ```bash
+   git add .
+   git commit -m "Deploy to Render"
+   git push origin main
+   ```
+2. Go to [Render Dashboard](https://dashboard.render.com/) -> **New +** -> **Web Service**.
+3. Select your repository `altairmurat/multivar-grapher`.
+4. Configure service settings:
+   - **Environment**: Python 3
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python main.py --host 0.0.0.0 --no-browser`
+5. In **Environment Variables**:
+   - Add `GEMINI_API_KEY` = `<your-api-key>`
+6. Click **Deploy Web Service**! Render will generate your public URL where Gemini AI is immediately available to all visitors without them needing to input any API key.
+
+### Option B: GitHub Pages (Free Static Hosting)
+
+1. In your GitHub repo, go to **Settings** -> **Pages**.
+2. Under **Build and deployment** -> **Branch**, select `main` and folder `/ (root)`.
+3. Click **Save**.
+4. Access at: `https://altairmurat.github.io/multivar-grapher/`
+
+---
+
+## 💻 Run Locally
+
+```bash
 python main.py
 ```
-
----
-
-## 🌐 GitHub Pages Deployment
-
-Updates are pushed directly to `main` branch and served via GitHub Pages:
-[https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)
+Open [http://localhost:8000/index.html](http://localhost:8000/index.html) in your browser.
