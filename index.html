@@ -722,7 +722,7 @@
           <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
         </span>
       </div>
-      <span class="text-xs font-bold tracking-wide pr-1 hidden xs:inline sm:inline">AI Репетитор</span>
+      <span class="text-xs font-bold tracking-wide pr-1 hidden xs:inline sm:inline">AI Tutor</span>
     </button>
   </div>
 
@@ -738,11 +738,11 @@
         <div>
           <div class="flex items-center space-x-1.5">
             <h3 class="font-extrabold text-sm tracking-tight text-white">AI Calculus Tutor</h3>
-            <span class="text-[9px] px-1.5 py-0.5 bg-white/20 rounded-full font-mono uppercase font-semibold">Live Graph</span>
+            <span class="text-[9px] px-1.5 py-0.5 bg-white/20 rounded-full font-mono uppercase font-semibold">gemini-3.5-flash-lite</span>
           </div>
           <p class="text-[11px] text-purple-100 flex items-center space-x-1">
             <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-            <span id="aiHeaderStatus">Синхронизирован с графиком</span>
+            <span id="aiHeaderStatus">Live Graph Synced</span>
           </p>
         </div>
       </div>
@@ -771,7 +771,7 @@
         <span class="text-violet-600 dark:text-cyan-400 font-bold">c:</span>
         <span id="aiCtxC" class="text-emerald-600 dark:text-emerald-400">4.0</span>
       </div>
-      <button id="aiRefreshContextBtn" title="Обновить контекст" class="ml-2 text-violet-600 dark:text-violet-400 hover:text-violet-800 shrink-0">
+      <button id="aiRefreshContextBtn" title="Refresh Live Context" class="ml-2 text-violet-600 dark:text-violet-400 hover:text-violet-800 shrink-0">
         <i data-lucide="refresh-cw" class="w-3 h-3"></i>
       </button>
     </div>
@@ -786,34 +786,34 @@
         <div class="bg-violet-50/90 dark:bg-purple-950/60 p-3 rounded-2xl rounded-tl-sm border border-violet-100 dark:border-purple-900/60 text-slate-800 dark:text-purple-100 max-w-[85%] space-y-1.5 shadow-sm">
           <p class="font-bold text-violet-900 dark:text-cyan-300 text-[11px] uppercase tracking-wider">AI Calculus Assistant</p>
           <p>
-            Привет! Я ваш персональный репетитор по мат. анализу. Я в реальном времени считываю вашу функцию, точку $\mathbf{a}$, градиент $\nabla f$, аффинную плоскость и линии уровня с графика!
+            Hello! I am your AI Multivariable Calculus Tutor. I parse your current function, point $\mathbf{a}$, gradient $\nabla f$, affine tangent plane, and level sets in real time directly from the graph!
           </p>
           <p class="text-slate-500 dark:text-slate-400 text-[11px]">
-            Нажмите на быстрый вопрос ниже или напишите любой свой вопрос.
+            Click any suggested question below or type your own question in English.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Quick Prompt Chips -->
+    <!-- Quick Prompt Chips (English) -->
     <div class="px-3 py-2 bg-white/70 dark:bg-[#0c0721]/70 border-t border-violet-100 dark:border-purple-900/50 flex space-x-1.5 overflow-x-auto shrink-0 scrollbar-none text-[11px]">
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-cyan-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Объясни градиент в текущей точке a">
-        🎯 Градиент ∇f
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-cyan-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Explain the gradient at the current point a">
+        🎯 Gradient ∇f
       </button>
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-emerald-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Что означает аффинная функция g(x) здесь?">
-        📐 Аффинная g(x)
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-emerald-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="What does the affine function g(x) represent here?">
+        📐 Affine g(x)
       </button>
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-pink-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Почему нормаль образует угол 90 градусов с касательной?">
-        🧭 Нормаль и 90°
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-pink-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Why is the normal line at a 90-degree angle to the tangent?">
+        🧭 Normal & 90°
       </button>
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-amber-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Проверь точку a на локальный экстремум (Hessian)">
-        🔍 Экстремум (Hessian)
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-amber-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Check point a for local extrema using the Hessian matrix">
+        🔍 Extremum (Hessian)
       </button>
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-violet-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Как понимать линию уровня f(x)=c и радиус?">
-        ⭕ Линия уровня
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-violet-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="How should I interpret the level set f(x)=c and circle radius?">
+        ⭕ Level Set
       </button>
-      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-indigo-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Поясни строчную матрицу производной Df [1x2]">
-        🔢 Матрица Df
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-indigo-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Explain the 1x2 derivative row matrix Df">
+        🔢 Matrix Df
       </button>
     </div>
 
@@ -822,12 +822,12 @@
       <input 
         type="text" 
         id="aiChatInput" 
-        placeholder="Спросите об этом графике..." 
+        placeholder="Ask a question about this graph in English..." 
         class="flex-1 bg-violet-50/60 dark:bg-purple-950/70 border border-violet-200 dark:border-purple-800/80 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-purple-100 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-medium"
         autocomplete="off"
         autocorrect="off"
       >
-      <button id="aiChatSendBtn" class="p-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-2xl shadow-sm transition shrink-0 active:scale-95" title="Отправить">
+      <button id="aiChatSendBtn" class="p-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-2xl shadow-sm transition shrink-0 active:scale-95" title="Send">
         <i data-lucide="send" class="w-4 h-4"></i>
       </button>
     </div>
@@ -838,18 +838,18 @@
         <div class="flex items-center justify-between border-b border-violet-100 dark:border-purple-900 pb-2">
           <div class="flex items-center space-x-1.5 font-bold text-xs text-violet-900 dark:text-purple-200">
             <i data-lucide="settings" class="w-4 h-4 text-violet-600"></i>
-            <span>Настройки AI Репетитора</span>
+            <span>AI Tutor Settings</span>
           </div>
           <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
         <p class="text-[11px] text-slate-600 dark:text-slate-300">
-          По умолчанию работает встроенный математический движок MultivarGrapher (бесплатно, мгновенно и без ключей).
+          Target model: <strong class="text-violet-700 dark:text-cyan-300 font-mono">gemini-3.5-flash-lite</strong>. Answers are in English. Without an API key, the built-in offline math engine answers instantly.
         </p>
         <div class="space-y-1.5">
           <label class="text-[11px] font-bold text-slate-700 dark:text-purple-200 block">
-            Google Gemini API Key (Опционально):
+            Google Gemini API Key (Optional):
           </label>
           <input 
             type="password" 
@@ -858,17 +858,19 @@
             class="w-full bg-violet-50/60 dark:bg-purple-950 border border-violet-200 dark:border-purple-800 rounded-xl px-3 py-2 font-mono text-xs focus:outline-none focus:border-violet-500"
           >
           <p class="text-[10px] text-slate-400">
-            Ключ сохраняется только в вашем браузере (localStorage) и используется для отправки запросов напрямую к модели Google Gemini 2.5 Flash.
+            Stored only in your browser (localStorage) to connect directly to <span class="font-mono text-violet-600 dark:text-cyan-300">gemini-3.5-flash-lite</span>.
           </p>
         </div>
       </div>
       <div class="flex items-center space-x-2 pt-3 border-t border-violet-100 dark:border-purple-900">
         <button id="saveAiSettingsBtn" class="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold transition">
-          Сохранить настройки
+          Save Settings
         </button>
         <button id="clearAiApiKeyBtn" class="px-3 py-2 bg-slate-100 dark:bg-purple-950 text-slate-600 dark:text-purple-300 rounded-xl text-xs font-medium hover:bg-rose-50 hover:text-rose-600 transition">
-          Сбросить
+          Reset
         </button>
+      </div>
+    </div>
       </div>
     </div>
 
@@ -2379,70 +2381,70 @@
       const mag = ctx.gradient_magnitude.toFixed(3);
 
       // Gradient
-      if (q.includes('градиент') || q.includes('gradient') || q.includes('grad') || q.includes('скорость роста') || q.includes('направление')) {
-        return `### 🎯 Анализ градиента $\\nabla f$
+      if (q.includes('gradient') || q.includes('grad') || q.includes('rate of increase') || q.includes('direction') || q.includes('градиент')) {
+        return `### 🎯 Gradient Analysis $\\nabla f$
 
-В текущей точке $\\mathbf{a} = (${a1}, ${a2})$ для функции $f(${v1}, ${v2}) = ${ctx.formula}$:
+At evaluation point $\\mathbf{a} = (${a1}, ${a2})$ for function $f(${v1}, ${v2}) = ${ctx.formula}$:
 
-- **Вектор градиента:** 
+- **Gradient Vector:**
   $$\\nabla f(\\mathbf{a}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${v1}} \\\\[4pt] \\frac{\\partial f}{\\partial ${v2}} \\end{bmatrix} = \\begin{bmatrix} ${fx} \\\\[4pt] ${fy} \\end{bmatrix}_{2 \\times 1}$$
-- **Величина (длина) градиента:** 
+- **Magnitude (Length):**
   $$\\|\\nabla f(\\mathbf{a})\\| = \\sqrt{(${fx})^2 + (${fy})^2} = ${mag}$$
 
-#### 💡 Математический и геометрический смысл:
-1. **Направление наискорейшего подъёма:** Вектор $\\nabla f(\\mathbf{a})$ указывает направление в плоскости $(${v1}, ${v2})$, при движении вдоль которого функция $f$ возрастает быстрее всего.
-2. **Перпендикулярность к линии уровня (угол $90^\\circ$):** Градиент всегда направлен строго перпендикулярно касательной к линии уровня $f(${v1}, ${v2}) = c$. Вектор нормали: $\\mathbf{n} = \\langle ${ctx.normal_vector_2d[0].toFixed(3)}, ${ctx.normal_vector_2d[1].toFixed(3)} \\rangle$.
-3. **Скорость роста:** Величина $\\|\\nabla f\\| = ${mag}$ задаёт максимальную производную по направлению.`;
+#### 💡 Mathematical & Geometric Meaning:
+1. **Direction of Steepest Ascent:** The gradient vector $\\nabla f(\\mathbf{a})$ points in the direction where function $f$ increases fastest in the $(${v1}, ${v2})$ plane.
+2. **Orthogonality to Level Curve ($90^\\circ$ Angle):** The gradient is always strictly perpendicular to the tangent line of the level curve $f(${v1}, ${v2}) = c$. The 2D unit normal vector is $\\mathbf{n} = \\langle ${ctx.normal_vector_2d[0].toFixed(3)}, ${ctx.normal_vector_2d[1].toFixed(3)} \\rangle$.
+3. **Steepness:** The magnitude $\\|\\nabla f\\| = ${mag}$ represents the maximum directional derivative at point $\\mathbf{a}$.`;
       }
 
       // Affine function / tangent plane
-      if (q.includes('аффин') || q.includes('affine') || q.includes('касательн') || q.includes('tangent plane') || q.includes('аппроксимац') || q.includes('g(x)') || q.includes('линеаризац')) {
+      if (q.includes('affine') || q.includes('tangent plane') || q.includes('approximation') || q.includes('g(x)') || q.includes('linearization') || q.includes('аффин') || q.includes('касательн')) {
         const signA1 = -ctx.point_a[0] >= 0 ? `+ ${(-ctx.point_a[0]).toFixed(2)}` : `- ${ctx.point_a[0].toFixed(2)}`;
         const signA2 = -ctx.point_a[1] >= 0 ? `+ ${(-ctx.point_a[1]).toFixed(2)}` : `- ${ctx.point_a[1].toFixed(2)}`;
         const constTerm = (ctx.f_at_a - ctx.derivatives.fx * ctx.point_a[0] - ctx.derivatives.fy * ctx.point_a[1]).toFixed(2);
         const signConst = parseFloat(constTerm) >= 0 ? `+ ${constTerm}` : `- ${Math.abs(constTerm)}`;
 
-        return `### 📐 Аффинная функция $g(\\mathbf{x})$ (Касательная плоскость)
+        return `### 📐 Affine Function $g(\\mathbf{x})$ (Tangent Plane)
 
-Аффинная функция — это **наилучшая линейная аппроксимация первого порядка** функции $f$ в окрестности точки $\\mathbf{a} = (${a1}, ${a2})$:
+The affine function is the **best first-order linear approximation** (tangent plane) of $f$ near point $\\mathbf{a} = (${a1}, ${a2})$:
 
 $$g(\\mathbf{x}) = f(\\mathbf{a}) + \\mathbf{D}f(\\mathbf{a})(\\mathbf{x} - \\mathbf{a})$$
 
-#### Точная формула для вашего графика:
+#### Exact Formula for Current Graph:
 $$g(${v1}, ${v2}) = ${fa} + (${fx})(${v1} ${signA1}) + (${fy})(${v2} ${signA2})$$
 
-В упрощённом виде уравнение плоскости в 3D:
+Simplified 3D plane equation:
 $$z = ${fx}${v1} + ${fy}${v2} ${signConst}$$
 
-#### 🔍 Тест аппроксимации в точке $\\mathbf{x}_{тест} = (${ctx.test_point[0]}, ${ctx.test_point[1]})$:
-- Точное значение: $f(\\mathbf{x}_{тест}) = ${ctx.test_exact.toFixed(4)}$
-- Аффинное значение: $g(\\mathbf{x}_{тест}) = ${ctx.test_affine.toFixed(4)}$
-- **Погрешность линейной аппроксимации:** $|f - g| = ${ctx.test_error.toFixed(4)}$
+#### 🔍 Linearization Test at $\\mathbf{x}_{\\text{test}} = (${ctx.test_point[0]}, ${ctx.test_point[1]})$:
+- Exact value: $f(\\mathbf{x}_{\\text{test}}) = ${ctx.test_exact.toFixed(4)}$
+- Affine approximation: $g(\\mathbf{x}_{\\text{test}}) = ${ctx.test_affine.toFixed(4)}$
+- **Approximation Error:** $|f - g| = ${ctx.test_error.toFixed(4)}$
 
-В 3D пространстве график $z = g(${v1}, ${v2})$ представляет собой касательную плоскость, которая касается поверхности $z = f(${v1}, ${v2})$ ровно в точке $\\mathbf{a}$.`;
+In 3D space, the graph of $z = g(${v1}, ${v2})$ represents the tangent plane kissing the surface $z = f(${v1}, ${v2})$ tangentially at point $\\mathbf{a}$.`;
       }
 
       // Normal line / 90 degree angle
-      if (q.includes('нормал') || q.includes('normal') || q.includes('90') || q.includes('перпендикуляр') || q.includes('угол') || q.includes('ортогональ')) {
-        return `### 🧭 Нормаль (Normal Line) и угол $90^\\circ$
+      if (q.includes('normal') || q.includes('90') || q.includes('perpendicular') || q.includes('orthogonal') || q.includes('нормал') || q.includes('перпендикуляр')) {
+        return `### 🧭 The Normal Line & $90^\\circ$ Orthogonality
 
-Прямая нормали — это прямая, проходящая через точку $\\mathbf{a} = (${a1}, ${a2})$ перпендикулярно касательной линии (в 2D) или касательной плоскости (в 3D).
+The Normal Line is the line passing through point $\\mathbf{a} = (${a1}, ${a2})$ perpendicular to the tangent line (in 2D) or tangent plane (in 3D).
 
-#### 1. В 2D (на линиях уровня $f = c$):
-- Касательный вектор к кривой уровня: $\\mathbf{T} = \\langle -\\frac{\\partial f}{\\partial ${v2}}, \\frac{\\partial f}{\\partial ${v1}} \\rangle = \\langle -${fy}, ${fx} \\rangle$.
-- Вектор градиента (нормаль): $\\nabla f = \\langle ${fx}, ${fy} \\rangle$.
-- **Математическое доказательство перпендикулярности:**
+#### 1. In 2D (Level Sets $f = c$):
+- Tangent vector to the level curve: $\\mathbf{T} = \\langle -\\frac{\\partial f}{\\partial ${v2}}, \\frac{\\partial f}{\\partial ${v1}} \\rangle = \\langle -${fy}, ${fx} \\rangle$.
+- Gradient vector (Normal): $\\nabla f = \\langle ${fx}, ${fy} \\rangle$.
+- **Proof of Perpendicularity:**
   $$\\mathbf{T} \\cdot \\nabla f = (-${fy})(${fx}) + (${fx})(${fy}) = 0$$
-  Скалярное произведение равно $0$, следовательно, угол между касательной и нормалью **строго равен $90^\\circ$**!
+  Since the dot product equals zero, the angle between the tangent line and the normal line is **strictly $90^\\circ$**!
 
-#### 2. В 3D (на поверхности $z = f(${v1}, ${v2})$):
-- Вектор нормали к касательной плоскости:
+#### 2. In 3D (Surface $z = f(${v1}, ${v2})$):
+- Surface normal vector:
   $$\\mathbf{n}_{3D} = \\langle -\\frac{\\partial f}{\\partial ${v1}}, -\\frac{\\partial f}{\\partial ${v2}}, 1 \\rangle = \\langle -${fx}, -${fy}, 1 \\rangle$$
-- Нормальная прямая проходит через точку $(\\mathbf{a}, f(\\mathbf{a}))$ перпендикулярно касательной плоскости $z = g(\\mathbf{x})$.`;
+- The 3D normal line passes through point $(\\mathbf{a}, f(\\mathbf{a}))$ perpendicular to the tangent plane $z = g(\\mathbf{x})$.`;
       }
 
       // Extremum / critical points / Hessian
-      if (q.includes('экстремум') || q.includes('минимум') || q.includes('максимум') || q.includes('седло') || q.includes('критическ') || q.includes('гессиан') || q.includes('hessian') || q.includes('min') || q.includes('max')) {
+      if (q.includes('extremum') || q.includes('minimum') || q.includes('maximum') || q.includes('saddle') || q.includes('critical') || q.includes('hessian') || q.includes('min') || q.includes('max') || q.includes('экстремум')) {
         const dHess = ctx.hessian.det.toFixed(3);
         const fxx = ctx.hessian.f_xx.toFixed(3);
         const fyy = ctx.hessian.f_yy.toFixed(3);
@@ -2450,78 +2452,79 @@ $$z = ${fx}${v1} + ${fy}${v2} ${signConst}$$
 
         let verdict = '';
         if (ctx.extremumType === 'local_min') {
-          verdict = `🟢 **ЛОКАЛЬНЫЙ МИНИМУМ**\nПоскольку $\\nabla f = 0$, дискриминант $D = ${dHess} > 0$ и $\\frac{\\partial^2 f}{\\partial ${v1}^2} = ${fxx} > 0$, поверхность в этой точке образует локальное дно (чашу).`;
+          verdict = `🟢 **LOCAL MINIMUM**\nBecause $\\nabla f = 0$, discriminant $D = ${dHess} > 0$ and $\\frac{\\partial^2 f}{\\partial ${v1}^2} = ${fxx} > 0$, the surface forms a local cup/basin.`;
         } else if (ctx.extremumType === 'local_max') {
-          verdict = `🔴 **ЛОКАЛЬНЫЙ МАКСИМУМ**\nПоскольку $\\nabla f = 0$, дискриминант $D = ${dHess} > 0$ и $\\frac{\\partial^2 f}{\\partial ${v1}^2} = ${fxx} < 0$, поверхность в этой точке образует вершину холма.`;
+          verdict = `🔴 **LOCAL MAXIMUM**\nBecause $\\nabla f = 0$, discriminant $D = ${dHess} > 0$ and $\\frac{\\partial^2 f}{\\partial ${v1}^2} = ${fxx} < 0$, the surface forms a hilltop peak.`;
         } else if (ctx.extremumType === 'saddle') {
-          verdict = `🟡 **СЕДЛОВАЯ ТОЧКА (Saddle Point)**\nПоскольку $\\nabla f = 0$, но дискриминант $D = ${dHess} < 0$, в одном направлении функция возрастает, а в другом убывает.`;
+          verdict = `🟡 **SADDLE POINT**\nBecause $\\nabla f = 0$ but discriminant $D = ${dHess} < 0$, the function increases in one direction and decreases in another.`;
         } else if (ctx.gradient_magnitude >= 1e-3) {
-          verdict = `⚪ **НЕ ЯВЛЯЕТСЯ КРИТИЧЕСКОЙ ТОЧКОЙ**\nГрадиент в точке $\\mathbf{a}$ отличен от нуля: $\\|\\nabla f\\| = ${mag} \\ne 0$.\nЭкстремума здесь нет — функция имеет наклон в направлении $\\nabla f = \\langle ${fx}, ${fy} \\rangle$. Чтобы найти экстремум, переместите точку $\\mathbf{a}$ туда, где $\\nabla f = 0$ (например, в $(0, 0)$ для $x_1^2 + x_2^2$).`;
+          verdict = `⚪ **NOT A CRITICAL POINT**\nThe gradient is non-zero: $\\|\\nabla f\\| = ${mag} \\ne 0$.\nThere is no local extremum here; the function slopes along $\\nabla f = \\langle ${fx}, ${fy} \\rangle$. Move point $\\mathbf{a}$ to where $\\nabla f = 0$ (e.g. $(0, 0)$ for $x_1^2 + x_2^2$) to find an extremum.`;
         } else {
-          verdict = `⚪ **НЕОПРЕДЕЛЁННЫЙ РЕЗУЛЬТАТ (D = 0)**\nТест вторых производных требует исследования высших порядков.`;
+          verdict = `⚪ **INCONCLUSIVE (D = 0)**\nThe second derivative test is inconclusive; higher-order terms must be checked.`;
         }
 
-        return `### 🔍 Анализ экстремумов и матрица Гессе (Hessian)
+        return `### 🔍 Local Extrema & Hessian Matrix Analysis
 
-Для точки $\\mathbf{a} = (${a1}, ${a2})$:
+At evaluation point $\\mathbf{a} = (${a1}, ${a2})$:
 
-- **Градиент:** $\\nabla f(\\mathbf{a}) = \\langle ${fx}, ${fy} \\rangle$, $\\|\\nabla f\\| = ${mag}$
-- **Вторые производные:**
+- **Gradient:** $\\nabla f(\\mathbf{a}) = \\langle ${fx}, ${fy} \\rangle$, $\\|\\nabla f\\| = ${mag}$
+- **Second Partial Derivatives:**
   $$f_{${v1}${v1}} = ${fxx},\\quad f_{${v2}${v2}} = ${fyy},\\quad f_{${v1}${v2}} = ${fxy}$$
-- **Определитель матрицы Гессе (дискриминант $D$):**
+- **Hessian Determinant (Discriminant $D$):**
   $$D = f_{${v1}${v1}} f_{${v2}${v2}} - (f_{${v1}${v2}})^2 = (${fxx})(${fyy}) - (${fxy})^2 = ${dHess}$$
 
-#### 🏁 Вердикт:
+#### 🏁 Verdict:
 ${verdict}`;
       }
 
       // Level Set / c
-      if (q.includes('линия уровня') || q.includes('уровн') || q.includes('level set') || q.includes('изолиния') || q.includes('радиус') || q.includes('circle') || q.includes('окружност')) {
-        const isOnCurve = ctx.level_diff < 0.05 ? 'лежит на линии уровня ✓' : `находится вне линии уровня (разница $\\Delta = ${ctx.level_diff.toFixed(3)}$)`;
-        return `### ⭕ Линия уровня $f^{-1}(c)$
+      if (q.includes('level set') || q.includes('contour') || q.includes('isoline') || q.includes('radius') || q.includes('circle') || q.includes('уровн')) {
+        const isOnCurve = ctx.level_diff < 0.05 ? 'lies directly on the level curve ✓' : `is off the level curve (difference $\\Delta = ${ctx.level_diff.toFixed(3)}$)`;
+        const radStr = Math.sqrt(Math.max(0, ctx.level_c)).toFixed(2);
+        return `### ⭕ Level Set $f^{-1}(c)$
 
-- **Текущее значение уровня:** $c = ${ctx.level_c.toFixed(2)}$
-- **Значение функции в точке $\\mathbf{a}$:** $f(\\mathbf{a}) = ${fa}$
-- **Статус точки $\\mathbf{a}$:** Точка ${isOnCurve}.
+- **Target Level Constant:** $c = ${ctx.level_c.toFixed(2)}$
+- **Function Value at $\\mathbf{a}$:** $f(\\mathbf{a}) = ${fa}$
+- **Point $\\mathbf{a}$ Status:** Point $\\mathbf{a}$ ${isOnCurve}.
 
-#### 💡 Как это работает:
-1. Линия уровня $f(${v1}, ${v2}) = c$ — это сечение трёхмерного графика $z = f(${v1}, ${v2})$ горизонтальной плоскостью на высоте $z = c$.
-2. Для круговой функции $f = ${v1}^2 + ${v2}^2$, линия уровня $c = r^2$ представляет собой окружность радиуса $r = \\sqrt{c} = ${Math.sqrt(Math.max(0, ctx.level_c)).toFixed(2)}$.
-3. Кнопка **"Snap to Curve"** на панели управления позволяет мгновенно спроецировать точку $\\mathbf{a}$ вдоль градиента прямо на линию уровня!`;
+#### 💡 How It Works:
+1. The level set $f(${v1}, ${v2}) = c$ is the horizontal slice of the 3D surface at height $z = c$.
+2. For circle functions $f = ${v1}^2 + ${v2}^2$, the level set $c = r^2$ forms a circle with radius $r = \\sqrt{c} = ${radStr}$.
+3. Click the **"Snap to Curve"** button on the controls panel to project point $\\mathbf{a}$ along the gradient directly onto the level curve!`;
       }
 
       // Derivative Matrix Df [1 x n]
-      if (q.includes('матриц') || q.includes('df') || q.includes('1xn') || q.includes('производн') || q.includes('dimension')) {
-        return `### 🔢 Матрица производной $\\mathbf{D}f$ $[1 \\times 2]$
+      if (q.includes('matrix') || q.includes('df') || q.includes('1xn') || q.includes('derivative') || q.includes('dimension') || q.includes('матриц')) {
+        return `### 🔢 Total Derivative Matrix $\\mathbf{D}f$ $[1 \\times 2]$
 
-Полная производная (дифференциал) функции $f: \\mathbb{R}^2 \\to \\mathbb{R}$ представляется в виде **строчной матрицы $1 \\times 2$**:
+The total derivative (Jacobian) of $f: \\mathbb{R}^2 \\to \\mathbb{R}$ is represented as a **$1 \\times 2$ row matrix**:
 
 $$\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${v1}} & \\frac{\\partial f}{\\partial ${v2}} \\end{bmatrix} = \\begin{bmatrix} ${fx} & ${fy} \\end{bmatrix}_{1 \\times 2}$$
 
-#### 🔄 Связь с градиентом:
-- Градиент $\\nabla f(\\mathbf{a})$ — это **вектор-столбец** (транспонированная матрица):
+#### 🔄 Dual Relationship with Gradient:
+- The gradient $\\nabla f(\\mathbf{a})$ is the **column vector transpose**:
   $$\\nabla f(\\mathbf{a}) = (\\mathbf{D}f(\\mathbf{a}))^T = \\begin{bmatrix} ${fx} \\\\[4pt] ${fy} \\end{bmatrix}_{2 \\times 1}$$
-- Дифференциал действует на вектор смещения $\\Delta \\mathbf{x} = \\begin{bmatrix} \\Delta ${v1} \\\\ \\Delta ${v2} \\end{bmatrix}$ матричным умножением:
+- The derivative maps a displacement vector $\\Delta \\mathbf{x} = \\begin{bmatrix} \\Delta ${v1} \\\\ \\Delta ${v2} \\end{bmatrix}$ via matrix multiplication:
   $$\\Delta f \\approx \\mathbf{D}f(\\mathbf{a}) \\Delta \\mathbf{x} = [${fx} \\;\\; ${fy}] \\begin{bmatrix} \\Delta ${v1} \\\\ \\Delta ${v2} \\end{bmatrix} = (${fx})\\Delta ${v1} + (${fy})\\Delta ${v2}$$`;
       }
 
-      // General fallback
-      return `### 🤖 Текущий статус графика $f(${v1}, ${v2}) = ${ctx.formula}$
+      // General fallback in English
+      return `### 🤖 Live Graph State for $f(${v1}, ${v2}) = ${ctx.formula}$
 
-Я считал параметры вашего графика в реальном времени:
-- **Функция:** $f(${v1}, ${v2}) = ${ctx.formula}$
-- **Точка анализа:** $\\mathbf{a} = (${a1}, ${a2})$, где $f(\\mathbf{a}) = ${fa}$
-- **Градиент:** $\\nabla f(\\mathbf{a}) = \\langle ${fx}, ${fy} \\rangle$ (величина $\\|\\nabla f\\| = ${mag}$)
-- **Матрица производной:** $\\mathbf{D}f(\\mathbf{a}) = [${fx} \\quad ${fy}]_{1 \\times 2}$
-- **Уровень $c$:** $c = ${ctx.level_c.toFixed(2)}$
-- **Аффинная плоскость:** $g(\\mathbf{x}) = ${fa} + ${fx}(${v1} - ${a1}) + ${fy}(${v2} - ${a2})$
+Here is the real-time mathematical snapshot from the graph:
+- **Function:** $f(${v1}, ${v2}) = ${ctx.formula}$
+- **Evaluation Point:** $\\mathbf{a} = (${a1}, ${a2})$, where $f(\\mathbf{a}) = ${fa}$
+- **Gradient:** $\\nabla f(\\mathbf{a}) = \\langle ${fx}, ${fy} \\rangle$ (magnitude $\\|\\nabla f\\| = ${mag}$)
+- **Derivative Row Matrix:** $\\mathbf{D}f(\\mathbf{a}) = [${fx} \\quad ${fy}]_{1 \\times 2}$
+- **Level Set Constant:** $c = ${ctx.level_c.toFixed(2)}$
+- **Affine Plane:** $g(\\mathbf{x}) = ${fa} + ${fx}(${v1} - ${a1}) + ${fy}(${v2} - ${a2})$
 
-💬 *Спросите меня:*
-- «Объясни градиент в этой точке»
-- «Что значит аффинная функция g(x)?»
-- «Почему нормаль под 90° к касательной?»
-- «Проверь на экстремум (Hessian)»
-- «Как интерпретировать линию уровня c?»`;
+💬 *Suggested Questions:*
+- "Explain the gradient at this point"
+- "What does the affine function g(x) represent?"
+- "Why is the normal perpendicular at 90 degrees?"
+- "Check point a for local extrema (Hessian)"
+- "How do I interpret the level set c?"`;
     }
 
     async function askAiAssistant(userQuestion) {
@@ -2532,58 +2535,75 @@ $$\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${v
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(generateLocalAIResponse(userQuestion, ctx));
-          }, 120);
+          }, 100);
         });
       }
 
       const systemPrompt = `You are an expert Multivariable Calculus AI Tutor in the MultivarGrapher web app.
-The user's current live math snapshot:
+IMPORTANT: ALWAYS RESPOND IN ENGLISH.
+Use clear, pedagogical explanations with formatted LaTeX math ($...$ for inline and $$...$$ for block equations).
+
+Current live graph state:
 - Function: f(${ctx.v1}, ${ctx.v2}) = ${ctx.formula}
 - Point a = (${ctx.point_a[0]}, ${ctx.point_a[1]})
-- f(a) = ${ctx.f_at_a}
-- df/d${ctx.v1} = ${ctx.derivatives.fx}, df/d${ctx.v2} = ${ctx.derivatives.fy}
+- Value f(a) = ${ctx.f_at_a}
+- Partial derivatives: df/d${ctx.v1} = ${ctx.derivatives.fx}, df/d${ctx.v2} = ${ctx.derivatives.fy}
 - Gradient: ∇f(a) = [${ctx.derivatives.fx}, ${ctx.derivatives.fy}]^T (magnitude = ${ctx.gradient_magnitude})
 - Derivative row matrix: Df(a) = [${ctx.derivatives.fx}, ${ctx.derivatives.fy}] [1x2]
 - Level set constant c = ${ctx.level_c} (difference at a = ${ctx.level_diff})
 - Affine function: g(x) = f(a) + Df(a)(x - a)
-- Test point: (${ctx.test_point[0]}, ${ctx.test_point[1]}), exact = ${ctx.test_exact}, affine = ${ctx.test_affine}, error = ${ctx.test_error}
+- Test point for linearization: (${ctx.test_point[0]}, ${ctx.test_point[1]}), exact = ${ctx.test_exact}, affine = ${ctx.test_affine}, error = ${ctx.test_error}
 - Second derivatives: f_11 = ${ctx.hessian.f_xx}, f_22 = ${ctx.hessian.f_yy}, f_12 = ${ctx.hessian.f_xy}, Hessian determinant D = ${ctx.hessian.det}
-- Extremum status: ${ctx.extremumType}
+- Extremum classification: ${ctx.extremumType}
 
 Instructions:
-1. Provide accurate, clear mathematical explanations directly relevant to this function and point.
-2. Use LaTeX math ($...$ inline, $$...$$ block).
-3. If user writes in Russian, respond in Russian.
-4. Keep explanations concise, educational, and intuitive.`;
+1. Answer the user's question directly in English using LaTeX math equations ($...$ and $$...$$).
+2. Ground your answer on the exact function and numeric values provided in the snapshot.
+3. Be concise, mathematically accurate, and educational.`;
 
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const payload = {
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: `${systemPrompt}\n\nUser Question: ${userQuestion}` }]
+      // Models to try in sequence: gemini-3.5-flash-lite first as requested by user
+      const candidateModels = [
+        'gemini-3.5-flash-lite',
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
+      ];
+
+      for (const model of candidateModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const payload = {
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: `${systemPrompt}\n\nUser Question: ${userQuestion}` }]
+              }
+            ]
+          };
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (candidateText) {
+              const statusEl = document.getElementById("aiHeaderStatus");
+              if (statusEl) statusEl.textContent = `${model} 🟢`;
+              return candidateText;
             }
-          ]
-        };
-
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          return generateLocalAIResponse(userQuestion, ctx) + 
-            `\n\n> ⚠️ *(Gemini API вернул статус ${res.status}. Использован локальный движок MultivarGrapher)*`;
+          }
+        } catch (err) {
+          console.warn(`Attempt with ${model} failed:`, err);
         }
-
-        const data = await res.json();
-        const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        return candidateText || generateLocalAIResponse(userQuestion, ctx);
-      } catch (err) {
-        return generateLocalAIResponse(userQuestion, ctx);
       }
+
+      // If all models fail, fallback to built-in local engine in English
+      return generateLocalAIResponse(userQuestion, ctx) + 
+        `\n\n> ⚠️ *(Gemini API returned an error. Answer generated by built-in MultivarGrapher Math Engine. Check your API key in Settings ⚙️)*`;
     }
 
     function appendChatMessage(sender, text) {
@@ -2733,11 +2753,11 @@ Instructions:
           if (key) {
             localStorage.setItem("multivar_gemini_key", key);
             const statusEl = document.getElementById("aiHeaderStatus");
-            if (statusEl) statusEl.textContent = "Google Gemini 2.5 Flash 🟢";
+            if (statusEl) statusEl.textContent = "gemini-3.5-flash-lite 🟢";
           } else {
             localStorage.removeItem("multivar_gemini_key");
             const statusEl = document.getElementById("aiHeaderStatus");
-            if (statusEl) statusEl.textContent = "Синхронизирован с графиком";
+            if (statusEl) statusEl.textContent = "Live Graph Synced";
           }
           overlay.classList.add("hidden");
         });
@@ -2748,7 +2768,7 @@ Instructions:
           keyInput.value = "";
           localStorage.removeItem("multivar_gemini_key");
           const statusEl = document.getElementById("aiHeaderStatus");
-          if (statusEl) statusEl.textContent = "Синхронизирован с графиком";
+          if (statusEl) statusEl.textContent = "Live Graph Synced";
           overlay.classList.add("hidden");
         });
       }
@@ -2782,7 +2802,7 @@ Instructions:
       const existingKey = localStorage.getItem("multivar_gemini_key");
       if (existingKey) {
         const headerStatus = document.getElementById("aiHeaderStatus");
-        if (headerStatus) headerStatus.textContent = "Google Gemini 2.5 Flash 🟢";
+        if (headerStatus) headerStatus.textContent = "gemini-3.5-flash-lite 🟢";
       }
     }
 
