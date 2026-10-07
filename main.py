@@ -92,7 +92,30 @@ Current live graph state:
 Instructions:
 1. Answer the user's question directly in English using LaTeX math equations ($...$ and $$...$$).
 2. Ground your answer on the exact function and numeric values provided in the snapshot.
-3. Be concise, mathematically accurate, and educational."""
+3. Be concise, mathematically accurate, and educational.
+4. ACTION EXECUTION: If the user asks to create, graph, set, or change a function, shape (such as an ellipse, circle, saddle, paraboloid, ripple, cone, vector field, etc.), level set c, evaluation point a, domain, or toggles:
+   Provide your mathematical explanation in English with LaTeX equations first.
+   At the very end of your response, you MUST output a ```graph_action code block with valid JSON containing the exact parameters to apply to the web application:
+   ```graph_action
+   {{
+     "f": "x1^2 / 4 + x2^2 / 9",
+     "c": 1.0,
+     "r": 1.0,
+     "point_a": [1.0, 1.5],
+     "view_mode": "split",
+     "x_range": [-5, 5],
+     "y_range": [-5, 5],
+     "toggles": {{
+       "show_gradient": true,
+       "show_normal_line": true,
+       "show_tangent_line": true,
+       "show_affine_plane": true,
+       "show_matrix_arrows": true
+     }},
+     "summary": "Configured ellipse: f(x1, x2) = x1^2/4 + x2^2/9 at level c=1 with point a=(1.0, 1.5)"
+   }}
+   ```
+   The web application will automatically parse this JSON and update the HTML input text boxes and graph."""
 
     candidate_models = [
         'gemini-3.5-flash-lite',

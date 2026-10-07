@@ -530,6 +530,40 @@
             </div>
           </div>
 
+          <!-- Matrix Graphics & Vector Visualization Toggles -->
+          <div class="bg-white dark:bg-purple-950/40 p-4 rounded-2xl border border-violet-200/80 dark:border-purple-800/60 space-y-3 shadow-sm">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-purple-200 flex items-center space-x-1.5">
+              <i data-lucide="compass" class="w-3.5 h-3.5 text-violet-600 dark:text-cyan-400"></i>
+              <span>Matrix Df Visual Vectors on Graph</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+              <!-- Matrix Component Vectors -->
+              <label class="flex items-center space-x-2 text-slate-700 dark:text-emerald-300 cursor-pointer font-medium hover:text-emerald-600 transition">
+                <input type="checkbox" id="showMatrixArrows" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-emerald-500 focus:ring-emerald-500">
+                <span>Show Df Basis Arrows (∂f/∂x₁·e₁, ∂f/∂x₂·e₂) & Parallelogram</span>
+              </label>
+
+              <!-- Displacement & Linear Approximation Vector -->
+              <label class="flex items-center space-x-2 text-slate-700 dark:text-pink-300 cursor-pointer font-medium hover:text-pink-600 transition">
+                <input type="checkbox" id="showApproxVector" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-pink-500 focus:ring-pink-500">
+                <span>Show Displacement Vector Δx & Action Df · Δx on Test Point</span>
+              </label>
+
+              <!-- 3D Tangent Basis Vectors -->
+              <label class="flex items-center space-x-2 text-slate-700 dark:text-cyan-300 cursor-pointer font-medium hover:text-cyan-600 transition">
+                <input type="checkbox" id="show3DTangentBasis" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-cyan-500 focus:ring-cyan-500">
+                <span>Show 3D Tangent Plane Basis Vectors (T₁, T₂)</span>
+              </label>
+
+              <!-- 3D Error Rod -->
+              <label class="flex items-center space-x-2 text-slate-700 dark:text-amber-300 cursor-pointer font-medium hover:text-amber-600 transition">
+                <input type="checkbox" id="showErrorRod" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-amber-500 focus:ring-amber-500">
+                <span>Show 3D Approximation Error Rod |f(x) - g(x)|</span>
+              </label>
+            </div>
+          </div>
+
         </div>
 
         <!-- ============================================================= -->
@@ -559,10 +593,11 @@
             <!-- Quick insert buttons -->
             <div class="flex flex-wrap gap-1 text-[11px] pt-1">
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 + x2^2</button>
-              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 / 3 + x2^2</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 / 4 + x2^2 / 9</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 - x2^2</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">sin(x1) * cos(x2)</button>
-              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">exp(-x1^2 - x2^2)</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[-x2, x1]</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[x1; x2]</button>
             </div>
           </div>
 
@@ -809,9 +844,23 @@
       <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-violet-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="How should I interpret the level set f(x)=c and circle radius?">
         ⭕ Level Set
       </button>
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-emerald-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Create an ellipse on the graph with level set c=1 and evaluation point a">
+        🪐 Make Ellipse
+      </button>
+      <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-cyan-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Set a 2D vector field [-x2, x1] and show its Jacobian matrix">
+        🌀 Vector Field
+      </button>
       <button class="ai-chip shrink-0 px-2.5 py-1 bg-violet-100/70 hover:bg-violet-200 dark:bg-purple-950 dark:hover:bg-purple-900 text-violet-800 dark:text-indigo-300 rounded-full border border-violet-200 dark:border-purple-800 font-medium transition" data-prompt="Explain the 1x2 derivative row matrix Df">
         🔢 Matrix Df
       </button>
+    </div>
+
+    <!-- Floating Toast for Graph Updates -->
+    <div id="graphActionToast" class="fixed top-16 right-4 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+      <div class="bg-violet-950/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-violet-500/40 flex items-center space-x-2.5 text-xs font-semibold backdrop-blur-md">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-300 shrink-0"></i>
+        <span id="graphActionToastText">Graph parameters updated</span>
+      </div>
     </div>
 
     <!-- Input Bar -->
@@ -1002,7 +1051,14 @@
       show_3d_normal_line: true,
       show_affine_plane: true,
       show_right_angle: true,
-      show_all_contours: true
+      show_all_contours: true,
+      show_matrix_arrows: true,
+      show_approx_arrow: true,
+      show_3d_tangent_basis: true,
+      show_error_rod: true,
+      is_vector_func: false,
+      f1_expr_raw: '',
+      f2_expr_raw: ''
     };
 
     const presets = {
@@ -1012,13 +1068,18 @@
         x: [-6, 6], y: [-6, 6], mode: '2d'
       },
       ellipse: {
-        expr: "x1^2 / 3 + x2^2",
-        c: 6.0, r: 2.45, x0: 2.0, y0: 1.0,
-        x: [-7, 7], y: [-7, 7], mode: '2d'
+        expr: "x1^2 / 4 + x2^2 / 9",
+        c: 1.0, r: 1.0, x0: 1.0, y0: 1.5,
+        x: [-6, 6], y: [-6, 6], mode: 'split'
       },
       saddle: {
         expr: "x1^2 - x2^2",
         c: 1.0, r: 1.0, x0: 1.414, y0: 1.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      vector_field: {
+        expr: "[-x2, x1]",
+        c: 2.0, r: 1.414, x0: 1.0, y0: 1.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       ripple: {
@@ -1049,8 +1110,47 @@
     };
 
     let compiledF = null;
+    let compiledF1 = null;
+    let compiledF2 = null;
     let symDfD1 = null;
     let symDfD2 = null;
+    let symJ11 = null;
+    let symJ12 = null;
+    let symJ21 = null;
+    let symJ22 = null;
+
+    function parseVectorComponents(exprStr) {
+      if (!exprStr) return { isVector: false };
+      const trimmed = exprStr.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        const inner = trimmed.slice(1, -1).trim();
+        let parts = [];
+        let depth = 0;
+        let current = "";
+        for (let i = 0; i < inner.length; i++) {
+          const ch = inner[i];
+          if (ch === '(' || ch === '[' || ch === '{') depth++;
+          else if (ch === ')' || ch === ']' || ch === '}') depth--;
+          
+          if ((ch === ';' || ch === ',') && depth === 0) {
+            parts.push(current.trim());
+            current = "";
+          } else {
+            current += ch;
+          }
+        }
+        if (current.trim()) parts.push(current.trim());
+
+        if (parts.length >= 2) {
+          return {
+            isVector: true,
+            f1_raw: parts[0],
+            f2_raw: parts[1]
+          };
+        }
+      }
+      return { isVector: false };
+    }
 
     let isInternalUpdating = false;
     let relayoutDebounce = null;
@@ -1214,45 +1314,95 @@
       const formulaStatus = document.getElementById("formulaStatus");
       const expr = state.f_expr_raw;
 
-      try {
-        compiledF = math.compile(expr);
-        formulaStatus.textContent = "Valid";
-        formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-medium";
-      } catch (err) {
-        formulaStatus.textContent = "Syntax Error";
-        formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-medium";
-        console.warn("Compile error:", err);
-      }
+      const vecInfo = parseVectorComponents(expr);
+      if (vecInfo.isVector) {
+        state.is_vector_func = true;
+        state.f1_expr_raw = vecInfo.f1_raw;
+        state.f2_expr_raw = vecInfo.f2_raw;
+        try {
+          compiledF1 = math.compile(vecInfo.f1_raw);
+          compiledF2 = math.compile(vecInfo.f2_raw);
+          compiledF = {
+            evaluate: (scope) => {
+              const v1 = Number(compiledF1.evaluate(scope)) || 0;
+              const v2 = Number(compiledF2.evaluate(scope)) || 0;
+              return Math.sqrt(v1 * v1 + v2 * v2);
+            }
+          };
+          formulaStatus.textContent = "Vector F(x₁, x₂)";
+          formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-medium";
+        } catch (err) {
+          formulaStatus.textContent = "Syntax Error";
+          formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-medium";
+        }
 
-      try {
-        const parsed = math.parse(expr);
-        const vars = new Set();
-        parsed.traverse(node => {
-          if (node.isSymbolNode) vars.add(node.name);
-        });
+        try {
+          const parsed1 = math.parse(vecInfo.f1_raw);
+          const parsed2 = math.parse(vecInfo.f2_raw);
+          const v1 = 'x1';
+          const v2 = 'x2';
+          symJ11 = math.derivative(parsed1, v1);
+          symJ12 = math.derivative(parsed1, v2);
+          symJ21 = math.derivative(parsed2, v1);
+          symJ22 = math.derivative(parsed2, v2);
 
-        const v1 = vars.has('x1') ? 'x1' : (vars.has('x') ? 'x' : 'x1');
-        const v2 = vars.has('x2') ? 'x2' : (vars.has('y') ? 'y' : 'x2');
+          const t11 = symJ11.toTex({ parenthesis: 'auto' });
+          const t12 = symJ12.toTex({ parenthesis: 'auto' });
+          const t21 = symJ21.toTex({ parenthesis: 'auto' });
+          const t22 = symJ22.toTex({ parenthesis: 'auto' });
 
-        symDfD1 = math.derivative(parsed, v1);
-        symDfD2 = math.derivative(parsed, v2);
+          const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
+          const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
+          const jacobianLatex = `\\mathbf{J}_F(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial F_1}{\\partial ${var1Name}} & \\frac{\\partial F_1}{\\partial ${var2Name}} \\\\[4pt] \\frac{\\partial F_2}{\\partial ${var1Name}} & \\frac{\\partial F_2}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${t11} & ${t12} \\\\[4pt] ${t21} & ${t22} \\end{bmatrix}_{2 \\times 2}`;
+          katex.render(jacobianLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+          katex.render(`\\mathbf{D}F_1 = [${t11}, ${t12}]`, document.getElementById("katexDfDx"), { throwOnError: false });
+          katex.render(`\\mathbf{D}F_2 = [${t21}, ${t22}]`, document.getElementById("katexDfDy"), { throwOnError: false });
+        } catch (e) {
+          symJ11 = null; symJ12 = null; symJ21 = null; symJ22 = null;
+          document.getElementById("katexMatrixSymbolic").textContent = "J_F = [ ∂F₁/∂x₁  ∂F₁/∂x₂ ; ∂F₂/∂x₁  ∂F₂/∂x₂ ]";
+        }
+      } else {
+        state.is_vector_func = false;
+        try {
+          compiledF = math.compile(expr);
+          formulaStatus.textContent = "Valid";
+          formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-medium";
+        } catch (err) {
+          formulaStatus.textContent = "Syntax Error";
+          formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-medium";
+          console.warn("Compile error:", err);
+        }
 
-        const tex1 = symDfD1.toTex({ parenthesis: 'auto' });
-        const tex2 = symDfD2.toTex({ parenthesis: 'auto' });
-        katex.render(tex1, document.getElementById("katexDfDx"), { throwOnError: false });
-        katex.render(tex2, document.getElementById("katexDfDy"), { throwOnError: false });
+        try {
+          const parsed = math.parse(expr);
+          const vars = new Set();
+          parsed.traverse(node => {
+            if (node.isSymbolNode) vars.add(node.name);
+          });
 
-        const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
-        const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
-        const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
-        katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+          const v1 = vars.has('x1') ? 'x1' : (vars.has('x') ? 'x' : 'x1');
+          const v2 = vars.has('x2') ? 'x2' : (vars.has('y') ? 'y' : 'x2');
 
-      } catch (e) {
-        symDfD1 = null;
-        symDfD2 = null;
-        document.getElementById("katexDfDx").textContent = "Numerical derivative";
-        document.getElementById("katexDfDy").textContent = "Numerical derivative";
-        document.getElementById("katexMatrixSymbolic").textContent = "Df = [ ∂f/∂x₁   ∂f/∂x₂ ]";
+          symDfD1 = math.derivative(parsed, v1);
+          symDfD2 = math.derivative(parsed, v2);
+
+          const tex1 = symDfD1.toTex({ parenthesis: 'auto' });
+          const tex2 = symDfD2.toTex({ parenthesis: 'auto' });
+          katex.render(tex1, document.getElementById("katexDfDx"), { throwOnError: false });
+          katex.render(tex2, document.getElementById("katexDfDy"), { throwOnError: false });
+
+          const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
+          const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
+          const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
+          katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+
+        } catch (e) {
+          symDfD1 = null;
+          symDfD2 = null;
+          document.getElementById("katexDfDx").textContent = "Numerical derivative";
+          document.getElementById("katexDfDy").textContent = "Numerical derivative";
+          document.getElementById("katexMatrixSymbolic").textContent = "Df = [ ∂f/∂x₁   ∂f/∂x₂ ]";
+        }
       }
 
       updateKatexHeader();
@@ -1262,10 +1412,14 @@
 
     function updateKatexHeader() {
       const container = document.getElementById("katexEquation");
+      const varTuple = state.notation === 'x1x2' ? '(x_1, x_2)' : '(x, y)';
+      if (state.is_vector_func) {
+        katex.render(`\\mathbf{F}${varTuple} = \\begin{bmatrix} ${state.f1_expr_raw} \\\\[4pt] ${state.f2_expr_raw} \\end{bmatrix}`, container, { throwOnError: false });
+        return;
+      }
       try {
         const parsed = math.parse(state.f_expr_raw);
         const tex = parsed.toTex({ parenthesis: 'auto' });
-        const varTuple = state.notation === 'x1x2' ? '(x_1, x_2)' : '(x, y)';
         katex.render(`f${varTuple} = ${tex}`, container, { throwOnError: false });
       } catch (e) {
         container.textContent = `f = ${state.f_expr_raw}`;
@@ -1287,13 +1441,65 @@
     }
 
     function evaluateAt(xVal, yVal) {
-      if (!compiledF) return { z: 0, fx: 0, fy: 0 };
       const scope = getEvalScope(xVal, yVal);
+      if (state.is_vector_func && compiledF1 && compiledF2) {
+        let f1 = 0, f2 = 0;
+        try {
+          f1 = Number(compiledF1.evaluate(scope));
+          if (isNaN(f1)) f1 = 0;
+        } catch { f1 = 0; }
+        try {
+          f2 = Number(compiledF2.evaluate(scope));
+          if (isNaN(f2)) f2 = 0;
+        } catch { f2 = 0; }
+
+        const z = Math.sqrt(f1 * f1 + f2 * f2);
+
+        let j11 = null, j12 = null, j21 = null, j22 = null;
+        if (symJ11 && symJ12 && symJ21 && symJ22) {
+          try {
+            j11 = Number(symJ11.evaluate(scope));
+            j12 = Number(symJ12.evaluate(scope));
+            j21 = Number(symJ21.evaluate(scope));
+            j22 = Number(symJ22.evaluate(scope));
+          } catch {}
+        }
+
+        if (j11 === null || isNaN(j11) || isNaN(j12) || isNaN(j21) || isNaN(j22)) {
+          const h = 1e-5;
+          try {
+            const sR = getEvalScope(xVal + h, yVal);
+            const sL = getEvalScope(xVal - h, yVal);
+            const sU = getEvalScope(xVal, yVal + h);
+            const sD = getEvalScope(xVal, yVal - h);
+            j11 = (compiledF1.evaluate(sR) - compiledF1.evaluate(sL)) / (2 * h);
+            j12 = (compiledF1.evaluate(sU) - compiledF1.evaluate(sD)) / (2 * h);
+            j21 = (compiledF2.evaluate(sR) - compiledF2.evaluate(sL)) / (2 * h);
+            j22 = (compiledF2.evaluate(sU) - compiledF2.evaluate(sD)) / (2 * h);
+          } catch {
+            j11 = 0; j12 = 0; j21 = 0; j22 = 0;
+          }
+        }
+
+        let fx = 0, fy = 0;
+        if (z > 1e-6) {
+          fx = (f1 * j11 + f2 * j21) / z;
+          fy = (f1 * j12 + f2 * j22) / z;
+        }
+
+        return {
+          z, f1, f2, fx, fy,
+          isVector: true,
+          j11, j12, j21, j22
+        };
+      }
+
+      if (!compiledF) return { z: 0, fx: 0, fy: 0, f1: 0, f2: 0, isVector: false };
 
       let z = 0;
       try {
-        z = compiledF.evaluate(scope);
-        if (typeof z !== 'number' || isNaN(z)) z = 0;
+        const rawZ = compiledF.evaluate(scope);
+        z = typeof rawZ === 'number' && !isNaN(rawZ) ? rawZ : 0;
       } catch {
         z = 0;
       }
@@ -1325,7 +1531,7 @@
       if (typeof fx !== 'number' || isNaN(fx)) fx = 0;
       if (typeof fy !== 'number' || isNaN(fy)) fy = 0;
 
-      return { z, fx, fy };
+      return { z, fx, fy, f1: z, f2: 0, isVector: false };
     }
 
     function evaluateAffineAt(xVal, yVal) {
@@ -1364,17 +1570,33 @@
       const pt = evaluateAt(state.x0, state.y0);
       const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
 
-      const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
-      katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+      if (pt.isVector) {
+        const j11 = pt.j11 !== null ? pt.j11.toFixed(3) : "0.000";
+        const j12 = pt.j12 !== null ? pt.j12.toFixed(3) : "0.000";
+        const j21 = pt.j21 !== null ? pt.j21.toFixed(3) : "0.000";
+        const j22 = pt.j22 !== null ? pt.j22.toFixed(3) : "0.000";
+        const matrixNumericLatex = `\\mathbf{J}_F(\\mathbf{a}) = \\begin{bmatrix} ${j11} & ${j12} \\\\[4pt] ${j21} & ${j22} \\end{bmatrix}_{2 \\times 2}`;
+        katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+
+        document.getElementById("evalZ0").textContent = `||F|| = ${pt.z.toFixed(3)} [${pt.f1.toFixed(2)}, ${pt.f2.toFixed(2)}]`;
+        document.getElementById("resDfDx").textContent = `${j11}, ${j12}`;
+        document.getElementById("resDfDy").textContent = `${j21}, ${j22}`;
+        document.getElementById("gradColumnVecDisplay").textContent = `F(a) = ⟨${pt.f1.toFixed(3)}, ${pt.f2.toFixed(3)}⟩ᵀ`;
+        document.getElementById("resGradMag").textContent = pt.z.toFixed(4);
+      } else {
+        const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
+        katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+
+        document.getElementById("evalZ0").textContent = pt.z.toFixed(3);
+        document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
+        document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
+        document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
+        document.getElementById("resGradMag").textContent = mag.toFixed(4);
+      }
 
       const var1 = state.notation === 'x1x2' ? 'a₁' : 'x';
       const var2 = state.notation === 'x1x2' ? 'a₂' : 'y';
       document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
-      document.getElementById("evalZ0").textContent = pt.z.toFixed(3);
-      document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
-      document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
-      document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
-      document.getElementById("resGradMag").textContent = mag.toFixed(4);
 
       if (mag > 1e-4) {
         document.getElementById("resNormalVec").textContent = `⟨${(pt.fx / mag).toFixed(3)}, ${(pt.fy / mag).toFixed(3)}⟩`;
@@ -1482,6 +1704,7 @@
     function build2DTraces(mesh) {
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0);
+      const span = Math.abs(state.x_range[1] - state.x_range[0]) || 12;
 
       // 1. Background Level Sets
       if (state.show_all_contours) {
@@ -1501,10 +1724,49 @@
           colorbar: {
             len: 0.8, thickness: 12,
             tickfont: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', size: 10 },
-            title: { text: 'f(x₁,x₂)', font: { color: state.theme === 'dark' ? '#cbd5e1' : '#1e1b4b', size: 11 } }
+            title: { text: state.is_vector_func ? '||F||' : 'f(x₁,x₂)', font: { color: state.theme === 'dark' ? '#cbd5e1' : '#1e1b4b', size: 11 } }
           },
-          name: 'Isolines'
+          name: state.is_vector_func ? '||F|| Field' : 'Isolines'
         });
+      }
+
+      // 1b. Vector Field Flow Arrows when is_vector_func is active
+      if (state.is_vector_func && compiledF1 && compiledF2) {
+        const gridSteps = 9;
+        const qx = [], qy = [];
+        const xMin = state.x_range[0], xMax = state.x_range[1];
+        const yMin = state.y_range[0], yMax = state.y_range[1];
+        const stepX = (xMax - xMin) / (gridSteps + 1);
+        const stepY = (yMax - yMin) / (gridSteps + 1);
+        const arrowMaxLen = Math.min(stepX, stepY) * 0.72;
+
+        for (let ix = 1; ix <= gridSteps; ix++) {
+          const gx = xMin + ix * stepX;
+          for (let iy = 1; iy <= gridSteps; iy++) {
+            const gy = yMin + iy * stepY;
+            const ptG = evaluateAt(gx, gy);
+            const len = Math.sqrt(ptG.f1 * ptG.f1 + ptG.f2 * ptG.f2);
+            if (len > 1e-4) {
+              const sc = Math.min(1, arrowMaxLen / len);
+              const tipX = gx + ptG.f1 * sc;
+              const tipY = gy + ptG.f2 * sc;
+              qx.push(gx, tipX, null);
+              qy.push(gy, tipY, null);
+            }
+          }
+        }
+
+        if (qx.length > 0) {
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: qx,
+            y: qy,
+            line: { color: state.theme === 'dark' ? 'rgba(168, 85, 247, 0.45)' : 'rgba(124, 58, 237, 0.35)', width: 1.5 },
+            hoverinfo: 'none',
+            name: 'Vector Field Flow F'
+          });
+        }
       }
 
       // 2. Highlighted Level Set Curve
@@ -1544,8 +1806,6 @@
         const ny = pt0.fy / gradMag;
         const tx = -ny;
         const ty = nx;
-
-        const span = Math.abs(state.x_range[1] - state.x_range[0]) || 12;
         const lineLen = span * 0.45;
 
         // 4. Normal Line in 2D
@@ -1612,6 +1872,149 @@
             hoverinfo: 'none'
           });
         }
+      }
+
+      // 8. MATRIX Df GRAPHICAL REPRESENTATION AS ARROWS & PARALLELOGRAM
+      if (state.show_matrix_arrows) {
+        if (pt0.isVector) {
+          // For vector function: Column vectors of Jacobian J_F and vector F(a)
+          const jMax = Math.max(1, Math.abs(pt0.j11 || 0), Math.abs(pt0.j12 || 0), Math.abs(pt0.j21 || 0), Math.abs(pt0.j22 || 0));
+          const s = (span * 0.18) / jMax;
+
+          // Column 1 arrow: ∂F/∂x₁ = ⟨J₁₁, J₂₁⟩
+          const col1X = state.x0 + (pt0.j11 || 0) * s;
+          const col1Y = state.y0 + (pt0.j21 || 0) * s;
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers+text',
+            x: [state.x0, col1X],
+            y: [state.y0, col1Y],
+            text: ['', `∂F/∂x₁ [${(pt0.j11||0).toFixed(2)}, ${(pt0.j21||0).toFixed(2)}]ᵀ`],
+            textposition: 'top left',
+            textfont: { color: '#06b6d4', size: 11 },
+            line: { color: '#06b6d4', width: 3.5 },
+            marker: { size: [0, 8], color: '#06b6d4', symbol: 'arrow' },
+            name: 'Jacobian Col 1 (∂F/∂x₁)'
+          });
+
+          // Column 2 arrow: ∂F/∂x₂ = ⟨J₁₂, J₂₂⟩
+          const col2X = state.x0 + (pt0.j12 || 0) * s;
+          const col2Y = state.y0 + (pt0.j22 || 0) * s;
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers+text',
+            x: [state.x0, col2X],
+            y: [state.y0, col2Y],
+            text: ['', `∂F/∂x₂ [${(pt0.j12||0).toFixed(2)}, ${(pt0.j22||0).toFixed(2)}]ᵀ`],
+            textposition: 'top right',
+            textfont: { color: '#8b5cf6', size: 11 },
+            line: { color: '#8b5cf6', width: 3.5 },
+            marker: { size: [0, 8], color: '#8b5cf6', symbol: 'arrow' },
+            name: 'Jacobian Col 2 (∂F/∂x₂)'
+          });
+
+          // Vector value F(a) = ⟨F₁, F₂⟩
+          const fMag = Math.sqrt(pt0.f1 * pt0.f1 + pt0.f2 * pt0.f2);
+          if (fMag > 1e-4) {
+            const sf = (span * 0.22) / Math.max(1, fMag);
+            const tipFx = state.x0 + pt0.f1 * sf;
+            const tipFy = state.y0 + pt0.f2 * sf;
+            traces.push({
+              type: 'scatter',
+              mode: 'lines+markers+text',
+              x: [state.x0, tipFx],
+              y: [state.y0, tipFy],
+              text: ['', `F(a) = ⟨${pt0.f1.toFixed(2)}, ${pt0.f2.toFixed(2)}⟩`],
+              textposition: 'bottom right',
+              textfont: { color: '#ec4899', size: 11 },
+              line: { color: '#ec4899', width: 4 },
+              marker: { size: [0, 9], color: '#ec4899', symbol: 'arrow' },
+              name: 'Vector Value F(a)'
+            });
+          }
+        } else {
+          // For scalar field: Derivative components Df · e₁ and Df · e₂ and parallelogram
+          const s = gradMag > 0 ? (span * 0.2) / Math.max(1, gradMag) : (span * 0.05);
+          const c1X = state.x0 + pt0.fx * s;
+          const c1Y = state.y0;
+          const c2X = state.x0;
+          const c2Y = state.y0 + pt0.fy * s;
+          const sumX = state.x0 + pt0.fx * s;
+          const sumY = state.y0 + pt0.fy * s;
+
+          // Arrow along x1: Df · e₁ = ∂f/∂x₁ · e₁
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers+text',
+            x: [state.x0, c1X],
+            y: [state.y0, c1Y],
+            text: ['', `Df·e₁ = ${pt0.fx.toFixed(2)}`],
+            textposition: 'bottom right',
+            textfont: { color: '#06b6d4', size: 11 },
+            line: { color: '#06b6d4', width: 3.5 },
+            marker: { size: [0, 8], color: '#06b6d4', symbol: 'arrow' },
+            name: 'Df · e₁ (∂f/∂x₁)'
+          });
+
+          // Arrow along x2: Df · e₂ = ∂f/∂x₂ · e₂
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers+text',
+            x: [state.x0, c2X],
+            y: [state.y0, c2Y],
+            text: ['', `Df·e₂ = ${pt0.fy.toFixed(2)}`],
+            textposition: 'top left',
+            textfont: { color: '#8b5cf6', size: 11 },
+            line: { color: '#8b5cf6', width: 3.5 },
+            marker: { size: [0, 8], color: '#8b5cf6', symbol: 'arrow' },
+            name: 'Df · e₂ (∂f/∂x₂)'
+          });
+
+          // Dashed Parallelogram lines connecting components to gradient sum
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: [c1X, sumX, c2X],
+            y: [c1Y, sumY, c2Y],
+            line: { color: '#a78bfa', width: 2, dash: 'dot' },
+            showlegend: false,
+            hoverinfo: 'none'
+          });
+        }
+      }
+
+      // 9. DISPLACEMENT VECTOR Δx AND LINEAR APPROXIMATION
+      if (state.show_approx_arrow) {
+        const dx = state.test_x - state.x0;
+        const dy = state.test_y - state.y0;
+        const approxDelta = pt0.fx * dx + pt0.fy * dy;
+
+        // Test Point marker
+        traces.push({
+          type: 'scatter',
+          mode: 'markers+text',
+          x: [state.test_x],
+          y: [state.test_y],
+          text: [`x_test (${state.test_x.toFixed(2)}, ${state.test_y.toFixed(2)})`],
+          textposition: 'top right',
+          textfont: { color: '#ec4899', size: 11, family: 'sans-serif' },
+          marker: { size: 9, color: '#ec4899', symbol: 'diamond', line: { color: '#ffffff', width: 1.5 } },
+          name: 'Test Point x_test'
+        });
+
+        // Displacement vector Δx arrow from a to x_test
+        traces.push({
+          type: 'scatter',
+          mode: 'lines+markers+text',
+          x: [state.x0, state.test_x],
+          y: [state.y0, state.test_y],
+          text: ['', `Δx: Df·Δx ≈ ${approxDelta.toFixed(3)}`],
+          textposition: 'top center',
+          textfont: { color: '#ec4899', size: 11 },
+          line: { color: '#ec4899', width: 2.5, dash: 'dash' },
+          marker: { size: [0, 8], color: '#ec4899', symbol: 'arrow' },
+          name: 'Displacement Δx (x_test - a)'
+        });
       }
 
       return traces;
@@ -1724,6 +2127,61 @@
           line: { color: '#f59e0b', width: 7 },
           marker: { size: [0, 6], color: '#f59e0b', symbol: 'diamond' },
           name: '3D Gradient ∇f'
+        });
+      }
+
+      // 3D Tangent Plane Basis Vectors (T₁, T₂)
+      if (state.show_3d_tangent_basis) {
+        const L = 2.2;
+        // T1 = <1, 0, fx>
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+markers+text',
+          x: [state.x0, state.x0 + L],
+          y: [state.y0, state.y0],
+          z: [pt0.z, pt0.z + L * pt0.fx],
+          text: ['', 'T₁ = ⟨1, 0, fx⟩'],
+          textposition: 'top right',
+          textfont: { color: '#06b6d4', size: 10 },
+          line: { color: '#06b6d4', width: 6 },
+          marker: { size: [0, 5], color: '#06b6d4', symbol: 'diamond' },
+          name: 'Tangent Basis T₁'
+        });
+
+        // T2 = <0, 1, fy>
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+markers+text',
+          x: [state.x0, state.x0],
+          y: [state.y0, state.y0 + L],
+          z: [pt0.z, pt0.z + L * pt0.fy],
+          text: ['', 'T₂ = ⟨0, 1, fy⟩'],
+          textposition: 'top left',
+          textfont: { color: '#8b5cf6', size: 10 },
+          line: { color: '#8b5cf6', width: 6 },
+          marker: { size: [0, 5], color: '#8b5cf6', symbol: 'diamond' },
+          name: 'Tangent Basis T₂'
+        });
+      }
+
+      // 3D Linearization Error Rod |f(x) - g(x)| at test point
+      if (state.show_error_rod) {
+        const testPt = evaluateAt(state.test_x, state.test_y);
+        const approxVal = evaluateAffineAt(state.test_x, state.test_y);
+        const err = Math.abs(testPt.z - approxVal);
+
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+markers+text',
+          x: [state.test_x, state.test_x],
+          y: [state.test_y, state.test_y],
+          z: [approxVal, testPt.z],
+          text: [`Affine g = ${approxVal.toFixed(2)}`, `Exact f = ${testPt.z.toFixed(2)} (Err: ${err.toFixed(3)})`],
+          textposition: 'top center',
+          textfont: { color: '#f59e0b', size: 10 },
+          line: { color: '#f59e0b', width: 7 },
+          marker: { size: 6, color: '#f59e0b', symbol: 'circle' },
+          name: '3D Error Rod |f - g|'
         });
       }
 
@@ -2159,6 +2617,22 @@
         state.show_all_contours = e.target.checked;
         renderPlots(true);
       });
+      document.getElementById('showMatrixArrows').addEventListener('change', (e) => {
+        state.show_matrix_arrows = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showApproxVector').addEventListener('change', (e) => {
+        state.show_approx_arrow = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('show3DTangentBasis').addEventListener('change', (e) => {
+        state.show_3d_tangent_basis = e.target.checked;
+        renderPlots(true);
+      });
+      document.getElementById('showErrorRod').addEventListener('change', (e) => {
+        state.show_error_rod = e.target.checked;
+        renderPlots(true);
+      });
 
       // Formula input
       let debounce = null;
@@ -2522,6 +2996,169 @@
       return html;
     }
 
+    function showToast(msg) {
+      const toast = document.getElementById("graphActionToast");
+      const text = document.getElementById("graphActionToastText");
+      if (!toast || !text) return;
+      text.textContent = msg;
+      toast.classList.remove("opacity-0", "translate-y-[-20px]", "pointer-events-none");
+      toast.classList.add("opacity-100", "translate-y-0");
+      setTimeout(() => {
+        toast.classList.remove("opacity-100", "translate-y-0");
+        toast.classList.add("opacity-0", "translate-y-[-20px]", "pointer-events-none");
+      }, 3500);
+    }
+
+    function applyGraphAction(action) {
+      if (!action || typeof action !== 'object') return false;
+      let applied = false;
+      const changes = [];
+
+      const expr = action.f || action.expr;
+      if (expr && typeof expr === 'string') {
+        state.f_expr_raw = expr;
+        const fInp = document.getElementById("functionInput");
+        if (fInp) fInp.value = expr;
+        applied = true;
+        changes.push(`f = ${expr}`);
+      }
+
+      if (action.c !== undefined && !isNaN(Number(action.c))) {
+        state.level_c = parseFloat(action.c);
+        const cVal = document.getElementById("levelValueC");
+        const cSld = document.getElementById("levelSliderC");
+        if (cVal) cVal.value = state.level_c.toFixed(1);
+        if (cSld) cSld.value = state.level_c;
+        applied = true;
+        changes.push(`c = ${state.level_c}`);
+      }
+
+      if (action.r !== undefined && !isNaN(Number(action.r))) {
+        state.radius_r = parseFloat(action.r);
+        const rInp = document.getElementById("radiusInputR");
+        if (rInp) rInp.value = state.radius_r.toFixed(2);
+      } else if (state.level_c >= 0) {
+        state.radius_r = Math.sqrt(state.level_c);
+        const rInp = document.getElementById("radiusInputR");
+        if (rInp) rInp.value = state.radius_r.toFixed(2);
+      }
+
+      const pointA = action.point_a || action.a;
+      if (Array.isArray(pointA) && pointA.length >= 2) {
+        state.x0 = parseFloat(pointA[0]);
+        state.y0 = parseFloat(pointA[1]);
+        const x0Inp = document.getElementById("x0Input");
+        const y0Inp = document.getElementById("y0Input");
+        const x0Sld = document.getElementById("x0Slider");
+        const y0Sld = document.getElementById("y0Slider");
+        if (x0Inp) x0Inp.value = state.x0.toFixed(2);
+        if (y0Inp) y0Inp.value = state.y0.toFixed(2);
+        if (x0Sld) x0Sld.value = state.x0;
+        if (y0Sld) y0Sld.value = state.y0;
+        applied = true;
+        changes.push(`a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`);
+      }
+
+      const vMode = action.mode || action.view_mode;
+      if (vMode && ['2d', '3d', 'split'].includes(vMode)) {
+        setViewMode(vMode);
+        applied = true;
+      }
+
+      const xRange = action.xr || action.x_range;
+      if (Array.isArray(xRange) && xRange.length === 2) {
+        state.x_range = [parseFloat(xRange[0]), parseFloat(xRange[1])];
+        applied = true;
+      }
+      const yRange = action.yr || action.y_range;
+      if (Array.isArray(yRange) && yRange.length === 2) {
+        state.y_range = [parseFloat(yRange[0]), parseFloat(yRange[1])];
+        applied = true;
+      }
+
+      if (action.toggles && typeof action.toggles === 'object') {
+        const t = action.toggles;
+        if (t.show_gradient !== undefined) {
+          state.show_gradient = Boolean(t.show_gradient);
+          const el = document.getElementById('showGradientVector');
+          if (el) el.checked = state.show_gradient;
+        }
+        if (t.show_matrix_arrows !== undefined) {
+          state.show_matrix_arrows = Boolean(t.show_matrix_arrows);
+          const el = document.getElementById('showMatrixArrows');
+          if (el) el.checked = state.show_matrix_arrows;
+        }
+        if (t.show_normal_line !== undefined) {
+          state.show_normal_line = Boolean(t.show_normal_line);
+          const el = document.getElementById('showNormalLine');
+          if (el) el.checked = state.show_normal_line;
+        }
+        if (t.show_tangent_line !== undefined) {
+          state.show_tangent_line = Boolean(t.show_tangent_line);
+          const el = document.getElementById('showTangentLine');
+          if (el) el.checked = state.show_tangent_line;
+        }
+        if (t.show_affine_plane !== undefined) {
+          state.show_affine_plane = Boolean(t.show_affine_plane);
+          const el = document.getElementById('showAffinePlane');
+          if (el) el.checked = state.show_affine_plane;
+        }
+      }
+
+      if (applied) {
+        compileExpressions();
+        syncDomainInputs();
+        updateCalculusCalculations();
+        updateAffineCalculations();
+        renderPlots(false);
+
+        const toastMsg = action.description || action.summary || `Applied: ${changes.join(', ')}`;
+        showToast(toastMsg);
+      }
+      return applied;
+    }
+
+    window.reapplyAiAction = function(encoded) {
+      try {
+        const action = JSON.parse(decodeURIComponent(encoded));
+        applyGraphAction(action);
+      } catch (err) {
+        console.warn("Could not reapply AI action:", err);
+      }
+    };
+
+    function extractAndApplyGraphAction(rawText) {
+      let cleanText = rawText;
+      let matchedAction = null;
+
+      const actionBlockRegex = /```graph_action\s*([\s\S]*?)```/i;
+      const match = rawText.match(actionBlockRegex);
+      if (match) {
+        try {
+          matchedAction = JSON.parse(match[1].trim());
+        } catch (e) {
+          console.warn("Failed to parse graph_action block:", e);
+        }
+      } else {
+        const jsonBlockRegex = /```json\s*(\{[\s\S]*?"action"\s*:\s*"update_graph"[\s\S]*?\})```/i;
+        const jsonMatch = rawText.match(jsonBlockRegex);
+        if (jsonMatch) {
+          try {
+            matchedAction = JSON.parse(jsonMatch[1].trim());
+          } catch (e) {}
+        }
+      }
+
+      if (matchedAction) {
+        applyGraphAction(matchedAction);
+        const encoded = encodeURIComponent(JSON.stringify(matchedAction));
+        const badgeHtml = `\n\n<div class="mt-2.5 p-3 rounded-xl bg-violet-100/90 dark:bg-purple-900/60 border border-violet-300 dark:border-purple-700 space-y-1.5 shadow-sm text-xs"><div class="flex items-center justify-between"><span class="font-bold text-violet-900 dark:text-cyan-300 flex items-center space-x-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i><span>⚡ Graph Parameters Auto-Applied!</span></span><button onclick="reapplyAiAction('${encoded}')" class="px-2 py-0.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-[10px] font-bold transition">Re-apply</button></div><div class="text-[11px] text-slate-700 dark:text-purple-200 font-mono"><strong>f:</strong> ${matchedAction.f || state.f_expr_raw} | <strong>a:</strong> (${matchedAction.point_a ? matchedAction.point_a.join(', ') : `${state.x0}, ${state.y0}`}) | <strong>c:</strong> ${matchedAction.c !== undefined ? matchedAction.c : state.level_c}</div></div>`;
+        cleanText = rawText.replace(actionBlockRegex, '').replace(/```json\s*(\{[\s\S]*?"action"\s*:\s*"update_graph"[\s\S]*?\})```/i, '') + badgeHtml;
+      }
+
+      return { cleanText, action: matchedAction };
+    }
+
     function generateLocalAIResponse(query, ctx) {
       const q = query.toLowerCase();
       const v1 = ctx.v1;
@@ -2532,6 +3169,146 @@
       const fx = ctx.derivatives.fx.toFixed(3);
       const fy = ctx.derivatives.fy.toFixed(3);
       const mag = ctx.gradient_magnitude.toFixed(3);
+
+      // 1. Request to create ellipse
+      if (q.includes('ellipse') || q.includes('еллипс') || q.includes('эллипс')) {
+        return `### 🪐 Ellipse Level Set & Quadratic Form
+
+An **ellipse** in the $(${v1}, ${v2})$ plane is represented by the quadratic equation:
+$$\\frac{${v1}^2}{A^2} + \\frac{${v2}^2}{B^2} = c$$
+
+Configured here with semi-axes $A = 2$ and $B = 3$:
+$$f(${v1}, ${v2}) = \\frac{${v1}^2}{4} + \\frac{${v2}^2}{9}$$
+
+At level value $c = 1.0$, the level curve $f^{-1}(1)$ forms the exact ellipse with horizontal radius $2$ and vertical radius $3$.
+- **Derivative Matrix:** $\\mathbf{D}f(${v1}, ${v2}) = \\begin{bmatrix} \\frac{${v1}}{2} & \\frac{2${v2}}{9} \\end{bmatrix}_{1 \\times 2}$
+- **Gradient Vector:** $\\nabla f(\\mathbf{a})$ points outward along the normal line, perpendicular ($90^\\circ$) to the tangent line of the ellipse!
+
+I have automatically inserted these parameters into your graph inputs!
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "Ellipse with semi-axes A=2, B=3 at level c=1",
+  "f": "x1^2 / 4 + x2^2 / 9",
+  "c": 1.0,
+  "point_a": [1.0, 1.5],
+  "mode": "split",
+  "xr": [-6, 6],
+  "yr": [-6, 6]
+}
+\`\`\``;
+      }
+
+      // 2. Request to create saddle
+      if (q.includes('saddle') || q.includes('седло') || q.includes('гипербол')) {
+        return `### 🐎 Saddle Surface (Hyperbolic Paraboloid)
+
+A **hyperbolic paraboloid** is the quintessential saddle surface:
+$$f(${v1}, ${v2}) = ${v1}^2 - ${v2}^2$$
+
+- Along $x_2 = 0$, the trace is an upward parabola $z = ${v1}^2$.
+- Along $x_1 = 0$, the trace is a downward parabola $z = -${v2}^2$.
+- At $(0, 0)$, the Hessian determinant is $D = (2)(-2) - 0 = -4 < 0$, confirming a **saddle point**.
+- The level curves ${v1}^2 - ${v2}^2 = c$ are hyperbolas asymptotic to $x_1 = \\pm x_2$.
+
+I have automatically inserted these parameters into your graph inputs!
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "Saddle Surface x1^2 - x2^2",
+  "f": "x1^2 - x2^2",
+  "c": 1.0,
+  "point_a": [1.414, 1.0],
+  "mode": "split",
+  "xr": [-5, 5],
+  "yr": [-5, 5]
+}
+\`\`\``;
+      }
+
+      // 3. Request to create circle
+      if (q.includes('circle') || q.includes('круг') || q.includes('окружност')) {
+        return `### ⭕ Circle Level Set $x_1^2 + x_2^2 = c$
+
+A **circle** with radius $r = 2$ corresponds to:
+$$f(${v1}, ${v2}) = ${v1}^2 + ${v2}^2 = r^2 = 4$$
+
+- Level set constant: $c = r^2 = 4.0$.
+- Evaluation point $\\mathbf{a} = (2.0, 0.0)$ lies directly on the circle.
+- Derivative row matrix: $\\mathbf{D}f(\\mathbf{a}) = [4.0, 0.0]$.
+- The gradient vector $\\nabla f(\\mathbf{a})$ points radially outward at a strictly $90^\\circ$ angle to the circle tangent!
+
+I have automatically inserted these parameters into your graph inputs!
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "Circle with radius r=2 (c=4)",
+  "f": "x1^2 + x2^2",
+  "c": 4.0,
+  "r": 2.0,
+  "point_a": [2.0, 0.0],
+  "mode": "2d",
+  "xr": [-6, 6],
+  "yr": [-6, 6]
+}
+\`\`\``;
+      }
+
+      // 4. Request to create vector field
+      if (q.includes('vector field') || q.includes('векторное поле') || q.includes('[-x2') || q.includes('[x1;')) {
+        return `### 🌀 2D Vector Field $\\mathbf{F}(x_1, x_2) = [-x_2, x_1]^T$
+
+This represents a classic **rotational vector field** (counterclockwise circulation):
+$$\\mathbf{F}(x_1, x_2) = \\begin{bmatrix} -x_2 \\\\[2pt] x_1 \\end{bmatrix}$$
+
+- **$2 \\times 2$ Jacobian Matrix:**
+  $$\\mathbf{J}_F(x_1, x_2) = \\begin{bmatrix} \\frac{\\partial F_1}{\\partial x_1} & \\frac{\\partial F_1}{\\partial x_2} \\\\[4pt] \\frac{\\partial F_2}{\\partial x_1} & \\frac{\\partial F_2}{\\partial x_2} \\end{bmatrix} = \\begin{bmatrix} 0 & -1 \\\\[4pt] 1 & 0 \\end{bmatrix}_{2 \\times 2}$$
+- The column vectors of $\\mathbf{J}_F$ are depicted as basis arrows on the canvas, alongside the vector field flow!
+
+I have automatically inserted this vector field into your graph inputs!
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "2D Rotational Vector Field [-x2, x1]",
+  "f": "[-x2, x1]",
+  "c": 2.0,
+  "point_a": [1.0, 1.0],
+  "mode": "split",
+  "xr": [-5, 5],
+  "yr": [-5, 5]
+}
+\`\`\``;
+      }
+
+      // 5. Request to create paraboloid
+      if (q.includes('paraboloid') || q.includes('параболоид')) {
+        return `### 🥣 Elliptic Paraboloid $z = ${v1}^2 + ${v2}^2$
+
+The standard elliptic paraboloid forms a circular bowl opening upwards:
+$$f(${v1}, ${v2}) = ${v1}^2 + ${v2}^2$$
+
+- Global minimum at $(0, 0)$ with $f(0, 0) = 0$.
+- Level curves are concentric circles of radius $r = \\sqrt{c}$.
+
+I have automatically inserted these parameters into your graph inputs!
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "Elliptic Paraboloid x1^2 + x2^2",
+  "f": "x1^2 + x2^2",
+  "c": 4.0,
+  "point_a": [1.0, 1.732],
+  "mode": "split",
+  "xr": [-5, 5],
+  "yr": [-5, 5]
+}
+\`\`\``;
+      }
 
       // Gradient
       if (q.includes('gradient') || q.includes('grad') || q.includes('rate of increase') || q.includes('direction') || q.includes('градиент')) {
@@ -2673,11 +3450,12 @@ Here is the real-time mathematical snapshot from the graph:
 - **Affine Plane:** $g(\\mathbf{x}) = ${fa} + ${fx}(${v1} - ${a1}) + ${fy}(${v2} - ${a2})$
 
 💬 *Suggested Questions:*
+- "Make me an ellipse"
+- "Show me a saddle surface"
+- "Create a rotational vector field [-x2, x1]"
 - "Explain the gradient at this point"
 - "What does the affine function g(x) represent?"
-- "Why is the normal perpendicular at 90 degrees?"
-- "Check point a for local extrema (Hessian)"
-- "How do I interpret the level set c?"`;
+- "Why is the normal perpendicular at 90 degrees?"`;
     }
 
     async function checkBackendAiStatus() {
@@ -2754,7 +3532,26 @@ Current live graph state:
 Instructions:
 1. Answer the user's question directly in English using LaTeX math equations ($...$ and $$...$$).
 2. Ground your answer on the exact function and numeric values provided in the snapshot.
-3. Be concise, mathematically accurate, and educational.`;
+3. Be concise, mathematically accurate, and educational.
+4. ACTION EXECUTION: If the user asks to create, plot, or change a function or shape (e.g. "make an ellipse", "show a saddle", "create a circle with radius 2", "plot [-x2, x1]", "set point a to (1, 2)"), in addition to your mathematical explanation in English, YOU MUST output a JSON block at the very end formatted EXACTLY as:
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "Short description of what was set",
+  "f": "mathematical expression for f(x1, x2) or vector [f1, f2]",
+  "c": 1.0,
+  "r": 1.0,
+  "point_a": [1.0, 1.5],
+  "mode": "split",
+  "xr": [-6, 6],
+  "yr": [-6, 6],
+  "toggles": {
+    "show_gradient": true,
+    "show_matrix_arrows": true
+  }
+}
+\`\`\`
+The application will automatically parse this JSON and insert the values into the web page inputs!`;
 
       // Models to try in sequence: gemini-3.5-flash-lite first as requested by user
       const candidateModels = [
@@ -2863,7 +3660,8 @@ Instructions:
       showAiTypingIndicator();
       const answer = await askAiAssistant(text.trim());
       removeAiTypingIndicator();
-      appendChatMessage('ai', answer);
+      const { cleanText } = extractAndApplyGraphAction(answer);
+      appendChatMessage('ai', cleanText);
     }
 
     function updateAiContextStrip() {

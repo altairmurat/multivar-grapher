@@ -68,7 +68,14 @@ def test_index_html_structure():
         "aiChatSendBtn",
         "loadStateFromHash",
         "checkBackendAiStatus",
-        "renderConnectedBadge"
+        "renderConnectedBadge",
+        "parseVectorComponents",
+        "showMatrixArrows",
+        "showApproxVector",
+        "show3DTangentBasis",
+        "showErrorRod",
+        "applyGraphAction",
+        "graphActionToast"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"
