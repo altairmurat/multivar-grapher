@@ -70,10 +70,14 @@ def test_index_html_structure():
         "checkBackendAiStatus",
         "renderConnectedBadge",
         "parseVectorComponents",
-        "showMatrixArrows",
-        "showApproxVector",
-        "show3DTangentBasis",
-        "showErrorRod",
+        "parseMatrixOrVector",
+        "katexHessianSymbolic",
+        "katexHessianNumeric",
+        "resHessianDet",
+        "resHessianTrace",
+        "coordA3Row",
+        "z0Input",
+        "dfdx3_card",
         "applyGraphAction",
         "graphActionToast"
     ]

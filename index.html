@@ -147,6 +147,9 @@
         <option value="circle_example">🎯 Circle f = x₁² + x₂² (r=2, c=4)</option>
         <option value="ellipse">Ellipse f = x₁²/3 + x₂² (c=6)</option>
         <option value="saddle">Hyperbolic Saddle f = x₁² - x₂²</option>
+        <option value="r3_matrix">Matrix in ℝ³ [1, 2, 3; 4, 5, 6; 7, 8, 9]</option>
+        <option value="r3_vector">Vector in ℝ³ [x₁; x₂; x₃]</option>
+        <option value="r3_sphere">Sphere in ℝ³ x₁² + x₂² + x₃² (c=4)</option>
         <option value="ripple">Water Droplet Ripple (Sinc)</option>
         <option value="gaussian">Gaussian Bell Wave Packet</option>
         <option value="egg_carton">Egg Carton Grid</option>
@@ -196,7 +199,7 @@
         </button>
         <button id="tabNavCalculus" class="tab-btn py-1.5 px-1 rounded-lg bg-white dark:bg-purple-900/30 text-slate-600 dark:text-purple-300 hover:text-violet-700 dark:hover:text-white border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="grid" class="w-3.5 h-3.5 text-amber-500"></i>
-          <span>Matrix Df</span>
+          <span>Matrix & Hessian</span>
         </button>
         <button id="tabNavFunctions" class="tab-btn py-1.5 px-1 rounded-lg bg-white dark:bg-purple-900/30 text-slate-600 dark:text-purple-300 hover:text-violet-700 dark:hover:text-white border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-500"></i>
@@ -256,7 +259,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-1.5 text-xs font-bold text-violet-900 dark:text-purple-200">
                 <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i>
-                <span>Point of Tangency a = (a₁, a₂)</span>
+                <span id="pointOfTangencyLabel">Point of Tangency a = (a₁, a₂)</span>
               </div>
               <button id="snapToLevelSetBtn" class="px-2.5 py-1 bg-violet-100 dark:bg-purple-900 hover:bg-violet-200 dark:hover:bg-purple-800 text-violet-800 dark:text-purple-200 rounded-lg text-[11px] font-semibold flex items-center space-x-1 transition shadow-sm border border-violet-300 dark:border-purple-700" title="Project point 'a' directly onto the level curve f=c">
                 <i data-lucide="crosshair" class="w-3 h-3 text-violet-600 dark:text-cyan-400"></i>
@@ -283,6 +286,16 @@
                 </div>
                 <input type="range" id="y0Slider" min="-10" max="10" step="0.05" value="0" class="w-full">
               </div>
+            </div>
+
+            <!-- a3 coordinate input (Visible in R3 / 3-variable mode) -->
+            <div id="coordA3Row" class="space-y-1 text-xs hidden pt-1 border-t border-violet-100 dark:border-purple-900/40">
+              <label for="z0Input" class="text-[11px] font-mono text-slate-500 dark:text-purple-300 block" id="labelX3">a₃ coordinate (x₃ / z):</label>
+              <div class="flex items-center bg-violet-50/50 dark:bg-purple-950 border border-violet-200 dark:border-purple-800 rounded-lg overflow-hidden focus-within:border-violet-500">
+                <span class="px-2 font-mono text-slate-400 text-xs">a₃ =</span>
+                <input type="number" id="z0Input" value="0.0" step="0.1" class="w-full bg-transparent px-1 py-1.5 font-mono text-slate-900 dark:text-white text-xs focus:outline-none font-bold">
+              </div>
+              <input type="range" id="z0Slider" min="-10" max="10" step="0.05" value="0" class="w-full">
             </div>
 
             <!-- Point status relative to level set -->
@@ -507,6 +520,18 @@
                   <div id="resDfDy" class="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">0.0000</div>
                 </div>
               </div>
+
+              <!-- Third partial derivative ∂f/∂x₃ for ℝ³ -->
+              <div id="dfdx3_card" class="p-2.5 bg-violet-50/60 dark:bg-purple-950 rounded-xl border border-violet-100 dark:border-purple-900/40 flex items-center justify-between hidden">
+                <div>
+                  <div class="text-[10px] text-violet-700 dark:text-fuchsia-400 font-bold" id="dfdx3_title">∂f / ∂x₃ :</div>
+                  <div id="katexDfDz" class="text-slate-800 dark:text-slate-200 font-mono text-xs"></div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-400 font-sans">At a:</div>
+                  <div id="resDfDz" class="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">0.0000</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -530,37 +555,51 @@
             </div>
           </div>
 
-          <!-- Matrix Graphics & Vector Visualization Toggles -->
-          <div class="bg-white dark:bg-purple-950/40 p-4 rounded-2xl border border-violet-200/80 dark:border-purple-800/60 space-y-3 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-900 dark:text-purple-200 flex items-center space-x-1.5">
-              <i data-lucide="compass" class="w-3.5 h-3.5 text-violet-600 dark:text-cyan-400"></i>
-              <span>Matrix Df Visual Vectors on Graph</span>
-            </h3>
+          <!-- Hessian Matrix & 2nd Derivative Test Card -->
+          <div class="bg-gradient-to-br from-purple-50/70 via-white to-violet-50/50 dark:from-[#130b2e] dark:to-[#0a051d] p-4 rounded-2xl border border-violet-200 dark:border-purple-800/80 space-y-3.5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-violet-900 dark:text-purple-200">
+                <i data-lucide="layers" class="w-4 h-4 text-violet-600 dark:text-purple-400"></i>
+                <span id="hessianTitle">Hessian Matrix ∇²f / Hf</span>
+              </div>
+              <span id="hessianClassificationBadge" class="text-[10px] px-2.5 py-0.5 rounded-full bg-violet-100 dark:bg-purple-900 text-violet-800 dark:text-purple-200 border border-violet-300 dark:border-purple-700 font-bold">Local Extrema</span>
+            </div>
 
-            <div class="space-y-2 text-xs">
-              <!-- Matrix Component Vectors -->
-              <label class="flex items-center space-x-2 text-slate-700 dark:text-emerald-300 cursor-pointer font-medium hover:text-emerald-600 transition">
-                <input type="checkbox" id="showMatrixArrows" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-emerald-500 focus:ring-emerald-500">
-                <span>Show Df Basis Arrows (∂f/∂x₁·e₁, ∂f/∂x₂·e₂) & Parallelogram</span>
-              </label>
+            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              The <strong>Hessian Matrix</strong> collects all second-order partial derivatives <span class="font-mono text-violet-700 dark:text-purple-300 font-semibold">H_{ij} = ∂²f / (∂x_i ∂x_j)</span> to characterize surface curvature and extrema:
+            </p>
 
-              <!-- Displacement & Linear Approximation Vector -->
-              <label class="flex items-center space-x-2 text-slate-700 dark:text-pink-300 cursor-pointer font-medium hover:text-pink-600 transition">
-                <input type="checkbox" id="showApproxVector" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-pink-500 focus:ring-pink-500">
-                <span>Show Displacement Vector Δx & Action Df · Δx on Test Point</span>
-              </label>
+            <!-- Symbolic Hessian Matrix -->
+            <div class="p-3 bg-white dark:bg-purple-950/70 rounded-xl border border-violet-100 dark:border-purple-900/40 space-y-1 shadow-inner">
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Symbolic Hessian Matrix:</div>
+              <div id="katexHessianSymbolic" class="overflow-x-auto text-sm text-slate-900 dark:text-white py-1"></div>
+            </div>
 
-              <!-- 3D Tangent Basis Vectors -->
-              <label class="flex items-center space-x-2 text-slate-700 dark:text-cyan-300 cursor-pointer font-medium hover:text-cyan-600 transition">
-                <input type="checkbox" id="show3DTangentBasis" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-cyan-500 focus:ring-cyan-500">
-                <span>Show 3D Tangent Plane Basis Vectors (T₁, T₂)</span>
-              </label>
+            <!-- Evaluated Hessian Matrix at Point a -->
+            <div class="p-3 bg-white dark:bg-purple-950/70 rounded-xl border border-violet-200 dark:border-purple-800/60 space-y-1 shadow-inner">
+              <div class="flex items-center justify-between text-[10px] font-bold text-violet-700 dark:text-purple-300 uppercase tracking-wider">
+                <span>Evaluated at Point a:</span>
+                <span id="hessianEvalPointLabel" class="font-mono text-slate-500 dark:text-slate-400">a = (2.00, 0.00)</span>
+              </div>
+              <div id="katexHessianNumeric" class="overflow-x-auto text-sm text-violet-950 dark:text-purple-100 py-1 font-bold"></div>
+            </div>
 
-              <!-- 3D Error Rod -->
-              <label class="flex items-center space-x-2 text-slate-700 dark:text-amber-300 cursor-pointer font-medium hover:text-amber-600 transition">
-                <input type="checkbox" id="showErrorRod" checked class="rounded bg-white dark:bg-purple-950 border-violet-300 dark:border-purple-700 text-amber-500 focus:ring-amber-500">
-                <span>Show 3D Approximation Error Rod |f(x) - g(x)|</span>
-              </label>
+            <!-- Hessian Metrics: Determinant, Trace / Laplacian -->
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div class="p-2.5 bg-violet-50/70 dark:bg-purple-950/60 rounded-xl border border-violet-100 dark:border-purple-900/40">
+                <span class="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-sans font-bold">Determinant D = det(Hf):</span>
+                <span id="resHessianDet" class="font-bold text-violet-700 dark:text-purple-300 text-sm">4.0000</span>
+              </div>
+              <div class="p-2.5 bg-violet-50/70 dark:bg-purple-950/60 rounded-xl border border-violet-100 dark:border-purple-900/40">
+                <span class="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-sans font-bold">Trace Tr(Hf) = Δf (Laplacian):</span>
+                <span id="resHessianTrace" class="font-bold text-cyan-600 dark:text-cyan-400 text-sm">4.0000</span>
+              </div>
+            </div>
+
+            <!-- 2nd-Order Taylor Approximation Formula -->
+            <div class="p-2.5 bg-violet-50/50 dark:bg-purple-950/40 rounded-xl border border-violet-100 dark:border-purple-900/30 text-[11px] space-y-1">
+              <span class="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-sans font-bold">2nd-Order Taylor Polynomial T₂(x):</span>
+              <div id="katexTaylor2Formula" class="overflow-x-auto text-violet-900 dark:text-purple-200 font-mono text-xs"></div>
             </div>
           </div>
 
@@ -595,9 +634,11 @@
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 + x2^2</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 / 4 + x2^2 / 9</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 - x2^2</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">x1^2 + x2^2 + x3^2</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[x1; x2; x3]</button>
+              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[1, 2, 3; 4, 5, 6; 7, 8, 9]</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">sin(x1) * cos(x2)</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[-x2, x1]</button>
-              <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[x1; x2]</button>
             </div>
           </div>
 
@@ -980,6 +1021,30 @@
             The gradient <span class="font-mono text-amber-700 dark:text-amber-300 font-bold">∇f(a) = (Df)ᵀ</span> is the transpose (a column vector in <span class="font-mono">ℝⁿ</span>) pointing in the direction of steepest ascent.
           </p>
         </div>
+
+        <div class="p-4 bg-violet-50/60 dark:bg-purple-950/40 rounded-2xl border border-violet-100 dark:border-purple-900/40 space-y-1.5">
+          <h4 class="font-bold text-violet-900 dark:text-purple-300 text-sm flex items-center space-x-1.5">
+            <span>4. The Hessian Matrix Hf & Second Derivative Test</span>
+            <span class="text-[10px] font-mono text-slate-500">∇²f</span>
+          </h4>
+          <p>
+            The <strong>Hessian Matrix</strong> <span class="font-mono text-violet-700 dark:text-purple-300 font-semibold">\mathbf{H}f(\mathbf{x}) = [\frac{\partial^2 f}{\partial x_i \partial x_j}]_{n \times n}</span> collects all second-order partial derivatives. By Schwarz's theorem, it is symmetric (<span class="font-mono">f_{ij} = f_{ji}</span>) for smooth functions.
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-500 dark:text-slate-400">
+            <li><strong>Trace / Laplacian:</strong> The trace <span class="font-mono text-cyan-600 dark:text-cyan-400 font-semibold">\text{Tr}(\mathbf{H}f) = \sum f_{ii} = \Delta f</span> is the Laplacian of $f$.</li>
+            <li><strong>Second Derivative Test in ℝ²:</strong> With determinant <span class="font-mono text-violet-700 dark:text-purple-300 font-bold">D = \det(\mathbf{H}f) = f_{11}f_{22} - (f_{12})^2</span>:
+              <ul class="list-circle list-inside ml-4 space-y-0.5">
+                <li><span class="text-emerald-600 dark:text-emerald-400 font-bold">D > 0 and f₁₁ > 0:</span> Local Minimum (strictly convex, bowl up)</li>
+                <li><span class="text-rose-600 dark:text-rose-400 font-bold">D > 0 and f₁₁ < 0:</span> Local Maximum (strictly concave, bowl down)</li>
+                <li><span class="text-amber-600 dark:text-amber-400 font-bold">D < 0:</span> Saddle Point (indefinite quadratic form)</li>
+                <li><span class="text-slate-400 font-bold">D = 0:</span> Inconclusive</li>
+              </ul>
+            </li>
+            <li><strong>2nd-Order Taylor Polynomial:</strong>
+              <div class="font-mono text-violet-800 dark:text-purple-200 mt-1">T_2(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x}-\mathbf{a}) + \frac{1}{2}(\mathbf{x}-\mathbf{a})^T \mathbf{H}f(\mathbf{a})(\mathbf{x}-\mathbf{a})</div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -1038,6 +1103,8 @@
       radius_r: 2.0,
       x0: 2.0,
       y0: 0.0,
+      z0: 0.0,
+      dim: 2,
       test_x: 2.1,
       test_y: 0.2,
       x_range: [-6, 6],
@@ -1052,59 +1119,76 @@
       show_affine_plane: true,
       show_right_angle: true,
       show_all_contours: true,
-      show_matrix_arrows: true,
-      show_approx_arrow: true,
-      show_3d_tangent_basis: true,
-      show_error_rod: true,
+      show_matrix_arrows: false,
+      show_approx_arrow: false,
+      show_3d_tangent_basis: false,
+      show_error_rod: false,
       is_vector_func: false,
+      is_matrix_input: false,
       f1_expr_raw: '',
-      f2_expr_raw: ''
+      f2_expr_raw: '',
+      f3_expr_raw: ''
     };
 
     const presets = {
       circle_example: {
         expr: "x1^2 + x2^2",
-        c: 4.0, r: 2.0, x0: 2.0, y0: 0.0,
+        c: 4.0, r: 2.0, x0: 2.0, y0: 0.0, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: '2d'
       },
       ellipse: {
         expr: "x1^2 / 4 + x2^2 / 9",
-        c: 1.0, r: 1.0, x0: 1.0, y0: 1.5,
+        c: 1.0, r: 1.0, x0: 1.0, y0: 1.5, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: 'split'
       },
       saddle: {
         expr: "x1^2 - x2^2",
-        c: 1.0, r: 1.0, x0: 1.414, y0: 1.0,
+        c: 1.0, r: 1.0, x0: 1.414, y0: 1.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      r3_matrix: {
+        expr: "[1, 2, 3; 4, 5, 6; 7, 8, 9]",
+        c: 1.0, r: 1.0, x0: 1.0, y0: 1.0, z0: 1.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      r3_vector: {
+        expr: "[x1; x2; x3]",
+        c: 1.0, r: 1.0, x0: 1.0, y0: 2.0, z0: 1.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      r3_sphere: {
+        expr: "x1^2 + x2^2 + x3^2",
+        c: 4.0, r: 2.0, x0: 1.0, y0: 1.0, z0: 1.414,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       vector_field: {
         expr: "[-x2, x1]",
-        c: 2.0, r: 1.414, x0: 1.0, y0: 1.0,
+        c: 2.0, r: 1.414, x0: 1.0, y0: 1.0, z0: 0.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       ripple: {
         expr: "sin(sqrt(x1^2 + x2^2) * 2) / (sqrt(x1^2 + x2^2) + 0.1)",
-        c: 0.5, r: 1.0, x0: 1.2, y0: 0.8,
+        c: 0.5, r: 1.0, x0: 1.2, y0: 0.8, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: 'split'
       },
       gaussian: {
         expr: "3 * exp(-(x1^2 + x2^2) / 4)",
-        c: 1.5, r: 1.66, x0: 1.18, y0: 1.18,
+        c: 1.5, r: 1.66, x0: 1.18, y0: 1.18, z0: 0.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       egg_carton: {
         expr: "sin(x1) * cos(x2)",
-        c: 0.5, r: 1.0, x0: 0.78, y0: 0.61,
+        c: 0.5, r: 1.0, x0: 0.78, y0: 0.61, z0: 0.0,
         x: [-5, 5], y: [-5, 5], mode: '2d'
       },
       rosenbrock: {
         expr: "(1 - x1)^2 + 10 * (x2 - x1^2)^2",
-        c: 5.0, r: 1.0, x0: 1.0, y0: 1.5,
+        c: 5.0, r: 1.0, x0: 1.0, y0: 1.5, z0: 0.0,
         x: [-3, 3], y: [-2, 4], mode: 'split'
       },
       sombrero: {
         expr: "cos(2 * sqrt(x1^2 + x2^2) - t) / (sqrt(x1^2 + x2^2) + 0.5)",
-        c: 0.5, r: 1.0, x0: 1.5, y0: 0.5,
+        c: 0.5, r: 1.0, x0: 1.5, y0: 0.5, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: 'split'
       }
     };
@@ -1112,44 +1196,112 @@
     let compiledF = null;
     let compiledF1 = null;
     let compiledF2 = null;
+    let compiledF3 = null;
+    let compiledCells = null;
     let symDfD1 = null;
     let symDfD2 = null;
-    let symJ11 = null;
-    let symJ12 = null;
-    let symJ21 = null;
-    let symJ22 = null;
+    let symDfD3 = null;
+    let symH11 = null, symH12 = null, symH13 = null;
+    let symH21 = null, symH22 = null, symH23 = null;
+    let symH31 = null, symH32 = null, symH33 = null;
+    let symJacobian = null;
+    let parsedMatrixData = null;
 
-    function parseVectorComponents(exprStr) {
-      if (!exprStr) return { isVector: false };
+    function parseMatrixOrVector(exprStr) {
+      if (!exprStr) return { isMatrix: false, isVector: false };
       const trimmed = exprStr.trim();
-      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-        const inner = trimmed.slice(1, -1).trim();
-        let parts = [];
+      if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+        return { isMatrix: false, isVector: false };
+      }
+
+      const inner = trimmed.slice(1, -1).trim();
+      if (!inner) return { isMatrix: false, isVector: false };
+
+      let rawRows = [];
+      if (inner.startsWith('[')) {
         let depth = 0;
-        let current = "";
+        let cur = "";
+        for (let i = 0; i < inner.length; i++) {
+          const ch = inner[i];
+          if (ch === '[') {
+            if (depth === 0) cur = "";
+            depth++;
+          } else if (ch === ']') {
+            depth--;
+            if (depth === 0) {
+              rawRows.push(cur.trim());
+              cur = "";
+            }
+          } else if (depth > 0) {
+            cur += ch;
+          }
+        }
+      } else {
+        let depth = 0;
+        let cur = "";
         for (let i = 0; i < inner.length; i++) {
           const ch = inner[i];
           if (ch === '(' || ch === '[' || ch === '{') depth++;
           else if (ch === ')' || ch === ']' || ch === '}') depth--;
-          
-          if ((ch === ';' || ch === ',') && depth === 0) {
-            parts.push(current.trim());
-            current = "";
+
+          if (ch === ';' && depth === 0) {
+            rawRows.push(cur.trim());
+            cur = "";
           } else {
-            current += ch;
+            cur += ch;
           }
         }
-        if (current.trim()) parts.push(current.trim());
-
-        if (parts.length >= 2) {
-          return {
-            isVector: true,
-            f1_raw: parts[0],
-            f2_raw: parts[1]
-          };
-        }
+        if (cur.trim()) rawRows.push(cur.trim());
       }
-      return { isVector: false };
+
+      if (rawRows.length === 0) return { isMatrix: false, isVector: false };
+
+      const matrix = [];
+      for (const rowStr of rawRows) {
+        const cols = [];
+        let depth = 0;
+        let cur = "";
+        for (let i = 0; i < rowStr.length; i++) {
+          const ch = rowStr[i];
+          if (ch === '(' || ch === '[' || ch === '{') depth++;
+          else if (ch === ')' || ch === ']' || ch === '}') depth--;
+
+          if (ch === ',' && depth === 0) {
+            cols.push(cur.trim());
+            cur = "";
+          } else {
+            cur += ch;
+          }
+        }
+        if (cur.trim()) cols.push(cur.trim());
+        if (cols.length > 0) matrix.push(cols);
+      }
+
+      if (matrix.length === 0) return { isMatrix: false, isVector: false };
+
+      const numRows = matrix.length;
+      const numCols = Math.max(...matrix.map(r => r.length));
+
+      for (const r of matrix) {
+        while (r.length < numCols) r.push("0");
+      }
+
+      const isVector = (numCols === 1 && numRows >= 2) || (numRows === 1 && numCols >= 2);
+
+      return {
+        isMatrix: true,
+        isVector,
+        numRows,
+        numCols,
+        matrix,
+        f1_raw: matrix[0] ? matrix[0][0] : '',
+        f2_raw: numRows >= 2 ? (matrix[1] ? matrix[1][0] : '') : (matrix[0] && matrix[0][1] ? matrix[0][1] : ''),
+        f3_raw: numRows >= 3 ? (matrix[2] ? matrix[2][0] : '') : (matrix[0] && matrix[0][2] ? matrix[0][2] : '')
+      };
+    }
+
+    function parseVectorComponents(exprStr) {
+      return parseMatrixOrVector(exprStr);
     }
 
     let isInternalUpdating = false;
@@ -1242,6 +1394,13 @@
           if (y0Inp) y0Inp.value = state.y0.toFixed(2);
           if (y0Sld) y0Sld.value = state.y0;
         }
+        if (data.z0 !== undefined && !isNaN(Number(data.z0))) {
+          state.z0 = parseFloat(data.z0);
+          const z0Inp = document.getElementById("z0Input");
+          const z0Sld = document.getElementById("z0Slider");
+          if (z0Inp) z0Inp.value = state.z0.toFixed(2);
+          if (z0Sld) z0Sld.value = state.z0;
+        }
 
         // View mode (2d, 3d, split)
         if (data.mode && ['2d', '3d', 'split'].includes(data.mode)) {
@@ -1314,55 +1473,147 @@
       const formulaStatus = document.getElementById("formulaStatus");
       const expr = state.f_expr_raw;
 
-      const vecInfo = parseVectorComponents(expr);
-      if (vecInfo.isVector) {
-        state.is_vector_func = true;
-        state.f1_expr_raw = vecInfo.f1_raw;
-        state.f2_expr_raw = vecInfo.f2_raw;
+      const matInfo = parseMatrixOrVector(expr);
+
+      if (matInfo.isMatrix) {
+        state.is_matrix_input = true;
+        state.is_vector_func = matInfo.isVector;
+        parsedMatrixData = matInfo;
+        const numRows = matInfo.numRows;
+        const numCols = matInfo.numCols;
+
+        // Check if any cell has 3D variables or if dimension >= 3
+        let hasX3 = false;
+        matInfo.matrix.forEach(row => {
+          row.forEach(cellStr => {
+            if (cellStr.includes('x3') || cellStr.includes('z')) hasX3 = true;
+          });
+        });
+        if (numRows >= 3 || numCols >= 3 || hasX3) {
+          state.dim = 3;
+        } else {
+          state.dim = 2;
+        }
+
         try {
-          compiledF1 = math.compile(vecInfo.f1_raw);
-          compiledF2 = math.compile(vecInfo.f2_raw);
-          compiledF = {
-            evaluate: (scope) => {
-              const v1 = Number(compiledF1.evaluate(scope)) || 0;
-              const v2 = Number(compiledF2.evaluate(scope)) || 0;
-              return Math.sqrt(v1 * v1 + v2 * v2);
-            }
-          };
-          formulaStatus.textContent = "Vector F(x₁, x₂)";
+          compiledCells = matInfo.matrix.map(row =>
+            row.map(cellStr => {
+              try { return math.compile(cellStr); } catch { return math.compile("0"); }
+            })
+          );
+
+          if (matInfo.isVector) {
+            state.f1_expr_raw = matInfo.f1_raw;
+            state.f2_expr_raw = matInfo.f2_raw;
+            state.f3_expr_raw = matInfo.f3_raw;
+
+            compiledF = {
+              evaluate: (scope) => {
+                let sumSq = 0;
+                for (let r = 0; r < numRows; r++) {
+                  for (let c = 0; c < numCols; c++) {
+                    const v = Number(compiledCells[r][c].evaluate(scope)) || 0;
+                    sumSq += v * v;
+                  }
+                }
+                return Math.sqrt(sumSq);
+              }
+            };
+            formulaStatus.textContent = state.dim === 3 ? `Vector F in ℝ³ [${numRows}×${numCols}]` : `Vector F in ℝ² [${numRows}×${numCols}]`;
+          } else {
+            compiledF = {
+              evaluate: (scope) => {
+                const c00 = Number(compiledCells[0][0].evaluate(scope)) || 0;
+                const c01 = (numCols >= 2) ? (Number(compiledCells[0][1].evaluate(scope)) || 0) : 0;
+                return c00 * (scope.x1 || 0) + c01 * (scope.x2 || 0);
+              }
+            };
+            formulaStatus.textContent = `Matrix [${numRows}×${numCols}] in ℝ${state.dim}`;
+          }
           formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-medium";
         } catch (err) {
           formulaStatus.textContent = "Syntax Error";
           formulaStatus.className = "text-[11px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-medium";
         }
 
+        // Symbolic Matrix or Jacobian calculation
         try {
-          const parsed1 = math.parse(vecInfo.f1_raw);
-          const parsed2 = math.parse(vecInfo.f2_raw);
-          const v1 = 'x1';
-          const v2 = 'x2';
-          symJ11 = math.derivative(parsed1, v1);
-          symJ12 = math.derivative(parsed1, v2);
-          symJ21 = math.derivative(parsed2, v1);
-          symJ22 = math.derivative(parsed2, v2);
+          const varNames = state.notation === 'x1x2' 
+            ? (state.dim === 3 ? ['x_1', 'x_2', 'x_3'] : ['x_1', 'x_2'])
+            : (state.dim === 3 ? ['x', 'y', 'z'] : ['x', 'y']);
+          const diffVars = state.notation === 'x1x2'
+            ? (state.dim === 3 ? ['x1', 'x2', 'x3'] : ['x1', 'x2'])
+            : (state.dim === 3 ? ['x', 'y', 'z'] : ['x', 'y']);
 
-          const t11 = symJ11.toTex({ parenthesis: 'auto' });
-          const t12 = symJ12.toTex({ parenthesis: 'auto' });
-          const t21 = symJ21.toTex({ parenthesis: 'auto' });
-          const t22 = symJ22.toTex({ parenthesis: 'auto' });
+          if (matInfo.isVector && (numRows >= 2 || numCols >= 2)) {
+            const components = [];
+            for (let r = 0; r < numRows; r++) {
+              for (let c = 0; c < numCols; c++) {
+                components.push(matInfo.matrix[r][c]);
+              }
+            }
+            const n = state.dim;
 
-          const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
-          const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
-          const jacobianLatex = `\\mathbf{J}_F(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial F_1}{\\partial ${var1Name}} & \\frac{\\partial F_1}{\\partial ${var2Name}} \\\\[4pt] \\frac{\\partial F_2}{\\partial ${var1Name}} & \\frac{\\partial F_2}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${t11} & ${t12} \\\\[4pt] ${t21} & ${t22} \\end{bmatrix}_{2 \\times 2}`;
-          katex.render(jacobianLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
-          katex.render(`\\mathbf{D}F_1 = [${t11}, ${t12}]`, document.getElementById("katexDfDx"), { throwOnError: false });
-          katex.render(`\\mathbf{D}F_2 = [${t21}, ${t22}]`, document.getElementById("katexDfDy"), { throwOnError: false });
+            symJacobian = [];
+            let texRows = [];
+            for (let i = 0; i < components.length; i++) {
+              const compParsed = math.parse(components[i]);
+              const rowDerivs = [];
+              const rowTex = [];
+              for (let j = 0; j < n; j++) {
+                try {
+                  const d = math.derivative(compParsed, diffVars[j]);
+                  rowDerivs.push(d);
+                  rowTex.push(d.toTex({ parenthesis: 'auto' }));
+                } catch {
+                  rowDerivs.push(null);
+                  rowTex.push(`\\frac{\\partial F_${i+1}}{\\partial ${varNames[j]}}`);
+                }
+              }
+              symJacobian.push(rowDerivs);
+              texRows.push(rowTex.join(' & '));
+            }
+
+            const jacobianLatex = `\\mathbf{J}_F(${varNames.join(', ')}) = \\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}_{${components.length} \\times ${n}}`;
+            katex.render(jacobianLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+
+            if (symJacobian[0]) {
+              const t0 = symJacobian[0].map(d => d ? d.toTex({ parenthesis: 'auto' }) : '0').join(', ');
+              katex.render(`\\mathbf{D}F_1 = [${t0}]`, document.getElementById("katexDfDx"), { throwOnError: false });
+            }
+            if (symJacobian[1]) {
+              const t1 = symJacobian[1].map(d => d ? d.toTex({ parenthesis: 'auto' }) : '0').join(', ');
+              katex.render(`\\mathbf{D}F_2 = [${t1}]`, document.getElementById("katexDfDy"), { throwOnError: false });
+            }
+            if (symJacobian[2] && document.getElementById("katexDfDz")) {
+              const t2 = symJacobian[2].map(d => d ? d.toTex({ parenthesis: 'auto' }) : '0').join(', ');
+              katex.render(`\\mathbf{D}F_3 = [${t2}]`, document.getElementById("katexDfDz"), { throwOnError: false });
+            }
+          } else {
+            const texRows = matInfo.matrix.map(row => 
+              row.map(cell => {
+                try { return math.parse(cell).toTex({ parenthesis: 'auto' }); } catch { return cell; }
+              }).join(' & ')
+            );
+            const matLatex = `\\mathbf{M} = \\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}_{${numRows} \\times ${numCols}}`;
+            katex.render(matLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+            katex.render(`\\text{Row 1} = [${matInfo.matrix[0].join(', ')}]`, document.getElementById("katexDfDx"), { throwOnError: false });
+            if (matInfo.matrix[1]) {
+              katex.render(`\\text{Row 2} = [${matInfo.matrix[1].join(', ')}]`, document.getElementById("katexDfDy"), { throwOnError: false });
+            }
+            if (matInfo.matrix[2] && document.getElementById("katexDfDz")) {
+              katex.render(`\\text{Row 3} = [${matInfo.matrix[2].join(', ')}]`, document.getElementById("katexDfDz"), { throwOnError: false });
+            }
+          }
         } catch (e) {
-          symJ11 = null; symJ12 = null; symJ21 = null; symJ22 = null;
-          document.getElementById("katexMatrixSymbolic").textContent = "J_F = [ ∂F₁/∂x₁  ∂F₁/∂x₂ ; ∂F₂/∂x₁  ∂F₂/∂x₂ ]";
+          document.getElementById("katexMatrixSymbolic").textContent = expr;
         }
+
       } else {
+        state.is_matrix_input = false;
         state.is_vector_func = false;
+        parsedMatrixData = null;
+
         try {
           compiledF = math.compile(expr);
           formulaStatus.textContent = "Valid";
@@ -1380,43 +1631,130 @@
             if (node.isSymbolNode) vars.add(node.name);
           });
 
+          if (vars.has('x3') || vars.has('z')) {
+            state.dim = 3;
+          } else {
+            state.dim = 2;
+          }
+
           const v1 = vars.has('x1') ? 'x1' : (vars.has('x') ? 'x' : 'x1');
           const v2 = vars.has('x2') ? 'x2' : (vars.has('y') ? 'y' : 'x2');
+          const v3 = vars.has('x3') ? 'x3' : (vars.has('z') ? 'z' : 'x3');
 
           symDfD1 = math.derivative(parsed, v1);
           symDfD2 = math.derivative(parsed, v2);
+          symDfD3 = state.dim === 3 ? math.derivative(parsed, v3) : null;
 
           const tex1 = symDfD1.toTex({ parenthesis: 'auto' });
           const tex2 = symDfD2.toTex({ parenthesis: 'auto' });
+          const tex3 = symDfD3 ? symDfD3.toTex({ parenthesis: 'auto' }) : '0';
+
           katex.render(tex1, document.getElementById("katexDfDx"), { throwOnError: false });
           katex.render(tex2, document.getElementById("katexDfDy"), { throwOnError: false });
+          if (document.getElementById("katexDfDz")) {
+            katex.render(tex3, document.getElementById("katexDfDz"), { throwOnError: false });
+          }
 
           const var1Name = state.notation === 'x1x2' ? 'x_1' : 'x';
           const var2Name = state.notation === 'x1x2' ? 'x_2' : 'y';
-          const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
-          katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+          const var3Name = state.notation === 'x1x2' ? 'x_3' : 'z';
+
+          if (state.dim === 3) {
+            const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}, ${var3Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} & \\frac{\\partial f}{\\partial ${var3Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} & ${tex3} \\end{bmatrix}_{1 \\times 3}`;
+            katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+          } else {
+            const matrixSymbolicLatex = `\\mathbf{D}f(${var1Name}, ${var2Name}) = \\begin{bmatrix} \\frac{\\partial f}{\\partial ${var1Name}} & \\frac{\\partial f}{\\partial ${var2Name}} \\end{bmatrix} = \\begin{bmatrix} ${tex1} & ${tex2} \\end{bmatrix}_{1 \\times 2}`;
+            katex.render(matrixSymbolicLatex, document.getElementById("katexMatrixSymbolic"), { throwOnError: false });
+          }
+
+          symH11 = math.derivative(symDfD1, v1);
+          symH12 = math.derivative(symDfD1, v2);
+          symH21 = symH12;
+          symH22 = math.derivative(symDfD2, v2);
+
+          const h11Tex = symH11.toTex({ parenthesis: 'auto' });
+          const h12Tex = symH12.toTex({ parenthesis: 'auto' });
+          const h22Tex = symH22.toTex({ parenthesis: 'auto' });
+
+          if (state.dim === 3 && symDfD3) {
+            symH13 = math.derivative(symDfD1, v3);
+            symH23 = math.derivative(symDfD2, v3);
+            symH31 = symH13;
+            symH32 = symH23;
+            symH33 = math.derivative(symDfD3, v3);
+
+            const h13Tex = symH13.toTex({ parenthesis: 'auto' });
+            const h23Tex = symH23.toTex({ parenthesis: 'auto' });
+            const h33Tex = symH33.toTex({ parenthesis: 'auto' });
+
+            const hessianSymbolicLatex = `\\mathbf{H}f(${var1Name}, ${var2Name}, ${var3Name}) = \\begin{bmatrix}
+              ${h11Tex} & ${h12Tex} & ${h13Tex} \\\\[4pt]
+              ${h12Tex} & ${h22Tex} & ${h23Tex} \\\\[4pt]
+              ${h13Tex} & ${h23Tex} & ${h33Tex}
+            \\end{bmatrix}_{3 \\times 3}`;
+            katex.render(hessianSymbolicLatex, document.getElementById("katexHessianSymbolic"), { throwOnError: false });
+          } else {
+            symH13 = null; symH23 = null; symH31 = null; symH32 = null; symH33 = null;
+            const hessianSymbolicLatex = `\\mathbf{H}f(${var1Name}, ${var2Name}) = \\begin{bmatrix}
+              \\frac{\\partial^2 f}{\\partial ${var1Name}^2} & \\frac{\\partial^2 f}{\\partial ${var1Name} \\partial ${var2Name}} \\\\[4pt]
+              \\frac{\\partial^2 f}{\\partial ${var2Name} \\partial ${var1Name}} & \\frac{\\partial^2 f}{\\partial ${var2Name}^2}
+            \\end{bmatrix} = \\begin{bmatrix} ${h11Tex} & ${h12Tex} \\\\[4pt] ${h12Tex} & ${h22Tex} \\end{bmatrix}_{2 \\times 2}`;
+            katex.render(hessianSymbolicLatex, document.getElementById("katexHessianSymbolic"), { throwOnError: false });
+          }
 
         } catch (e) {
-          symDfD1 = null;
-          symDfD2 = null;
+          symDfD1 = null; symDfD2 = null; symDfD3 = null;
+          symH11 = null; symH12 = null; symH22 = null;
           document.getElementById("katexDfDx").textContent = "Numerical derivative";
           document.getElementById("katexDfDy").textContent = "Numerical derivative";
           document.getElementById("katexMatrixSymbolic").textContent = "Df = [ ∂f/∂x₁   ∂f/∂x₂ ]";
+          document.getElementById("katexHessianSymbolic").textContent = "Hf = [ ∂²f/∂x₁²  ∂²f/∂x₁∂x₂ ; ∂²f/∂x₂∂x₁  ∂²f/∂x₂² ]";
         }
+      }
+
+      // Update dimension UI
+      const coordA3Row = document.getElementById("coordA3Row");
+      const ptLabel = document.getElementById("pointOfTangencyLabel");
+      const dfdx3Card = document.getElementById("dfdx3_card");
+      const hessTitle = document.getElementById("hessianTitle");
+
+      if (state.dim === 3) {
+        if (coordA3Row) coordA3Row.classList.remove("hidden");
+        if (ptLabel) ptLabel.textContent = "Point of Tangency a = (a₁, a₂, a₃)";
+        if (dfdx3Card) dfdx3Card.classList.remove("hidden");
+        if (hessTitle) hessTitle.textContent = state.is_matrix_input ? "Matrix Properties & Determinant [3 × 3]" : "Hessian Matrix ∇²f / Hf [3 × 3]";
+      } else {
+        if (coordA3Row) coordA3Row.classList.add("hidden");
+        if (ptLabel) ptLabel.textContent = "Point of Tangency a = (a₁, a₂)";
+        if (dfdx3Card) dfdx3Card.classList.add("hidden");
+        if (hessTitle) hessTitle.textContent = state.is_matrix_input ? "Matrix Properties & Determinant [2 × 2]" : "Hessian Matrix ∇²f / Hf [2 × 2]";
       }
 
       updateKatexHeader();
       updateCalculusCalculations();
+      updateHessianCalculations();
       updateAffineCalculations();
     }
 
     function updateKatexHeader() {
       const container = document.getElementById("katexEquation");
-      const varTuple = state.notation === 'x1x2' ? '(x_1, x_2)' : '(x, y)';
-      if (state.is_vector_func) {
-        katex.render(`\\mathbf{F}${varTuple} = \\begin{bmatrix} ${state.f1_expr_raw} \\\\[4pt] ${state.f2_expr_raw} \\end{bmatrix}`, container, { throwOnError: false });
+      if (!container) return;
+      const is3D = state.dim === 3;
+      const varTuple = state.notation === 'x1x2' 
+        ? (is3D ? '(x_1, x_2, x_3)' : '(x_1, x_2)')
+        : (is3D ? '(x, y, z)' : '(x, y)');
+
+      if (state.is_matrix_input && parsedMatrixData) {
+        const texRows = parsedMatrixData.matrix.map(row => 
+          row.map(cell => {
+            try { return math.parse(cell).toTex({ parenthesis: 'auto' }); } catch { return cell; }
+          }).join(' & ')
+        );
+        const prefix = state.is_vector_func ? `\\mathbf{F}${varTuple} = ` : `\\mathbf{M} = `;
+        katex.render(`${prefix}\\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}`, container, { throwOnError: false });
         return;
       }
+
       try {
         const parsed = math.parse(state.f_expr_raw);
         const tex = parsed.toTex({ parenthesis: 'auto' });
@@ -1426,12 +1764,15 @@
       }
     }
 
-    function getEvalScope(xVal, yVal) {
+    function getEvalScope(xVal, yVal, zVal) {
+      const z_val = (zVal !== undefined && zVal !== null) ? zVal : (state.z0 !== undefined ? state.z0 : 0.0);
       const scope = {
         x1: xVal,
         x2: yVal,
+        x3: z_val,
         x: xVal,
         y: yVal,
+        z: z_val,
         t: state.t
       };
       for (const [k, v] of Object.entries(state.params)) {
@@ -1440,61 +1781,66 @@
       return scope;
     }
 
-    function evaluateAt(xVal, yVal) {
-      const scope = getEvalScope(xVal, yVal);
-      if (state.is_vector_func && compiledF1 && compiledF2) {
-        let f1 = 0, f2 = 0;
-        try {
-          f1 = Number(compiledF1.evaluate(scope));
-          if (isNaN(f1)) f1 = 0;
-        } catch { f1 = 0; }
-        try {
-          f2 = Number(compiledF2.evaluate(scope));
-          if (isNaN(f2)) f2 = 0;
-        } catch { f2 = 0; }
+    function evaluateAt(xVal, yVal, zVal) {
+      const scope = getEvalScope(xVal, yVal, zVal);
 
-        const z = Math.sqrt(f1 * f1 + f2 * f2);
+      if (state.is_matrix_input && compiledCells && parsedMatrixData) {
+        const numRows = parsedMatrixData.numRows;
+        const numCols = parsedMatrixData.numCols;
+        const evaluatedMatrix = [];
+        let sumSq = 0;
 
-        let j11 = null, j12 = null, j21 = null, j22 = null;
-        if (symJ11 && symJ12 && symJ21 && symJ22) {
-          try {
-            j11 = Number(symJ11.evaluate(scope));
-            j12 = Number(symJ12.evaluate(scope));
-            j21 = Number(symJ21.evaluate(scope));
-            j22 = Number(symJ22.evaluate(scope));
-          } catch {}
+        for (let r = 0; r < numRows; r++) {
+          const rowVals = [];
+          for (let c = 0; c < numCols; c++) {
+            let v = 0;
+            try {
+              v = Number(compiledCells[r][c].evaluate(scope));
+              if (isNaN(v)) v = 0;
+            } catch { v = 0; }
+            rowVals.push(v);
+            sumSq += v * v;
+          }
+          evaluatedMatrix.push(rowVals);
         }
 
-        if (j11 === null || isNaN(j11) || isNaN(j12) || isNaN(j21) || isNaN(j22)) {
-          const h = 1e-5;
-          try {
-            const sR = getEvalScope(xVal + h, yVal);
-            const sL = getEvalScope(xVal - h, yVal);
-            const sU = getEvalScope(xVal, yVal + h);
-            const sD = getEvalScope(xVal, yVal - h);
-            j11 = (compiledF1.evaluate(sR) - compiledF1.evaluate(sL)) / (2 * h);
-            j12 = (compiledF1.evaluate(sU) - compiledF1.evaluate(sD)) / (2 * h);
-            j21 = (compiledF2.evaluate(sR) - compiledF2.evaluate(sL)) / (2 * h);
-            j22 = (compiledF2.evaluate(sU) - compiledF2.evaluate(sD)) / (2 * h);
-          } catch {
-            j11 = 0; j12 = 0; j21 = 0; j22 = 0;
+        const z = state.is_vector_func ? Math.sqrt(sumSq) : (evaluatedMatrix[0][0] || 0);
+        const f1 = evaluatedMatrix[0] ? evaluatedMatrix[0][0] : 0;
+        const f2 = (numRows >= 2 && evaluatedMatrix[1]) ? evaluatedMatrix[1][0] : (evaluatedMatrix[0] && evaluatedMatrix[0][1] ? evaluatedMatrix[0][1] : 0);
+        const f3 = (numRows >= 3 && evaluatedMatrix[2]) ? evaluatedMatrix[2][0] : (evaluatedMatrix[0] && evaluatedMatrix[0][2] ? evaluatedMatrix[0][2] : 0);
+
+        const jacobianEval = [];
+        if (symJacobian && symJacobian.length > 0) {
+          for (let i = 0; i < symJacobian.length; i++) {
+            const row = [];
+            for (let j = 0; j < symJacobian[i].length; j++) {
+              let val = 0;
+              try {
+                if (symJacobian[i][j]) val = Number(symJacobian[i][j].evaluate(scope));
+                if (isNaN(val)) val = 0;
+              } catch { val = 0; }
+              row.push(val);
+            }
+            jacobianEval.push(row);
           }
         }
 
-        let fx = 0, fy = 0;
-        if (z > 1e-6) {
-          fx = (f1 * j11 + f2 * j21) / z;
-          fy = (f1 * j12 + f2 * j22) / z;
-        }
+        const j11 = jacobianEval[0] ? jacobianEval[0][0] : (evaluatedMatrix[0] ? evaluatedMatrix[0][0] : 0);
+        const j12 = jacobianEval[0] ? (jacobianEval[0][1] || 0) : (evaluatedMatrix[0] ? evaluatedMatrix[0][1] || 0 : 0);
+        const j21 = jacobianEval[1] ? jacobianEval[1][0] : (evaluatedMatrix[1] ? evaluatedMatrix[1][0] || 0 : 0);
+        const j22 = jacobianEval[1] ? (jacobianEval[1][1] || 0) : (evaluatedMatrix[1] ? evaluatedMatrix[1][1] || 0 : 0);
 
         return {
-          z, f1, f2, fx, fy,
-          isVector: true,
+          z, f1, f2, f3, fx: f1, fy: f2, fz: f3,
+          isVector: state.is_vector_func,
+          isMatrix: true,
+          evaluatedMatrix,
+          jacobianEval,
           j11, j12, j21, j22
         };
       }
 
-      if (!compiledF) return { z: 0, fx: 0, fy: 0, f1: 0, f2: 0, isVector: false };
+      if (!compiledF) return { z: 0, fx: 0, fy: 0, fz: 0, f1: 0, f2: 0, f3: 0, isVector: false, isMatrix: false };
 
       let z = 0;
       try {
@@ -1504,60 +1850,81 @@
         z = 0;
       }
 
-      let fx = null, fy = null;
+      let fx = null, fy = null, fz = null;
       if (symDfD1 && symDfD2) {
         try {
-          fx = symDfD1.evaluate(scope);
-          fy = symDfD2.evaluate(scope);
+          fx = Number(symDfD1.evaluate(scope));
+          fy = Number(symDfD2.evaluate(scope));
+          if (symDfD3) fz = Number(symDfD3.evaluate(scope));
         } catch {
-          fx = null; fy = null;
+          fx = null; fy = null; fz = null;
         }
       }
 
-      if (fx === null || typeof fx !== 'number' || isNaN(fx)) {
-        const h = 1e-5;
+      if (fx === null || isNaN(fx) || fy === null || isNaN(fy) || (state.dim === 3 && (fz === null || isNaN(fz)))) {
+        const h = 1e-4;
         try {
-          const sR = getEvalScope(xVal + h, yVal);
-          const sL = getEvalScope(xVal - h, yVal);
-          const sU = getEvalScope(xVal, yVal + h);
-          const sD = getEvalScope(xVal, yVal - h);
+          const sR = getEvalScope(xVal + h, yVal, zVal);
+          const sL = getEvalScope(xVal - h, yVal, zVal);
+          const sU = getEvalScope(xVal, yVal + h, zVal);
+          const sD = getEvalScope(xVal, yVal - h, zVal);
           fx = (compiledF.evaluate(sR) - compiledF.evaluate(sL)) / (2 * h);
           fy = (compiledF.evaluate(sU) - compiledF.evaluate(sD)) / (2 * h);
+          if (state.dim === 3) {
+            const z_v = (zVal !== undefined ? zVal : state.z0);
+            const sF = getEvalScope(xVal, yVal, z_v + h);
+            const sB = getEvalScope(xVal, yVal, z_v - h);
+            fz = (compiledF.evaluate(sF) - compiledF.evaluate(sB)) / (2 * h);
+          } else {
+            fz = 0;
+          }
         } catch {
-          fx = 0; fy = 0;
+          fx = 0; fy = 0; fz = 0;
         }
       }
 
       if (typeof fx !== 'number' || isNaN(fx)) fx = 0;
       if (typeof fy !== 'number' || isNaN(fy)) fy = 0;
+      if (typeof fz !== 'number' || isNaN(fz)) fz = 0;
 
-      return { z, fx, fy, f1: z, f2: 0, isVector: false };
+      return { z, fx, fy, fz, f1: z, f2: 0, f3: 0, isVector: false, isMatrix: false };
     }
 
     function evaluateAffineAt(xVal, yVal) {
-      const ptA = evaluateAt(state.x0, state.y0);
+      const ptA = evaluateAt(state.x0, state.y0, state.z0);
       return ptA.z + ptA.fx * (xVal - state.x0) + ptA.fy * (yVal - state.y0);
     }
 
     function updateAffineCalculations() {
-      const ptA = evaluateAt(state.x0, state.y0);
+      const ptA = evaluateAt(state.x0, state.y0, state.z0);
       const var1 = state.notation === 'x1x2' ? 'x_1' : 'x';
       const var2 = state.notation === 'x1x2' ? 'x_2' : 'y';
+      const var3 = state.notation === 'x1x2' ? 'x_3' : 'z';
 
       const vecLatex = `g(\\mathbf{x}) = f(\\mathbf{a}) + \\mathbf{D}f(\\mathbf{a})(\\mathbf{x} - \\mathbf{a}) = f(\\mathbf{a}) + \\nabla f(\\mathbf{a}) \\cdot (\\mathbf{x} - \\mathbf{a})`;
       katex.render(vecLatex, document.getElementById("katexAffineVector"), { throwOnError: false });
 
       const signA1 = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
       const signA2 = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
-      const affineLatex = `g(${var1}, ${var2}) = ${ptA.z.toFixed(2)} + (${ptA.fx.toFixed(2)})(${var1} ${signA1}) + (${ptA.fy.toFixed(2)})(${var2} ${signA2})`;
-      katex.render(affineLatex, document.getElementById("katexAffineFormula"), { throwOnError: false });
+      const signA3 = -state.z0 >= 0 ? `+ ${(-state.z0).toFixed(2)}` : `- ${state.z0.toFixed(2)}`;
 
-      const constantTerm = ptA.z - ptA.fx * state.x0 - ptA.fy * state.y0;
-      const signConst = constantTerm >= 0 ? `+ ${constantTerm.toFixed(2)}` : `- ${Math.abs(constantTerm).toFixed(2)}`;
-      document.getElementById("katexAffineSimplified").textContent = 
-        `Simplified: z = ${ptA.fx.toFixed(2)}${var1} + ${ptA.fy.toFixed(2)}${var2} ${signConst}`;
+      if (state.dim === 3) {
+        const affineLatex = `g(${var1}, ${var2}, ${var3}) = ${ptA.z.toFixed(2)} + (${ptA.fx.toFixed(2)})(${var1} ${signA1}) + (${ptA.fy.toFixed(2)})(${var2} ${signA2}) + (${(ptA.fz||0).toFixed(2)})(${var3} ${signA3})`;
+        katex.render(affineLatex, document.getElementById("katexAffineFormula"), { throwOnError: false });
+        const constTerm = ptA.z - ptA.fx * state.x0 - ptA.fy * state.y0 - (ptA.fz || 0) * state.z0;
+        const signConst = constTerm >= 0 ? `+ ${constTerm.toFixed(2)}` : `- ${Math.abs(constTerm).toFixed(2)}`;
+        document.getElementById("katexAffineSimplified").textContent = 
+          `Simplified: w = ${ptA.fx.toFixed(2)}${var1} + ${ptA.fy.toFixed(2)}${var2} + ${(ptA.fz||0).toFixed(2)}${var3} ${signConst}`;
+      } else {
+        const affineLatex = `g(${var1}, ${var2}) = ${ptA.z.toFixed(2)} + (${ptA.fx.toFixed(2)})(${var1} ${signA1}) + (${ptA.fy.toFixed(2)})(${var2} ${signA2})`;
+        katex.render(affineLatex, document.getElementById("katexAffineFormula"), { throwOnError: false });
+        const constTerm = ptA.z - ptA.fx * state.x0 - ptA.fy * state.y0;
+        const signConst = constTerm >= 0 ? `+ ${constTerm.toFixed(2)}` : `- ${Math.abs(constTerm).toFixed(2)}`;
+        document.getElementById("katexAffineSimplified").textContent = 
+          `Simplified: z = ${ptA.fx.toFixed(2)}${var1} + ${ptA.fy.toFixed(2)}${var2} ${signConst}`;
+      }
 
-      const testPt = evaluateAt(state.test_x, state.test_y);
+      const testPt = evaluateAt(state.test_x, state.test_y, state.z0);
       const approxVal = evaluateAffineAt(state.test_x, state.test_y);
       const err = Math.abs(testPt.z - approxVal);
 
@@ -1567,42 +1934,65 @@
     }
 
     function updateCalculusCalculations() {
-      const pt = evaluateAt(state.x0, state.y0);
-      const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy);
+      const pt = evaluateAt(state.x0, state.y0, state.z0);
+      const mag = Math.sqrt(pt.fx * pt.fx + pt.fy * pt.fy + (pt.fz ? pt.fz * pt.fz : 0));
 
-      if (pt.isVector) {
-        const j11 = pt.j11 !== null ? pt.j11.toFixed(3) : "0.000";
-        const j12 = pt.j12 !== null ? pt.j12.toFixed(3) : "0.000";
-        const j21 = pt.j21 !== null ? pt.j21.toFixed(3) : "0.000";
-        const j22 = pt.j22 !== null ? pt.j22.toFixed(3) : "0.000";
-        const matrixNumericLatex = `\\mathbf{J}_F(\\mathbf{a}) = \\begin{bmatrix} ${j11} & ${j12} \\\\[4pt] ${j21} & ${j22} \\end{bmatrix}_{2 \\times 2}`;
+      const var1 = state.notation === 'x1x2' ? 'a₁' : 'x';
+      const var2 = state.notation === 'x1x2' ? 'a₂' : 'y';
+      const var3 = state.notation === 'x1x2' ? 'a₃' : 'z';
+
+      if (state.dim === 3) {
+        document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)}, ${var3} = ${state.z0.toFixed(2)})`;
+      } else {
+        document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
+      }
+
+      if (pt.isMatrix) {
+        const mat = pt.jacobianEval && pt.jacobianEval.length > 0 ? pt.jacobianEval : pt.evaluatedMatrix;
+        const numRows = mat.length;
+        const numCols = mat[0] ? mat[0].length : 0;
+        const texRows = mat.map(row => row.map(v => Number(v).toFixed(3)).join(' & '));
+        const prefix = pt.isVector ? `\\mathbf{J}_F(\\mathbf{a}) = ` : `\\mathbf{M}(\\mathbf{a}) = `;
+        const matrixNumericLatex = `${prefix}\\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}_{${numRows} \\times ${numCols}}`;
         katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
 
-        document.getElementById("evalZ0").textContent = `||F|| = ${pt.z.toFixed(3)} [${pt.f1.toFixed(2)}, ${pt.f2.toFixed(2)}]`;
-        document.getElementById("resDfDx").textContent = `${j11}, ${j12}`;
-        document.getElementById("resDfDy").textContent = `${j21}, ${j22}`;
-        document.getElementById("gradColumnVecDisplay").textContent = `F(a) = ⟨${pt.f1.toFixed(3)}, ${pt.f2.toFixed(3)}⟩ᵀ`;
+        document.getElementById("evalZ0").textContent = pt.isVector 
+          ? `||F|| = ${pt.z.toFixed(3)} [${pt.f1.toFixed(2)}, ${pt.f2.toFixed(2)}${state.dim === 3 ? `, ${pt.f3.toFixed(2)}` : ''}]`
+          : `M₁₁ = ${pt.f1.toFixed(3)}`;
+
+        document.getElementById("resDfDx").textContent = mat[0] ? mat[0].map(v => Number(v).toFixed(3)).join(', ') : '0.000';
+        if (mat[1]) document.getElementById("resDfDy").textContent = mat[1].map(v => Number(v).toFixed(3)).join(', ');
+        if (mat[2] && document.getElementById("resDfDz")) document.getElementById("resDfDz").textContent = mat[2].map(v => Number(v).toFixed(3)).join(', ');
+
+        document.getElementById("gradColumnVecDisplay").textContent = pt.isVector 
+          ? (state.dim === 3 ? `F(a) = ⟨${pt.f1.toFixed(3)}, ${pt.f2.toFixed(3)}, ${pt.f3.toFixed(3)}⟩ᵀ` : `F(a) = ⟨${pt.f1.toFixed(3)}, ${pt.f2.toFixed(3)}⟩ᵀ`)
+          : `Col 1 = ⟨${mat.map(r => Number(r[0]||0).toFixed(2)).join(', ')}⟩ᵀ`;
         document.getElementById("resGradMag").textContent = pt.z.toFixed(4);
       } else {
-        const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
-        katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+        if (state.dim === 3) {
+          const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} & ${pt.fz.toFixed(3)} \\end{bmatrix}_{1 \\times 3}`;
+          katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+          document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}, ${pt.fz.toFixed(3)}⟩ᵀ`;
+          if (document.getElementById("resDfDz")) document.getElementById("resDfDz").textContent = pt.fz.toFixed(4);
+        } else {
+          const matrixNumericLatex = `\\mathbf{D}f(\\mathbf{a}) = \\begin{bmatrix} ${pt.fx.toFixed(3)} & ${pt.fy.toFixed(3)} \\end{bmatrix}_{1 \\times 2}`;
+          katex.render(matrixNumericLatex, document.getElementById("katexMatrixNumeric"), { throwOnError: false });
+          document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
+        }
 
         document.getElementById("evalZ0").textContent = pt.z.toFixed(3);
         document.getElementById("resDfDx").textContent = pt.fx.toFixed(4);
         document.getElementById("resDfDy").textContent = pt.fy.toFixed(4);
-        document.getElementById("gradColumnVecDisplay").textContent = `⟨${pt.fx.toFixed(3)}, ${pt.fy.toFixed(3)}⟩ᵀ`;
         document.getElementById("resGradMag").textContent = mag.toFixed(4);
       }
 
-      const var1 = state.notation === 'x1x2' ? 'a₁' : 'x';
-      const var2 = state.notation === 'x1x2' ? 'a₂' : 'y';
-      document.getElementById("matrixEvalPointLabel").textContent = `(${var1} = ${state.x0.toFixed(2)}, ${var2} = ${state.y0.toFixed(2)})`;
-
       if (mag > 1e-4) {
-        document.getElementById("resNormalVec").textContent = `⟨${(pt.fx / mag).toFixed(3)}, ${(pt.fy / mag).toFixed(3)}⟩`;
+        document.getElementById("resNormalVec").textContent = state.dim === 3
+          ? `⟨${(pt.fx / mag).toFixed(3)}, ${(pt.fy / mag).toFixed(3)}, ${(pt.fz / mag).toFixed(3)}⟩`
+          : `⟨${(pt.fx / mag).toFixed(3)}, ${(pt.fy / mag).toFixed(3)}⟩`;
         document.getElementById("resTangentVec").textContent = `⟨${(-pt.fy / mag).toFixed(3)}, ${(pt.fx / mag).toFixed(3)}⟩`;
       } else {
-        document.getElementById("resNormalVec").textContent = "⟨0, 0⟩ (Critical pt)";
+        document.getElementById("resNormalVec").textContent = state.dim === 3 ? "⟨0, 0, 0⟩ (Critical pt)" : "⟨0, 0⟩ (Critical pt)";
         document.getElementById("resTangentVec").textContent = "Undefined";
       }
 
@@ -1618,11 +2008,219 @@
 
       const signX0 = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
       const signY0 = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
-      document.getElementById("tangentLineEq").textContent = 
-        `${pt.fx.toFixed(2)}(${state.notation === 'x1x2' ? 'x₁' : 'x'} ${signX0}) + ${pt.fy.toFixed(2)}(${state.notation === 'x1x2' ? 'x₂' : 'y'} ${signY0}) = 0`;
+      const signZ0 = -state.z0 >= 0 ? `+ ${(-state.z0).toFixed(2)}` : `- ${state.z0.toFixed(2)}`;
+      const v1Name = state.notation === 'x1x2' ? 'x₁' : 'x';
+      const v2Name = state.notation === 'x1x2' ? 'x₂' : 'y';
+      const v3Name = state.notation === 'x1x2' ? 'x₃' : 'z';
+
+      if (state.dim === 3) {
+        document.getElementById("tangentLineEq").textContent = 
+          `${pt.fx.toFixed(2)}(${v1Name} ${signX0}) + ${pt.fy.toFixed(2)}(${v2Name} ${signY0}) + ${(pt.fz||0).toFixed(2)}(${v3Name} ${signZ0}) = 0`;
+      } else {
+        document.getElementById("tangentLineEq").textContent = 
+          `${pt.fx.toFixed(2)}(${v1Name} ${signX0}) + ${pt.fy.toFixed(2)}(${v2Name} ${signY0}) = 0`;
+      }
 
       if (typeof updateAiContextStrip === 'function') {
         updateAiContextStrip();
+      }
+    }
+
+    function updateHessianCalculations() {
+      const scope = getEvalScope(state.x0, state.y0, state.z0);
+      const is3D = state.dim === 3;
+      const evalPointLabel = document.getElementById("hessianEvalPointLabel");
+      const badge = document.getElementById("hessianClassificationBadge");
+      const detEl = document.getElementById("resHessianDet");
+      const trEl = document.getElementById("resHessianTrace");
+      const taylorEl = document.getElementById("katexTaylor2Formula");
+      const numMatrixEl = document.getElementById("katexHessianNumeric");
+
+      if (evalPointLabel) {
+        evalPointLabel.textContent = is3D 
+          ? `a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)}, ${state.z0.toFixed(2)})`
+          : `a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`;
+      }
+
+      if (state.is_matrix_input && parsedMatrixData) {
+        const mat = parsedMatrixData.matrix.map((row, r) => 
+          row.map((_, c) => {
+            try { return Number(compiledCells[r][c].evaluate(scope)) || 0; } catch { return 0; }
+          })
+        );
+        const nRows = mat.length;
+        const nCols = mat[0] ? mat[0].length : 0;
+        const texRows = mat.map(row => row.map(v => Number(v).toFixed(3)).join(' & '));
+        const numLatex = `\\mathbf{M}(\\mathbf{a}) = \\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}_{${nRows} \\times ${nCols}}`;
+        katex.render(numLatex, numMatrixEl, { throwOnError: false });
+
+        let det = 0;
+        let trace = 0;
+        if (nRows === 2 && nCols === 2) {
+          det = mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
+          trace = mat[0][0] + mat[1][1];
+        } else if (nRows === 3 && nCols === 3) {
+          det = mat[0][0] * (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1])
+              - mat[0][1] * (mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0])
+              + mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]);
+          trace = mat[0][0] + mat[1][1] + mat[2][2];
+        } else {
+          det = 0;
+          trace = mat[0][0] || 0;
+        }
+
+        if (detEl) detEl.textContent = det.toFixed(4);
+        if (trEl) trEl.textContent = trace.toFixed(4);
+
+        if (badge) {
+          if (Math.abs(det) > 1e-5) {
+            badge.textContent = "Invertible Matrix (det ≠ 0)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-bold";
+          } else {
+            badge.textContent = "Singular Matrix (det = 0)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 font-bold";
+          }
+        }
+
+        if (taylorEl) {
+          taylorEl.textContent = `det(M) = ${det.toFixed(4)}, Tr(M) = ${trace.toFixed(4)}`;
+        }
+        return;
+      }
+
+      let h11 = 0, h12 = 0, h22 = 0;
+      let h13 = 0, h23 = 0, h33 = 0;
+
+      if (symH11 && symH12 && symH22) {
+        try {
+          h11 = Number(symH11.evaluate(scope)) || 0;
+          h12 = Number(symH12.evaluate(scope)) || 0;
+          h22 = Number(symH22.evaluate(scope)) || 0;
+          if (is3D && symH33) {
+            h13 = Number(symH13 ? symH13.evaluate(scope) : 0) || 0;
+            h23 = Number(symH23 ? symH23.evaluate(scope) : 0) || 0;
+            h33 = Number(symH33.evaluate(scope)) || 0;
+          }
+        } catch {
+          h11 = null;
+        }
+      }
+
+      if (h11 === null || isNaN(h11) || isNaN(h12) || isNaN(h22)) {
+        const h = 1e-3;
+        const x = state.x0, y = state.y0, z = state.z0;
+        const f0 = evaluateAt(x, y, z).z;
+        const fXp = evaluateAt(x + h, y, z).z;
+        const fXm = evaluateAt(x - h, y, z).z;
+        const fYp = evaluateAt(x, y + h, z).z;
+        const fYm = evaluateAt(x, y - h, z).z;
+        const fXpYp = evaluateAt(x + h, y + h, z).z;
+        const fXpYm = evaluateAt(x + h, y - h, z).z;
+        const fXmYp = evaluateAt(x - h, y + h, z).z;
+        const fXmYm = evaluateAt(x - h, y - h, z).z;
+
+        h11 = (fXp - 2 * f0 + fXm) / (h * h);
+        h22 = (fYp - 2 * f0 + fYm) / (h * h);
+        h12 = (fXpYp - fXpYm - fXmYp + fXmYm) / (4 * h * h);
+
+        if (is3D) {
+          const fZp = evaluateAt(x, y, z + h).z;
+          const fZm = evaluateAt(x, y, z - h).z;
+          h33 = (fZp - 2 * f0 + fZm) / (h * h);
+          const fXpZp = evaluateAt(x + h, y, z + h).z;
+          const fXpZm = evaluateAt(x + h, y, z - h).z;
+          const fXmZp = evaluateAt(x - h, y, z + h).z;
+          const fXmZm = evaluateAt(x - h, y, z - h).z;
+          h13 = (fXpZp - fXpZm - fXmZp + fXmZm) / (4 * h * h);
+
+          const fYpZp = evaluateAt(x, y + h, z + h).z;
+          const fYpZm = evaluateAt(x, y + h, z - h).z;
+          const fYmZp = evaluateAt(x, y - h, z + h).z;
+          const fYmZm = evaluateAt(x, y - h, z - h).z;
+          h23 = (fYpZp - fYpZm - fYmZp + fYmZm) / (4 * h * h);
+        }
+      }
+
+      let det = 0;
+      let trace = 0;
+
+      if (is3D) {
+        det = h11 * (h22 * h33 - h23 * h23)
+            - h12 * (h12 * h33 - h23 * h13)
+            + h13 * (h12 * h23 - h22 * h13);
+        trace = h11 + h22 + h33;
+
+        const numLatex = `\\mathbf{H}f(\\mathbf{a}) = \\begin{bmatrix}
+          ${h11.toFixed(3)} & ${h12.toFixed(3)} & ${h13.toFixed(3)} \\\\[4pt]
+          ${h12.toFixed(3)} & ${h22.toFixed(3)} & ${h23.toFixed(3)} \\\\[4pt]
+          ${h13.toFixed(3)} & ${h23.toFixed(3)} & ${h33.toFixed(3)}
+        \\end{bmatrix}_{3 \\times 3}`;
+        katex.render(numLatex, numMatrixEl, { throwOnError: false });
+
+        const delta1 = h11;
+        const delta2 = h11 * h22 - h12 * h12;
+        const delta3 = det;
+
+        if (badge) {
+          if (delta1 > 1e-4 && delta2 > 1e-4 && delta3 > 1e-4) {
+            badge.textContent = "Local Min 🟢 (Positive Definite)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-bold";
+          } else if (delta1 < -1e-4 && delta2 > 1e-4 && delta3 < -1e-4) {
+            badge.textContent = "Local Max 🔴 (Negative Definite)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-bold";
+          } else if (Math.abs(delta3) > 1e-4) {
+            badge.textContent = "Saddle Point 🟡 (Indefinite)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 font-bold";
+          } else {
+            badge.textContent = "Test Inconclusive ⚪ (det = 0)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-bold";
+          }
+        }
+
+      } else {
+        det = h11 * h22 - h12 * h12;
+        trace = h11 + h22;
+
+        const numLatex = `\\mathbf{H}f(\\mathbf{a}) = \\begin{bmatrix}
+          ${h11.toFixed(3)} & ${h12.toFixed(3)} \\\\[4pt]
+          ${h12.toFixed(3)} & ${h22.toFixed(3)}
+        \\end{bmatrix}_{2 \\times 2}`;
+        katex.render(numLatex, numMatrixEl, { throwOnError: false });
+
+        if (badge) {
+          if (det > 1e-4) {
+            if (h11 > 1e-4) {
+              badge.textContent = "Local Min 🟢 (D > 0, f₁₁ > 0)";
+              badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 font-bold";
+            } else if (h11 < -1e-4) {
+              badge.textContent = "Local Max 🔴 (D > 0, f₁₁ < 0)";
+              badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-bold";
+            } else {
+              badge.textContent = "Degenerate Extrema";
+              badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 font-bold";
+            }
+          } else if (det < -1e-4) {
+            badge.textContent = "Saddle Point 🟡 (D < 0)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 font-bold";
+          } else {
+            badge.textContent = "Test Inconclusive ⚪ (D = 0)";
+            badge.className = "text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-bold";
+          }
+        }
+      }
+
+      if (detEl) detEl.textContent = det.toFixed(4);
+      if (trEl) trEl.textContent = trace.toFixed(4);
+
+      if (taylorEl) {
+        const pt = evaluateAt(state.x0, state.y0, state.z0);
+        const v1 = state.notation === 'x1x2' ? 'x₁' : 'x';
+        const v2 = state.notation === 'x1x2' ? 'x₂' : 'y';
+        const sX = -state.x0 >= 0 ? `+ ${(-state.x0).toFixed(2)}` : `- ${state.x0.toFixed(2)}`;
+        const sY = -state.y0 >= 0 ? `+ ${(-state.y0).toFixed(2)}` : `- ${state.y0.toFixed(2)}`;
+
+        const poly = `T₂(x) = ${pt.z.toFixed(2)} + ${pt.fx.toFixed(2)}(${v1}${sX}) + ${pt.fy.toFixed(2)}(${v2}${sY}) + 0.5[${h11.toFixed(2)}(${v1}${sX})² + 2(${h12.toFixed(2)})(${v1}${sX})(${v2}${sY}) + ${h22.toFixed(2)}(${v2}${sY})²]`;
+        taylorEl.textContent = poly;
       }
     }
 
@@ -1874,149 +2472,6 @@
         }
       }
 
-      // 8. MATRIX Df GRAPHICAL REPRESENTATION AS ARROWS & PARALLELOGRAM
-      if (state.show_matrix_arrows) {
-        if (pt0.isVector) {
-          // For vector function: Column vectors of Jacobian J_F and vector F(a)
-          const jMax = Math.max(1, Math.abs(pt0.j11 || 0), Math.abs(pt0.j12 || 0), Math.abs(pt0.j21 || 0), Math.abs(pt0.j22 || 0));
-          const s = (span * 0.18) / jMax;
-
-          // Column 1 arrow: ∂F/∂x₁ = ⟨J₁₁, J₂₁⟩
-          const col1X = state.x0 + (pt0.j11 || 0) * s;
-          const col1Y = state.y0 + (pt0.j21 || 0) * s;
-          traces.push({
-            type: 'scatter',
-            mode: 'lines+markers+text',
-            x: [state.x0, col1X],
-            y: [state.y0, col1Y],
-            text: ['', `∂F/∂x₁ [${(pt0.j11||0).toFixed(2)}, ${(pt0.j21||0).toFixed(2)}]ᵀ`],
-            textposition: 'top left',
-            textfont: { color: '#06b6d4', size: 11 },
-            line: { color: '#06b6d4', width: 3.5 },
-            marker: { size: [0, 8], color: '#06b6d4', symbol: 'arrow' },
-            name: 'Jacobian Col 1 (∂F/∂x₁)'
-          });
-
-          // Column 2 arrow: ∂F/∂x₂ = ⟨J₁₂, J₂₂⟩
-          const col2X = state.x0 + (pt0.j12 || 0) * s;
-          const col2Y = state.y0 + (pt0.j22 || 0) * s;
-          traces.push({
-            type: 'scatter',
-            mode: 'lines+markers+text',
-            x: [state.x0, col2X],
-            y: [state.y0, col2Y],
-            text: ['', `∂F/∂x₂ [${(pt0.j12||0).toFixed(2)}, ${(pt0.j22||0).toFixed(2)}]ᵀ`],
-            textposition: 'top right',
-            textfont: { color: '#8b5cf6', size: 11 },
-            line: { color: '#8b5cf6', width: 3.5 },
-            marker: { size: [0, 8], color: '#8b5cf6', symbol: 'arrow' },
-            name: 'Jacobian Col 2 (∂F/∂x₂)'
-          });
-
-          // Vector value F(a) = ⟨F₁, F₂⟩
-          const fMag = Math.sqrt(pt0.f1 * pt0.f1 + pt0.f2 * pt0.f2);
-          if (fMag > 1e-4) {
-            const sf = (span * 0.22) / Math.max(1, fMag);
-            const tipFx = state.x0 + pt0.f1 * sf;
-            const tipFy = state.y0 + pt0.f2 * sf;
-            traces.push({
-              type: 'scatter',
-              mode: 'lines+markers+text',
-              x: [state.x0, tipFx],
-              y: [state.y0, tipFy],
-              text: ['', `F(a) = ⟨${pt0.f1.toFixed(2)}, ${pt0.f2.toFixed(2)}⟩`],
-              textposition: 'bottom right',
-              textfont: { color: '#ec4899', size: 11 },
-              line: { color: '#ec4899', width: 4 },
-              marker: { size: [0, 9], color: '#ec4899', symbol: 'arrow' },
-              name: 'Vector Value F(a)'
-            });
-          }
-        } else {
-          // For scalar field: Derivative components Df · e₁ and Df · e₂ and parallelogram
-          const s = gradMag > 0 ? (span * 0.2) / Math.max(1, gradMag) : (span * 0.05);
-          const c1X = state.x0 + pt0.fx * s;
-          const c1Y = state.y0;
-          const c2X = state.x0;
-          const c2Y = state.y0 + pt0.fy * s;
-          const sumX = state.x0 + pt0.fx * s;
-          const sumY = state.y0 + pt0.fy * s;
-
-          // Arrow along x1: Df · e₁ = ∂f/∂x₁ · e₁
-          traces.push({
-            type: 'scatter',
-            mode: 'lines+markers+text',
-            x: [state.x0, c1X],
-            y: [state.y0, c1Y],
-            text: ['', `Df·e₁ = ${pt0.fx.toFixed(2)}`],
-            textposition: 'bottom right',
-            textfont: { color: '#06b6d4', size: 11 },
-            line: { color: '#06b6d4', width: 3.5 },
-            marker: { size: [0, 8], color: '#06b6d4', symbol: 'arrow' },
-            name: 'Df · e₁ (∂f/∂x₁)'
-          });
-
-          // Arrow along x2: Df · e₂ = ∂f/∂x₂ · e₂
-          traces.push({
-            type: 'scatter',
-            mode: 'lines+markers+text',
-            x: [state.x0, c2X],
-            y: [state.y0, c2Y],
-            text: ['', `Df·e₂ = ${pt0.fy.toFixed(2)}`],
-            textposition: 'top left',
-            textfont: { color: '#8b5cf6', size: 11 },
-            line: { color: '#8b5cf6', width: 3.5 },
-            marker: { size: [0, 8], color: '#8b5cf6', symbol: 'arrow' },
-            name: 'Df · e₂ (∂f/∂x₂)'
-          });
-
-          // Dashed Parallelogram lines connecting components to gradient sum
-          traces.push({
-            type: 'scatter',
-            mode: 'lines',
-            x: [c1X, sumX, c2X],
-            y: [c1Y, sumY, c2Y],
-            line: { color: '#a78bfa', width: 2, dash: 'dot' },
-            showlegend: false,
-            hoverinfo: 'none'
-          });
-        }
-      }
-
-      // 9. DISPLACEMENT VECTOR Δx AND LINEAR APPROXIMATION
-      if (state.show_approx_arrow) {
-        const dx = state.test_x - state.x0;
-        const dy = state.test_y - state.y0;
-        const approxDelta = pt0.fx * dx + pt0.fy * dy;
-
-        // Test Point marker
-        traces.push({
-          type: 'scatter',
-          mode: 'markers+text',
-          x: [state.test_x],
-          y: [state.test_y],
-          text: [`x_test (${state.test_x.toFixed(2)}, ${state.test_y.toFixed(2)})`],
-          textposition: 'top right',
-          textfont: { color: '#ec4899', size: 11, family: 'sans-serif' },
-          marker: { size: 9, color: '#ec4899', symbol: 'diamond', line: { color: '#ffffff', width: 1.5 } },
-          name: 'Test Point x_test'
-        });
-
-        // Displacement vector Δx arrow from a to x_test
-        traces.push({
-          type: 'scatter',
-          mode: 'lines+markers+text',
-          x: [state.x0, state.test_x],
-          y: [state.y0, state.test_y],
-          text: ['', `Δx: Df·Δx ≈ ${approxDelta.toFixed(3)}`],
-          textposition: 'top center',
-          textfont: { color: '#ec4899', size: 11 },
-          line: { color: '#ec4899', width: 2.5, dash: 'dash' },
-          marker: { size: [0, 8], color: '#ec4899', symbol: 'arrow' },
-          name: 'Displacement Δx (x_test - a)'
-        });
-      }
-
       return traces;
     }
 
@@ -2127,61 +2582,6 @@
           line: { color: '#f59e0b', width: 7 },
           marker: { size: [0, 6], color: '#f59e0b', symbol: 'diamond' },
           name: '3D Gradient ∇f'
-        });
-      }
-
-      // 3D Tangent Plane Basis Vectors (T₁, T₂)
-      if (state.show_3d_tangent_basis) {
-        const L = 2.2;
-        // T1 = <1, 0, fx>
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines+markers+text',
-          x: [state.x0, state.x0 + L],
-          y: [state.y0, state.y0],
-          z: [pt0.z, pt0.z + L * pt0.fx],
-          text: ['', 'T₁ = ⟨1, 0, fx⟩'],
-          textposition: 'top right',
-          textfont: { color: '#06b6d4', size: 10 },
-          line: { color: '#06b6d4', width: 6 },
-          marker: { size: [0, 5], color: '#06b6d4', symbol: 'diamond' },
-          name: 'Tangent Basis T₁'
-        });
-
-        // T2 = <0, 1, fy>
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines+markers+text',
-          x: [state.x0, state.x0],
-          y: [state.y0, state.y0 + L],
-          z: [pt0.z, pt0.z + L * pt0.fy],
-          text: ['', 'T₂ = ⟨0, 1, fy⟩'],
-          textposition: 'top left',
-          textfont: { color: '#8b5cf6', size: 10 },
-          line: { color: '#8b5cf6', width: 6 },
-          marker: { size: [0, 5], color: '#8b5cf6', symbol: 'diamond' },
-          name: 'Tangent Basis T₂'
-        });
-      }
-
-      // 3D Linearization Error Rod |f(x) - g(x)| at test point
-      if (state.show_error_rod) {
-        const testPt = evaluateAt(state.test_x, state.test_y);
-        const approxVal = evaluateAffineAt(state.test_x, state.test_y);
-        const err = Math.abs(testPt.z - approxVal);
-
-        traces.push({
-          type: 'scatter3d',
-          mode: 'lines+markers+text',
-          x: [state.test_x, state.test_x],
-          y: [state.test_y, state.test_y],
-          z: [approxVal, testPt.z],
-          text: [`Affine g = ${approxVal.toFixed(2)}`, `Exact f = ${testPt.z.toFixed(2)} (Err: ${err.toFixed(3)})`],
-          textposition: 'top center',
-          textfont: { color: '#f59e0b', size: 10 },
-          line: { color: '#f59e0b', width: 7 },
-          marker: { size: 6, color: '#f59e0b', symbol: 'circle' },
-          name: '3D Error Rod |f - g|'
         });
       }
 
@@ -2451,16 +2851,29 @@
       }, 50);
     }
 
-    function setEvaluationPoint(x, y) {
+    function setEvaluationPoint(x, y, z) {
       state.x0 = parseFloat(x);
       state.y0 = parseFloat(y);
+      if (z !== undefined && z !== null && !isNaN(parseFloat(z))) {
+        state.z0 = parseFloat(z);
+      }
 
-      document.getElementById('x0Input').value = state.x0.toFixed(2);
-      document.getElementById('y0Input').value = state.y0.toFixed(2);
-      document.getElementById('x0Slider').value = state.x0;
-      document.getElementById('y0Slider').value = state.y0;
+      const xInp = document.getElementById('x0Input');
+      const yInp = document.getElementById('y0Input');
+      const xSld = document.getElementById('x0Slider');
+      const ySld = document.getElementById('y0Slider');
+      const zInp = document.getElementById('z0Input');
+      const zSld = document.getElementById('z0Slider');
+
+      if (xInp) xInp.value = state.x0.toFixed(2);
+      if (yInp) yInp.value = state.y0.toFixed(2);
+      if (xSld) xSld.value = state.x0;
+      if (ySld) ySld.value = state.y0;
+      if (zInp) zInp.value = state.z0.toFixed(2);
+      if (zSld) zSld.value = state.z0;
 
       updateCalculusCalculations();
+      updateHessianCalculations();
       updateAffineCalculations();
       renderPlots(true);
     }
@@ -2566,16 +2979,21 @@
       const onPointType = () => {
         const x = parseFloat(document.getElementById('x0Input').value) || 0;
         const y = parseFloat(document.getElementById('y0Input').value) || 0;
-        setEvaluationPoint(x, y);
+        const z = parseFloat(document.getElementById('z0Input')?.value) || 0;
+        setEvaluationPoint(x, y, z);
       };
       document.getElementById('x0Input').addEventListener('input', onPointType);
       document.getElementById('y0Input').addEventListener('input', onPointType);
+      document.getElementById('z0Input')?.addEventListener('input', onPointType);
 
       document.getElementById('x0Slider').addEventListener('input', (e) => {
-        setEvaluationPoint(e.target.value, state.y0);
+        setEvaluationPoint(e.target.value, state.y0, state.z0);
       });
       document.getElementById('y0Slider').addEventListener('input', (e) => {
-        setEvaluationPoint(state.x0, e.target.value);
+        setEvaluationPoint(state.x0, e.target.value, state.z0);
+      });
+      document.getElementById('z0Slider')?.addEventListener('input', (e) => {
+        setEvaluationPoint(state.x0, state.y0, e.target.value);
       });
 
       // Linearization test point inputs
@@ -2588,7 +3006,7 @@
         updateAffineCalculations();
       });
 
-      // Geometric Toggles
+      // Geometric Toggles (Clean, essential multivariable geometry)
       document.getElementById('showNormalLine').addEventListener('change', (e) => {
         state.show_normal_line = e.target.checked;
         renderPlots(true);
@@ -2615,22 +3033,6 @@
       });
       document.getElementById('showAllContourLines').addEventListener('change', (e) => {
         state.show_all_contours = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById('showMatrixArrows').addEventListener('change', (e) => {
-        state.show_matrix_arrows = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById('showApproxVector').addEventListener('change', (e) => {
-        state.show_approx_arrow = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById('show3DTangentBasis').addEventListener('change', (e) => {
-        state.show_3d_tangent_basis = e.target.checked;
-        renderPlots(true);
-      });
-      document.getElementById('showErrorRod').addEventListener('change', (e) => {
-        state.show_error_rod = e.target.checked;
         renderPlots(true);
       });
 
@@ -2662,8 +3064,12 @@
         document.getElementById('notationXY').className = "px-2.5 py-1 rounded text-slate-600 dark:text-slate-400 hover:text-violet-700 dark:hover:text-white font-mono text-[11px]";
         document.getElementById('labelX1').textContent = "a₁ coordinate (x₁):";
         document.getElementById('labelX2').textContent = "a₂ coordinate (x₂):";
+        const l3 = document.getElementById('labelX3');
+        if (l3) l3.textContent = "a₃ coordinate (x₃):";
         document.getElementById('dfdx1_title').textContent = "∂f / ∂x₁ :";
         document.getElementById('dfdx2_title').textContent = "∂f / ∂x₂ :";
+        const d3 = document.getElementById('dfdx3_title');
+        if (d3) d3.textContent = "∂f / ∂x₃ :";
         compileExpressions();
         renderPlots(true);
       });
@@ -2673,8 +3079,12 @@
         document.getElementById('notationX1X2').className = "px-2.5 py-1 rounded text-slate-600 dark:text-slate-400 hover:text-violet-700 dark:hover:text-white font-mono text-[11px]";
         document.getElementById('labelX1').textContent = "a coordinate (x):";
         document.getElementById('labelX2').textContent = "b coordinate (y):";
+        const l3 = document.getElementById('labelX3');
+        if (l3) l3.textContent = "c coordinate (z):";
         document.getElementById('dfdx1_title').textContent = "∂f / ∂x :";
         document.getElementById('dfdx2_title').textContent = "∂f / ∂y :";
+        const d3 = document.getElementById('dfdx3_title');
+        if (d3) d3.textContent = "∂f / ∂z :";
         compileExpressions();
         renderPlots(true);
       });
@@ -2722,6 +3132,7 @@
         }
         if (preset.x0 !== undefined) state.x0 = preset.x0;
         if (preset.y0 !== undefined) state.y0 = preset.y0;
+        if (preset.z0 !== undefined) state.z0 = preset.z0; else state.z0 = 0.0;
         if (preset.x) {
           state.x_range = preset.x;
           syncDomainInputs();
@@ -2733,7 +3144,7 @@
         if (preset.mode) setViewMode(preset.mode);
 
         compileExpressions();
-        setEvaluationPoint(state.x0, state.y0);
+        setEvaluationPoint(state.x0, state.y0, state.z0);
         renderPlots(false);
       });
 
@@ -2764,6 +3175,7 @@
           r: state.radius_r,
           x0: state.x0,
           y0: state.y0,
+          z0: state.z0,
           mode: state.view_mode,
           xr: state.x_range,
           yr: state.y_range,
@@ -3055,8 +3467,17 @@
         if (y0Inp) y0Inp.value = state.y0.toFixed(2);
         if (x0Sld) x0Sld.value = state.x0;
         if (y0Sld) y0Sld.value = state.y0;
+        if (pointA.length >= 3) {
+          state.z0 = parseFloat(pointA[2]);
+          const z0Inp = document.getElementById("z0Input");
+          const z0Sld = document.getElementById("z0Slider");
+          if (z0Inp) z0Inp.value = state.z0.toFixed(2);
+          if (z0Sld) z0Sld.value = state.z0;
+          changes.push(`a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)}, ${state.z0.toFixed(2)})`);
+        } else {
+          changes.push(`a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`);
+        }
         applied = true;
-        changes.push(`a = (${state.x0.toFixed(2)}, ${state.y0.toFixed(2)})`);
       }
 
       const vMode = action.mode || action.view_mode;
@@ -3083,11 +3504,6 @@
           const el = document.getElementById('showGradientVector');
           if (el) el.checked = state.show_gradient;
         }
-        if (t.show_matrix_arrows !== undefined) {
-          state.show_matrix_arrows = Boolean(t.show_matrix_arrows);
-          const el = document.getElementById('showMatrixArrows');
-          if (el) el.checked = state.show_matrix_arrows;
-        }
         if (t.show_normal_line !== undefined) {
           state.show_normal_line = Boolean(t.show_normal_line);
           const el = document.getElementById('showNormalLine');
@@ -3107,9 +3523,11 @@
 
       if (applied) {
         compileExpressions();
+        setEvaluationPoint(state.x0, state.y0, state.z0);
         syncDomainInputs();
         updateCalculusCalculations();
         updateAffineCalculations();
+        updateHessianCalculations();
         renderPlots(false);
 
         const toastMsg = action.description || action.summary || `Applied: ${changes.join(', ')}`;
@@ -3397,7 +3815,7 @@ The Normal Line is the line passing through point $\\mathbf{a} = (${a1}, ${a2})$
       }
 
       // Extremum / critical points / Hessian
-      if (q.includes('extremum') || q.includes('minimum') || q.includes('maximum') || q.includes('saddle') || q.includes('critical') || q.includes('hessian') || q.includes('min') || q.includes('max') || q.includes('экстремум')) {
+      if (q.includes('extremum') || q.includes('minimum') || q.includes('maximum') || q.includes('saddle') || q.includes('critical') || q.includes('hessian') || q.includes('heissian') || q.includes('гессиан') || q.includes('second derivative') || q.includes('min') || q.includes('max') || q.includes('экстремум')) {
         const dHess = ctx.hessian.det.toFixed(3);
         const fxx = ctx.hessian.f_xx.toFixed(3);
         const fyy = ctx.hessian.f_yy.toFixed(3);
@@ -3475,7 +3893,8 @@ Here is the real-time mathematical snapshot from the graph:
 💬 *Suggested Questions:*
 - "Make me an ellipse"
 - "Show me a saddle surface"
-- "Create a rotational vector field [-x2, x1]"
+- "Explain the Hessian matrix and 2nd derivative test"
+- "Enter a 3x3 matrix in R3: [1, 2, 3; 4, 5, 6; 7, 8, 9]"
 - "Explain the gradient at this point"
 - "What does the affine function g(x) represent?"
 - "Why is the normal perpendicular at 90 degrees?"`;
