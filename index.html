@@ -150,6 +150,9 @@
         <option value="r3_matrix">Matrix in ℝ³ [1, 2, 3; 4, 5, 6; 7, 8, 9]</option>
         <option value="r3_vector">Vector in ℝ³ [x₁; x₂; x₃]</option>
         <option value="r3_sphere">Sphere in ℝ³ x₁² + x₂² + x₃² (c=4)</option>
+        <option value="cylindrical_parabola">Parabolic Cylinder [x₁;x₂;x₃] s.t. x₁²/4 + x₂ = 1</option>
+        <option value="cylindrical_ellipse">Elliptic Cylinder [x₁;x₂;x₃] s.t. x₁²/4 + x₂²/9 = 1</option>
+        <option value="lagrange_opt">Lagrange Surface: x₁² + x₂² s.t. x₁ + 2x₂ = 4</option>
         <option value="ripple">Water Droplet Ripple (Sinc)</option>
         <option value="gaussian">Gaussian Bell Wave Packet</option>
         <option value="egg_carton">Egg Carton Grid</option>
@@ -251,6 +254,17 @@
                   </button>
                 </div>
               </div>
+            </div>
+
+            <!-- Active Requirement / Constraint Indicator (Click to jump to Tab 4) -->
+            <div id="tab1ConstraintBadge" class="p-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-900/60 text-xs flex items-center justify-between hidden">
+              <div class="flex items-center space-x-1.5 text-indigo-900 dark:text-cyan-300 font-semibold truncate mr-2">
+                <i data-lucide="check-square" class="w-3.5 h-3.5 shrink-0 text-indigo-600 dark:text-cyan-400"></i>
+                <span class="truncate">Req: <span id="tab1ConstraintText" class="font-mono font-bold text-violet-700 dark:text-purple-200"></span></span>
+              </div>
+              <button id="tab1GoToConstraintBtn" class="shrink-0 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/60 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-800 dark:text-indigo-200 text-[10px] font-bold rounded-md border border-indigo-300 dark:border-indigo-700 transition">
+                Edit ⚙️
+              </button>
             </div>
           </div>
 
@@ -639,6 +653,54 @@
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[1, 2, 3; 4, 5, 6; 7, 8, 9]</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">sin(x1) * cos(x2)</button>
               <button type="button" class="math-insert px-2 py-1 bg-violet-100/70 dark:bg-purple-900/40 hover:bg-violet-600 hover:text-white rounded-lg text-violet-800 dark:text-purple-200 font-mono transition shadow-sm">[-x2, x1]</button>
+            </div>
+          </div>
+
+          <!-- Optional Requirement / Constraint / Domain Condition Card -->
+          <div class="bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:to-purple-950/40 p-3.5 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 shadow-sm space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label for="constraintInput" class="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300 flex items-center space-x-1.5">
+                <i data-lucide="check-square" class="w-3.5 h-3.5 text-indigo-600 dark:text-cyan-400"></i>
+                <span>Optional Requirement / Constraint</span>
+              </label>
+              <span id="constraintStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 font-medium">Inactive</span>
+            </div>
+
+            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-tight">
+              Specify an equality rule or domain condition (e.g. <span class="font-mono text-indigo-700 dark:text-cyan-300 font-semibold">x1^2/4 + x2 = 1</span> or <span class="font-mono text-indigo-700 dark:text-cyan-300 font-semibold">x1^2/4 + x2^2/9 = 1</span>). For 3D vectors like <span class="font-mono text-indigo-700 dark:text-cyan-300 font-semibold">[x1; x2; x3]</span>, this extrudes a 3D cylinder since <span class="font-mono">x3</span> is free!
+            </p>
+
+            <div class="relative">
+              <input 
+                type="text" 
+                id="constraintInput" 
+                value="" 
+                class="w-full bg-white dark:bg-purple-950 font-mono text-xs sm:text-sm text-slate-900 dark:text-purple-100 px-3 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none tracking-wide shadow-inner transition font-semibold"
+                placeholder="e.g. x1^2/4 + x2 = 1 or x1^2/4 + x2^2/9 = 1"
+                spellcheck="false"
+              >
+            </div>
+
+            <!-- Quick insert chips for constraints -->
+            <div class="flex flex-wrap gap-1 text-[10px] pt-0.5">
+              <button type="button" class="constraint-chip px-2 py-0.5 bg-indigo-100/70 dark:bg-indigo-900/40 hover:bg-indigo-600 hover:text-white rounded-md text-indigo-800 dark:text-indigo-200 font-mono transition shadow-sm" data-val="x1^2/4 + x2 = 1">x1^2/4 + x2 = 1</button>
+              <button type="button" class="constraint-chip px-2 py-0.5 bg-indigo-100/70 dark:bg-indigo-900/40 hover:bg-indigo-600 hover:text-white rounded-md text-indigo-800 dark:text-indigo-200 font-mono transition shadow-sm" data-val="x1^2/4 + x2^2/9 = 1">x1^2/4 + x2^2/9 = 1</button>
+              <button type="button" class="constraint-chip px-2 py-0.5 bg-indigo-100/70 dark:bg-indigo-900/40 hover:bg-indigo-600 hover:text-white rounded-md text-indigo-800 dark:text-indigo-200 font-mono transition shadow-sm" data-val="x1^2 + x2^2 = 4">x1^2 + x2^2 = 4</button>
+              <button type="button" class="constraint-chip px-2 py-0.5 bg-indigo-100/70 dark:bg-indigo-900/40 hover:bg-indigo-600 hover:text-white rounded-md text-indigo-800 dark:text-indigo-200 font-mono transition shadow-sm" data-val="x1 + 2*x2 = 4">x1 + 2*x2 = 4</button>
+              <button type="button" class="constraint-chip px-2 py-0.5 bg-indigo-100/70 dark:bg-indigo-900/40 hover:bg-indigo-600 hover:text-white rounded-md text-indigo-800 dark:text-indigo-200 font-mono transition shadow-sm" data-val="x1^2 + x2^2 <= 4">x1^2 + x2^2 &lt;= 4</button>
+              <button type="button" id="clearConstraintBtn" class="px-2 py-0.5 bg-rose-100 dark:bg-rose-950 hover:bg-rose-600 hover:text-white rounded-md text-rose-700 dark:text-rose-300 font-mono transition shadow-sm font-bold">Clear ✕</button>
+            </div>
+
+            <!-- Toggles for constraint display -->
+            <div class="flex items-center space-x-3 pt-1 text-[11px] text-slate-700 dark:text-slate-300">
+              <label class="flex items-center space-x-1.5 cursor-pointer hover:text-indigo-600">
+                <input type="checkbox" id="showConstraintSurface" checked class="rounded bg-white dark:bg-purple-950 border-indigo-300 text-indigo-600">
+                <span>3D Cylinder / Surface</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer hover:text-indigo-600">
+                <input type="checkbox" id="showConstraintCurve" checked class="rounded bg-white dark:bg-purple-950 border-indigo-300 text-indigo-600">
+                <span>2D/3D Trace</span>
+              </label>
             </div>
           </div>
 
@@ -1127,38 +1189,65 @@
       is_matrix_input: false,
       f1_expr_raw: '',
       f2_expr_raw: '',
-      f3_expr_raw: ''
+      f3_expr_raw: '',
+      constraint_raw: '',
+      show_constraint_surface: true,
+      show_constraint_curve: true
     };
 
     const presets = {
       circle_example: {
         expr: "x1^2 + x2^2",
+        constraint: "",
         c: 4.0, r: 2.0, x0: 2.0, y0: 0.0, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: '2d'
       },
       ellipse: {
         expr: "x1^2 / 4 + x2^2 / 9",
+        constraint: "",
         c: 1.0, r: 1.0, x0: 1.0, y0: 1.5, z0: 0.0,
         x: [-6, 6], y: [-6, 6], mode: 'split'
       },
       saddle: {
         expr: "x1^2 - x2^2",
+        constraint: "",
         c: 1.0, r: 1.0, x0: 1.414, y0: 1.0, z0: 0.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       r3_matrix: {
         expr: "[1, 2, 3; 4, 5, 6; 7, 8, 9]",
+        constraint: "",
         c: 1.0, r: 1.0, x0: 1.0, y0: 1.0, z0: 1.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       r3_vector: {
         expr: "[x1; x2; x3]",
+        constraint: "",
         c: 1.0, r: 1.0, x0: 1.0, y0: 2.0, z0: 1.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       r3_sphere: {
         expr: "x1^2 + x2^2 + x3^2",
+        constraint: "",
         c: 4.0, r: 2.0, x0: 1.0, y0: 1.0, z0: 1.414,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      cylindrical_parabola: {
+        expr: "[x1; x2; x3]",
+        constraint: "x1^2/4 + x2 = 1",
+        c: 1.0, r: 1.0, x0: 0.0, y0: 1.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      cylindrical_ellipse: {
+        expr: "[x1; x2; x3]",
+        constraint: "x1^2 / 4 + x2^2 / 9 = 1",
+        c: 1.0, r: 1.0, x0: 2.0, y0: 0.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      lagrange_opt: {
+        expr: "x1^2 + x2^2",
+        constraint: "x1 + 2*x2 = 4",
+        c: 4.0, r: 2.0, x0: 0.8, y0: 1.6, z0: 0.0,
         x: [-5, 5], y: [-5, 5], mode: 'split'
       },
       vector_field: {
@@ -1206,6 +1295,16 @@
     let symH31 = null, symH32 = null, symH33 = null;
     let symJacobian = null;
     let parsedMatrixData = null;
+    let compiledConstraint = null;
+    let constraintInfo = {
+      active: false,
+      raw: "",
+      op: "=",
+      isInequality: false,
+      isCylinderX3: false,
+      hasX3: false,
+      polylines: []
+    };
 
     function parseMatrixOrVector(exprStr) {
       if (!exprStr) return { isMatrix: false, isVector: false };
@@ -1302,6 +1401,240 @@
 
     function parseVectorComponents(exprStr) {
       return parseMatrixOrVector(exprStr);
+    }
+
+    // -------------------------------------------------------------------------
+    // Marching Squares 2D Contour Extractor & Constraint Engine
+    // -------------------------------------------------------------------------
+    function extractContourLines(evalFunc, xRange, yRange, nx = 75, ny = 75) {
+      const xMin = Math.min(xRange[0], xRange[1]);
+      const xMax = Math.max(xRange[0], xRange[1]);
+      const yMin = Math.min(yRange[0], yRange[1]);
+      const yMax = Math.max(yRange[0], yRange[1]);
+      const dx = (xMax - xMin) / (nx - 1);
+      const dy = (yMax - yMin) / (ny - 1);
+
+      const grid = [];
+      for (let j = 0; j < ny; j++) {
+        const row = new Float64Array(nx);
+        const y = yMin + j * dy;
+        for (let i = 0; i < nx; i++) {
+          const x = xMin + i * dx;
+          row[i] = evalFunc(x, y);
+        }
+        grid.push(row);
+      }
+
+      function interp(x1, y1, v1, x2, y2, v2) {
+        if (Math.abs(v2 - v1) < 1e-12) return [(x1 + x2) / 2, (y1 + y2) / 2];
+        const t = Math.max(0, Math.min(1, -v1 / (v2 - v1)));
+        return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)];
+      }
+
+      const segments = [];
+      for (let j = 0; j < ny - 1; j++) {
+        const y0 = yMin + j * dy;
+        const y1 = y0 + dy;
+        for (let i = 0; i < nx - 1; i++) {
+          const x0 = xMin + i * dx;
+          const x1 = x0 + dx;
+
+          const vTL = grid[j + 1][i];
+          const vTR = grid[j + 1][i + 1];
+          const vBR = grid[j][i + 1];
+          const vBL = grid[j][i];
+
+          let mask = 0;
+          if (vTL > 0) mask |= 1;
+          if (vTR > 0) mask |= 2;
+          if (vBR > 0) mask |= 4;
+          if (vBL > 0) mask |= 8;
+
+          if (mask === 0 || mask === 15) continue;
+
+          const pTop = (mask & 3) === 1 || (mask & 3) === 2 ? interp(x0, y1, vTL, x1, y1, vTR) : null;
+          const pRight = (mask & 6) === 2 || (mask & 6) === 4 ? interp(x1, y1, vTR, x1, y0, vBR) : null;
+          const pBottom = (mask & 12) === 4 || (mask & 12) === 8 ? interp(x1, y0, vBR, x0, y0, vBL) : null;
+          const pLeft = (mask & 9) === 8 || (mask & 9) === 1 ? interp(x0, y0, vBL, x0, y1, vTL) : null;
+
+          if (mask === 1 || mask === 14) segments.push([pLeft, pTop]);
+          else if (mask === 2 || mask === 13) segments.push([pTop, pRight]);
+          else if (mask === 3 || mask === 12) segments.push([pLeft, pRight]);
+          else if (mask === 4 || mask === 11) segments.push([pRight, pBottom]);
+          else if (mask === 5) { segments.push([pLeft, pTop]); segments.push([pRight, pBottom]); }
+          else if (mask === 6 || mask === 9) segments.push([pTop, pBottom]);
+          else if (mask === 7 || mask === 8) segments.push([pLeft, pBottom]);
+          else if (mask === 10) { segments.push([pTop, pRight]); segments.push([pLeft, pBottom]); }
+        }
+      }
+
+      const used = new Uint8Array(segments.length);
+      const tolSq = (dx * dx + dy * dy) * 2.5;
+      const polylines = [];
+
+      for (let s = 0; s < segments.length; s++) {
+        if (used[s]) continue;
+        used[s] = 1;
+        const poly = [segments[s][0], segments[s][1]];
+        let extended = true;
+
+        while (extended) {
+          extended = false;
+          const head = poly[0];
+          const tail = poly[poly.length - 1];
+
+          for (let k = 0; k < segments.length; k++) {
+            if (used[k]) continue;
+            const pA = segments[k][0];
+            const pB = segments[k][1];
+
+            if ((tail[0] - pA[0]) ** 2 + (tail[1] - pA[1]) ** 2 <= tolSq) {
+              poly.push(pB); used[k] = 1; extended = true; break;
+            } else if ((tail[0] - pB[0]) ** 2 + (tail[1] - pB[1]) ** 2 <= tolSq) {
+              poly.push(pA); used[k] = 1; extended = true; break;
+            } else if ((head[0] - pA[0]) ** 2 + (head[0] - pA[0]) ** 2 <= tolSq) {
+              poly.unshift(pB); used[k] = 1; extended = true; break;
+            } else if ((head[0] - pB[0]) ** 2 + (head[1] - pB[1]) ** 2 <= tolSq) {
+              poly.unshift(pA); used[k] = 1; extended = true; break;
+            }
+          }
+        }
+        if (poly.length >= 3) {
+          polylines.push(poly);
+        }
+      }
+
+      // Merge polylines whose endpoints meet
+      let merged = true;
+      while (merged) {
+        merged = false;
+        for (let i = 0; i < polylines.length; i++) {
+          const p1 = polylines[i];
+          const p1Head = p1[0];
+          const p1Tail = p1[p1.length - 1];
+          for (let j = i + 1; j < polylines.length; j++) {
+            const p2 = polylines[j];
+            const p2Head = p2[0];
+            const p2Tail = p2[p2.length - 1];
+
+            if ((p1Tail[0] - p2Head[0]) ** 2 + (p1Tail[1] - p2Head[1]) ** 2 <= tolSq * 4) {
+              p1.push(...p2); polylines.splice(j, 1); merged = true; break;
+            } else if ((p1Tail[0] - p2Tail[0]) ** 2 + (p1Tail[1] - p2Tail[1]) ** 2 <= tolSq * 4) {
+              p1.push(...p2.slice().reverse()); polylines.splice(j, 1); merged = true; break;
+            } else if ((p1Head[0] - p2Tail[0]) ** 2 + (p1Head[1] - p2Tail[1]) ** 2 <= tolSq * 4) {
+              p1.unshift(...p2); polylines.splice(j, 1); merged = true; break;
+            } else if ((p1Head[0] - p2Head[0]) ** 2 + (p1Head[1] - p2Head[1]) ** 2 <= tolSq * 4) {
+              p1.unshift(...p2.slice().reverse()); polylines.splice(j, 1); merged = true; break;
+            }
+          }
+          if (merged) break;
+        }
+      }
+
+      // If curve is closed loop, ensure smooth closure
+      polylines.forEach(p => {
+        if ((p[0][0] - p[p.length - 1][0]) ** 2 + (p[0][1] - p[p.length - 1][1]) ** 2 <= tolSq * 4) {
+          p.push([p[0][0], p[0][1]]);
+        }
+      });
+
+      return polylines;
+    }
+
+    function compileConstraint() {
+      const statusEl = document.getElementById("constraintStatus");
+      const badgeTab1 = document.getElementById("tab1ConstraintBadge");
+      const badgeTab1Text = document.getElementById("tab1ConstraintText");
+      const raw = (state.constraint_raw || "").trim();
+
+      if (!raw) {
+        constraintInfo = { active: false, raw: "", op: "=", isInequality: false, isCylinderX3: false, hasX3: false, polylines: [] };
+        if (statusEl) {
+          statusEl.textContent = "Optional (Inactive)";
+          statusEl.className = "text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 font-medium";
+        }
+        if (badgeTab1) badgeTab1.classList.add("hidden");
+        return;
+      }
+
+      // Detect operator
+      let op = "=";
+      let lhs = raw;
+      let rhs = "0";
+
+      if (raw.includes("<=")) { op = "<="; const p = raw.split("<="); lhs = p[0]; rhs = p[1]; }
+      else if (raw.includes(">=")) { op = ">="; const p = raw.split(">="); lhs = p[0]; rhs = p[1]; }
+      else if (raw.includes("<")) { op = "<"; const p = raw.split("<"); lhs = p[0]; rhs = p[1]; }
+      else if (raw.includes(">")) { op = ">"; const p = raw.split(">"); lhs = p[0]; rhs = p[1]; }
+      else if (raw.includes("==")) { op = "="; const p = raw.split("=="); lhs = p[0]; rhs = p[1]; }
+      else if (raw.includes("=")) { op = "="; const p = raw.split("="); lhs = p[0]; rhs = p[1]; }
+
+      const diffStr = `(${lhs.trim()}) - (${rhs.trim()})`;
+      let compiledDiff = null;
+
+      try {
+        compiledDiff = math.compile(diffStr);
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = "Syntax Error";
+          statusEl.className = "text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-700 font-medium";
+        }
+        constraintInfo = { active: false, raw, op, isInequality: false, isCylinderX3: false, hasX3: false, polylines: [] };
+        if (badgeTab1) badgeTab1.classList.add("hidden");
+        return;
+      }
+
+      const hasX3 = raw.includes("x3") || raw.includes("z");
+      const isInequality = ["<=", ">=", "<", ">"].includes(op);
+      const isCylinderX3 = !hasX3 && !isInequality;
+
+      constraintInfo = {
+        active: true,
+        raw,
+        op,
+        diffStr,
+        compiledDiff,
+        isInequality,
+        isCylinderX3,
+        hasX3,
+        polylines: []
+      };
+
+      if (statusEl) {
+        if (isCylinderX3) {
+          statusEl.textContent = "Active: 3D Cylinder (x₃ free)";
+          statusEl.className = "text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-cyan-300 border border-indigo-300 dark:border-indigo-700 font-bold";
+        } else if (isInequality) {
+          statusEl.textContent = "Active: Domain Restriction";
+          statusEl.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold";
+        } else {
+          statusEl.textContent = "Active: 3D Constraint";
+          statusEl.className = "text-[10px] px-2 py-0.5 rounded-full bg-violet-100 dark:bg-purple-900/60 text-violet-700 dark:text-purple-300 border border-violet-300 dark:border-purple-700 font-bold";
+        }
+      }
+
+      if (badgeTab1 && badgeTab1Text) {
+        badgeTab1Text.textContent = raw;
+        badgeTab1.classList.remove("hidden");
+      }
+
+      // Extract 2D polylines for the constraint curve g(x1, x2) = 0
+      try {
+        const evalDiff = (xVal, yVal) => {
+          const sc = getEvalScope(xVal, yVal, 0);
+          try {
+            const v = Number(compiledDiff.evaluate(sc));
+            return isFinite(v) ? v : 0;
+          } catch {
+            return 0;
+          }
+        };
+
+        const polylines = extractContourLines(evalDiff, state.x_range, state.y_range, 75, 75);
+        constraintInfo.polylines = polylines;
+      } catch (err) {
+        console.warn("Could not extract constraint contour polylines:", err);
+      }
     }
 
     let isInternalUpdating = false;
@@ -1402,6 +1735,13 @@
           if (z0Sld) z0Sld.value = state.z0;
         }
 
+        // Constraint / requirement
+        if (data.constraint !== undefined) {
+          state.constraint_raw = String(data.constraint);
+          const cInp = document.getElementById("constraintInput");
+          if (cInp) cInp.value = state.constraint_raw;
+        }
+
         // View mode (2d, 3d, split)
         if (data.mode && ['2d', '3d', 'split'].includes(data.mode)) {
           state.view_mode = data.mode;
@@ -1470,6 +1810,7 @@
     // Math Compilation & Differentiation
     // -------------------------------------------------------------------------
     function compileExpressions() {
+      compileConstraint();
       const formulaStatus = document.getElementById("formulaStatus");
       const expr = state.f_expr_raw;
 
@@ -1744,6 +2085,7 @@
         ? (is3D ? '(x_1, x_2, x_3)' : '(x_1, x_2)')
         : (is3D ? '(x, y, z)' : '(x, y)');
 
+      let formulaLatex = "";
       if (state.is_matrix_input && parsedMatrixData) {
         const texRows = parsedMatrixData.matrix.map(row => 
           row.map(cell => {
@@ -1751,17 +2093,27 @@
           }).join(' & ')
         );
         const prefix = state.is_vector_func ? `\\mathbf{F}${varTuple} = ` : `\\mathbf{M} = `;
-        katex.render(`${prefix}\\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}`, container, { throwOnError: false });
-        return;
+        formulaLatex = `${prefix}\\begin{bmatrix} ${texRows.join(' \\\\[4pt] ')} \\end{bmatrix}`;
+      } else {
+        try {
+          const parsed = math.parse(state.f_expr_raw);
+          const tex = parsed.toTex({ parenthesis: 'auto' });
+          formulaLatex = `f${varTuple} = ${tex}`;
+        } catch (e) {
+          formulaLatex = `f = ${state.f_expr_raw}`;
+        }
       }
 
-      try {
-        const parsed = math.parse(state.f_expr_raw);
-        const tex = parsed.toTex({ parenthesis: 'auto' });
-        katex.render(`f${varTuple} = ${tex}`, container, { throwOnError: false });
-      } catch (e) {
-        container.textContent = `f = ${state.f_expr_raw}`;
+      if (constraintInfo.active && constraintInfo.raw) {
+        const v1 = state.notation === 'x1x2' ? 'x_1' : 'x';
+        const v2 = state.notation === 'x1x2' ? 'x_2' : 'y';
+        const v3 = state.notation === 'x1x2' ? 'x_3' : 'z';
+        let cleanReq = constraintInfo.raw
+          .replace(/x1/g, v1).replace(/x2/g, v2).replace(/x3/g, v3);
+        formulaLatex += ` \\quad \\left[\\text{s.t. } ${cleanReq}\\right]`;
       }
+
+      katex.render(formulaLatex, container, { throwOnError: false });
     }
 
     function getEvalScope(xVal, yVal, zVal) {
@@ -2281,6 +2633,17 @@
           } catch {
             val = null;
           }
+          if (val !== null && constraintInfo.active && constraintInfo.isInequality && constraintInfo.compiledDiff) {
+            try {
+              const diffVal = Number(constraintInfo.compiledDiff.evaluate(scope));
+              let ok = true;
+              if (constraintInfo.op === '<=') ok = diffVal <= 1e-5;
+              else if (constraintInfo.op === '<') ok = diffVal < 0;
+              else if (constraintInfo.op === '>=') ok = diffVal >= -1e-5;
+              else if (constraintInfo.op === '>') ok = diffVal > 0;
+              if (!ok) val = null;
+            } catch {}
+          }
           row[i] = val;
         }
         zArr.push(Array.from(row));
@@ -2472,6 +2835,21 @@
         }
       }
 
+      // 8. Constraint / Requirement Curves in 2D
+      if (constraintInfo.active && state.show_constraint_curve && constraintInfo.polylines && constraintInfo.polylines.length > 0) {
+        constraintInfo.polylines.forEach((poly, idx) => {
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: poly.map(p => p[0]),
+            y: poly.map(p => p[1]),
+            line: { color: '#8b5cf6', width: 3.5, dash: 'solid' },
+            name: idx === 0 ? `Requirement: ${state.constraint_raw}` : undefined,
+            showlegend: idx === 0
+          });
+        });
+      }
+
       return traces;
     }
 
@@ -2480,29 +2858,119 @@
     // -------------------------------------------------------------------------
     function build3DTraces(mesh) {
       const traces = [];
-      const pt0 = evaluateAt(state.x0, state.y0);
+      const pt0 = evaluateAt(state.x0, state.y0, state.z0);
+      const isIdentityVector = (state.f_expr_raw || '').includes('[x1;') || 
+                               (state.f_expr_raw || '').includes('[x1,') || 
+                               (state.f_expr_raw || '').includes('[x;') || 
+                               (state.f_expr_raw || '').includes('[x,');
 
-      traces.push({
-        type: 'surface',
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z,
-        colorscale: state.color_scale,
-        opacity: state.opacity,
-        showscale: true,
-        contours: {
-          z: { show: true, usecolormap: true, highlightcolor: "#ffffff", project: { z: true } }
-        },
-        colorbar: {
-          len: 0.65, thickness: 12,
-          tickfont: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', size: 10 },
-          title: { text: 'z', font: { color: state.theme === 'dark' ? '#cbd5e1' : '#1e1b4b', size: 12 } }
-        },
-        name: 'f(x₁, x₂)'
-      });
+      // 1. Regular 3D Function Surface (unless it's identity vector with active constraint)
+      if (!isIdentityVector || !constraintInfo.active) {
+        traces.push({
+          type: 'surface',
+          x: mesh.x,
+          y: mesh.y,
+          z: mesh.z,
+          colorscale: state.color_scale,
+          opacity: state.opacity,
+          showscale: true,
+          contours: {
+            z: { show: true, usecolormap: true, highlightcolor: "#ffffff", project: { z: true } }
+          },
+          colorbar: {
+            len: 0.65, thickness: 12,
+            tickfont: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', size: 10 },
+            title: { text: 'z', font: { color: state.theme === 'dark' ? '#cbd5e1' : '#1e1b4b', size: 12 } }
+          },
+          name: state.is_matrix_input ? '||F||' : 'f(x₁, x₂)'
+        });
+      }
 
-      // Affine Function Surface z = g(x) (Tangent Plane!)
-      if (state.show_affine_plane) {
+      // 2. 3D Cylinder / Extruded Constraint Surface (x3 free!)
+      if (constraintInfo.active && state.show_constraint_surface && constraintInfo.polylines && constraintInfo.polylines.length > 0) {
+        const zMin = state.y_range[0] || -5;
+        const zMax = state.y_range[1] || 5;
+        const numZ = 24;
+
+        constraintInfo.polylines.forEach((poly, idx) => {
+          if (poly.length < 2) return;
+          const cylX = [];
+          const cylY = [];
+          const cylZ = [];
+
+          for (let j = 0; j < numZ; j++) {
+            const rowX = [];
+            const rowY = [];
+            const rowZ = [];
+            const zVal = zMin + j * (zMax - zMin) / (numZ - 1);
+            for (let k = 0; k < poly.length; k++) {
+              rowX.push(poly[k][0]);
+              rowY.push(poly[k][1]);
+              rowZ.push(zVal);
+            }
+            cylX.push(rowX);
+            cylY.push(rowY);
+            cylZ.push(rowZ);
+          }
+
+          traces.push({
+            type: 'surface',
+            x: cylX,
+            y: cylY,
+            z: cylZ,
+            colorscale: [
+              [0, '#06b6d4'],
+              [0.5, '#6366f1'],
+              [1, '#a855f7']
+            ],
+            opacity: 0.82,
+            showscale: isIdentityVector,
+            contours: {
+              z: { show: true, width: 2, color: '#ffffff', project: { z: false } }
+            },
+            lighting: { ambient: 0.85, diffuse: 0.8, specular: 0.3, roughness: 0.4 },
+            name: idx === 0 ? `Cylinder: ${state.constraint_raw}` : undefined,
+            showlegend: idx === 0
+          });
+        });
+      }
+
+      // 3. 3D Restriction Curve (f restricted to constraint)
+      if (constraintInfo.active && state.show_constraint_curve && constraintInfo.polylines && constraintInfo.polylines.length > 0 && !isIdentityVector) {
+        constraintInfo.polylines.forEach((poly, idx) => {
+          const curX = [];
+          const curY = [];
+          const curZ = [];
+          for (let k = 0; k < poly.length; k++) {
+            const xVal = poly[k][0];
+            const yVal = poly[k][1];
+            const sc = getEvalScope(xVal, yVal, 0);
+            let zVal = 0;
+            try {
+              zVal = compiledF ? Number(compiledF.evaluate(sc)) : 0;
+              if (isNaN(zVal) || !isFinite(zVal)) continue;
+            } catch { continue; }
+            curX.push(xVal);
+            curY.push(yVal);
+            curZ.push(zVal);
+          }
+          if (curX.length > 1) {
+            traces.push({
+              type: 'scatter3d',
+              mode: 'lines',
+              x: curX,
+              y: curY,
+              z: curZ,
+              line: { color: '#f43f5e', width: 8 },
+              name: idx === 0 ? `f on constraint` : undefined,
+              showlegend: idx === 0
+            });
+          }
+        });
+      }
+
+      // 4. Affine Function Surface z = g(x) (Tangent Plane!)
+      if (state.show_affine_plane && !isIdentityVector) {
         const span = 2.8;
         const tx = [state.x0 - span, state.x0 + span];
         const ty = [state.y0 - span, state.y0 + span];
@@ -2529,14 +2997,15 @@
         });
       }
 
-      // Point a in 3D
+      // 5. Point a in 3D
+      const aZ = (isIdentityVector || state.dim === 3) ? state.z0 : pt0.z;
       traces.push({
         type: 'scatter3d',
         mode: 'markers+text',
         x: [state.x0],
         y: [state.y0],
-        z: [pt0.z],
-        text: [`a(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${pt0.z.toFixed(1)})`],
+        z: [aZ],
+        text: [`a(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)}, ${aZ.toFixed(1)})`],
         textposition: 'top center',
         textfont: { color: '#f43f5e', size: 11 },
         marker: { size: 7, color: '#f43f5e', symbol: 'circle' },
@@ -3133,6 +3602,15 @@
         if (preset.x0 !== undefined) state.x0 = preset.x0;
         if (preset.y0 !== undefined) state.y0 = preset.y0;
         if (preset.z0 !== undefined) state.z0 = preset.z0; else state.z0 = 0.0;
+        if (preset.constraint !== undefined) {
+          state.constraint_raw = preset.constraint;
+          const cInp = document.getElementById("constraintInput");
+          if (cInp) cInp.value = preset.constraint;
+        } else {
+          state.constraint_raw = "";
+          const cInp = document.getElementById("constraintInput");
+          if (cInp) cInp.value = "";
+        }
         if (preset.x) {
           state.x_range = preset.x;
           syncDomainInputs();
@@ -3146,6 +3624,57 @@
         compileExpressions();
         setEvaluationPoint(state.x0, state.y0, state.z0);
         renderPlots(false);
+      });
+
+      // Constraint Input & Chips Listeners
+      let constraintDebounce = null;
+      document.getElementById("constraintInput")?.addEventListener("input", (e) => {
+        clearTimeout(constraintDebounce);
+        constraintDebounce = setTimeout(() => {
+          state.constraint_raw = e.target.value;
+          compileExpressions();
+          renderPlots(true);
+        }, 200);
+      });
+
+      document.querySelectorAll(".constraint-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const val = btn.getAttribute("data-val") || btn.textContent;
+          const input = document.getElementById("constraintInput");
+          if (input) input.value = val;
+          state.constraint_raw = val;
+          compileExpressions();
+          renderPlots(true);
+        });
+      });
+
+      document.getElementById("clearConstraintBtn")?.addEventListener("click", () => {
+        const input = document.getElementById("constraintInput");
+        if (input) input.value = "";
+        state.constraint_raw = "";
+        compileExpressions();
+        renderPlots(true);
+      });
+
+      document.getElementById("showConstraintSurface")?.addEventListener("change", (e) => {
+        state.show_constraint_surface = e.target.checked;
+        renderPlots(true);
+      });
+
+      document.getElementById("showConstraintCurve")?.addEventListener("change", (e) => {
+        state.show_constraint_curve = e.target.checked;
+        renderPlots(true);
+      });
+
+      document.getElementById("tab1GoToConstraintBtn")?.addEventListener("click", () => {
+        switchTab("tabNavFunctions", "tabContentFunctions");
+        setTimeout(() => {
+          const input = document.getElementById("constraintInput");
+          if (input) {
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
       });
 
       // Fullscreen
@@ -3171,6 +3700,7 @@
       document.getElementById("shareBtn").addEventListener("click", () => {
         const data = {
           f: state.f_expr_raw,
+          constraint: state.constraint_raw,
           c: state.level_c,
           r: state.radius_r,
           x0: state.x0,
@@ -3336,6 +3866,8 @@
 
       return {
         formula: state.f_expr_raw,
+        constraint: state.constraint_raw,
+        has_constraint: Boolean((state.constraint_raw || "").trim()),
         point_a: [state.x0, state.y0],
         f_at_a: ptA.z,
         derivatives: { fx: ptA.fx, fy: ptA.fy },
@@ -3433,6 +3965,15 @@
         if (fInp) fInp.value = expr;
         applied = true;
         changes.push(`f = ${expr}`);
+      }
+
+      const constraint = action.constraint || action.requirement || action.req;
+      if (constraint !== undefined && typeof constraint === 'string') {
+        state.constraint_raw = constraint;
+        const cInp = document.getElementById("constraintInput");
+        if (cInp) cInp.value = constraint;
+        applied = true;
+        changes.push(`req: ${constraint}`);
       }
 
       if (action.c !== undefined && !isNaN(Number(action.c))) {
@@ -3610,6 +4151,38 @@
       const fx = ctx.derivatives.fx.toFixed(3);
       const fy = ctx.derivatives.fy.toFixed(3);
       const mag = ctx.gradient_magnitude.toFixed(3);
+
+      // 0. Request for cylinder / constraint / free variable in R3
+      if (q.includes('cylinder') || q.includes('цилиндр') || q.includes('requirement') || q.includes('constraint') || q.includes('domain') || q.includes('ограничение') || q.includes('free variable') || q.includes('x1^2/4')) {
+        const isParabola = q.includes('parabol') || q.includes('парабол') || q.includes('+ x2 =') || q.includes('+x2=');
+        const fVec = "[x1; x2; x3]";
+        const reqStr = isParabola ? "x1^2 / 4 + x2 = 1" : "x1^2 / 4 + x2^2 / 9 = 1";
+        const cylName = isParabola ? "Parabolic Cylinder" : "Elliptic Cylinder";
+        const cylEq = isParabola ? "\\frac{x_1^2}{4} + x_2 = 1" : "\\frac{x_1^2}{4} + \\frac{x_2^2}{9} = 1";
+
+        return `### 🏛️ ${cylName} in $\\mathbb{R}^3$ via Free Variable $x_3$
+
+In multivariable calculus and $\\mathbb{R}^3$ geometry, an equation involving only two coordinates (such as $x_1$ and $x_2$) defines a **cylindrical surface**:
+$$${cylEq}$$
+
+- **Free Variable $x_3$:** The coordinate $x_3$ does not appear in the constraint equation. Therefore, $x_3$ can take **any real value** ($-\\infty < x_3 < \\infty$).
+- **Geometric Construction:** The 2D cross-section curve in the $(x_1, x_2)$ plane is extruded vertically along the entire $x_3$ axis, forming a cylinder parallel to $x_3$.
+- **Parametric Identity Vector:** With $\\mathbf{F}(x_1, x_2, x_3) = \\begin{bmatrix} x_1 \\\\ x_2 \\\\ x_3 \\end{bmatrix}$ and requirement $${cylEq}$, the 3D viewport plots the continuous 3D cylinder surface!
+
+I have applied the identity vector field $\\mathbf{F} = [x_1; x_2; x_3]$ and requirement \`${reqStr}\` into your inputs:
+
+\`\`\`graph_action
+{
+  "action": "update_graph",
+  "description": "${cylName} in R3",
+  "f": "${fVec}",
+  "constraint": "${reqStr}",
+  "mode": "3d",
+  "xr": [-5, 5],
+  "yr": [-5, 5]
+}
+\`\`\``;
+      }
 
       // 1. Request to create ellipse
       if (q.includes('ellipse') || q.includes('еллипс') || q.includes('эллипс')) {

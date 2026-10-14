@@ -49,6 +49,7 @@ def call_gemini_api(api_key: str, message: str, context: dict = None) -> tuple:
         context = {}
 
     formula = context.get('formula', 'x1^2 + x2^2')
+    constraint = context.get('constraint', '')
     v1 = context.get('v1', 'x1')
     v2 = context.get('v2', 'x2')
     point_a = context.get('point_a', [0, 0])
@@ -78,6 +79,7 @@ Use clear, pedagogical explanations with formatted LaTeX math ($...$ for inline 
 
 Current live graph state:
 - Function: f({v1}, {v2}) = {formula}
+- Optional Requirement / Constraint: {constraint if constraint else 'None'}
 - Point a = ({pt_x}, {pt_y})
 - Value f(a) = {fa}
 - Partial derivatives: df/d{v1} = {fx}, df/d{v2} = {fy}
@@ -91,14 +93,15 @@ Current live graph state:
 
 Instructions:
 1. Answer the user's question directly in English using LaTeX math equations ($...$ and $$...$$).
-2. Ground your answer on the exact function and numeric values provided in the snapshot.
+2. Ground your answer on the exact function, constraint, and numeric values provided in the snapshot.
 3. Be concise, mathematically accurate, and educational.
-4. ACTION EXECUTION: If the user asks to create, graph, set, or change a function, shape (such as an ellipse, circle, saddle, paraboloid, ripple, cone, vector field, etc.), level set c, evaluation point a, domain, or toggles:
+4. ACTION EXECUTION: If the user asks to create, graph, set, or change a function, shape (such as an ellipse, circle, saddle, paraboloid, cylinder, cylindrical ellipse/parabola, ripple, cone, vector field, etc.), requirement/constraint (e.g. x1^2/4 + x2 = 1, x1^2/4 + x2^2/9 = 1, or inequalities like x1^2 + x2^2 <= 4), level set c, evaluation point a, domain, or toggles:
    Provide your mathematical explanation in English with LaTeX equations first.
    At the very end of your response, you MUST output a ```graph_action code block with valid JSON containing the exact parameters to apply to the web application:
    ```graph_action
    {{
      "f": "x1^2 / 4 + x2^2 / 9",
+     "constraint": "",
      "c": 1.0,
      "r": 1.0,
      "point_a": [1.0, 1.5],
@@ -115,6 +118,7 @@ Instructions:
      "summary": "Configured ellipse: f(x1, x2) = x1^2/4 + x2^2/9 at level c=1 with point a=(1.0, 1.5)"
    }}
    ```
+   For cylindrical surfaces in R3 (where e.g. x3 is free and x1, x2 satisfy an equation like x1^2/4 + x2 = 1), use "f": "[x1; x2; x3]" and "constraint": "x1^2/4 + x2 = 1" with "view_mode": "3d".
    The web application will automatically parse this JSON and update the HTML input text boxes and graph."""
 
     candidate_models = [

@@ -79,7 +79,16 @@ def test_index_html_structure():
         "z0Input",
         "dfdx3_card",
         "applyGraphAction",
-        "graphActionToast"
+        "graphActionToast",
+        "constraintInput",
+        "constraintStatus",
+        "compileConstraint",
+        "extractContourLines",
+        "cylindrical_parabola",
+        "cylindrical_ellipse",
+        "showConstraintSurface",
+        "showConstraintCurve",
+        "tab1ConstraintBadge"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"
