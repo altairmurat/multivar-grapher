@@ -8,3 +8,4 @@ ENV/
 multivar_plot.html
 .DS_Store
 Thumbs.db
+__marimo__/

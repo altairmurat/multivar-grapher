@@ -160,6 +160,11 @@
         <option value="sombrero">Animated Sombrero Wave</option>
       </select>
 
+      <button id="headerMarimoBtn" title="Launch Reactive Marimo App & Animations" class="p-1.5 sm:px-2.5 sm:py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center space-x-1">
+        <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+        <span class="hidden sm:inline">Marimo ⚡</span>
+      </button>
+
       <button id="shareBtn" title="Copy Shareable Link" class="p-1.5 sm:px-2.5 sm:py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-violet-500/20 transition flex items-center space-x-1">
         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
         <span class="hidden lg:inline">Share</span>
@@ -814,6 +819,28 @@
             <span class="text-[11px] hidden sm:inline">Reset</span>
           </button>
 
+          <div class="h-4 w-px bg-violet-200 dark:bg-purple-800"></div>
+
+          <!-- 3D Orbit Animation Button -->
+          <button id="orbit3DBtn" class="px-2.5 py-1 rounded-lg bg-white dark:bg-purple-950 border border-violet-200 dark:border-purple-800 hover:bg-violet-100 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 transition flex items-center space-x-1 shadow-sm font-semibold" title="Auto Orbit 3D Camera (Continuous Spin)">
+            <i data-lucide="play" class="w-3.5 h-3.5 text-violet-600 dark:text-cyan-400" id="orbitIcon"></i>
+            <span class="text-[11px]" id="orbitText">Orbit 3D</span>
+          </button>
+
+          <!-- Level Slice Animation Button -->
+          <button id="animateSliceBtn" class="px-2.5 py-1 rounded-lg bg-white dark:bg-purple-950 border border-violet-200 dark:border-purple-800 hover:bg-violet-100 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 transition flex items-center space-x-1 shadow-sm font-semibold" title="Animate Level Constant c(t) Slicing">
+            <i data-lucide="waves" class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400"></i>
+            <span class="text-[11px]" id="sliceText">Slice c</span>
+          </button>
+
+          <!-- Marimo Reactive App Button -->
+          <button id="openMarimoBtn" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white transition flex items-center space-x-1 shadow-sm font-bold" title="Open Marimo Reactive Python App">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-200"></i>
+            <span class="text-[11px]">Marimo ⚡</span>
+          </button>
+
+          <div class="h-4 w-px bg-violet-200 dark:bg-purple-800"></div>
+
           <!-- Fullscreen Toggle -->
           <button id="fullscreenBtn" class="p-1.5 rounded-lg hover:bg-violet-100 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-300 transition" title="Toggle Fullscreen">
             <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
@@ -1139,6 +1166,56 @@
     </div>
   </div>
 
+  <!-- Marimo Reactive Notebook Modal -->
+  <div id="marimoModal" class="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c0721] border border-violet-200 dark:border-purple-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-violet-100 dark:border-purple-900 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="zap" class="w-5 h-5 text-emerald-500"></i>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Marimo Reactive Python Suite</h3>
+        </div>
+        <button id="closeMarimoModal" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl flex items-start space-x-3">
+          <i data-lucide="sparkles" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="font-bold text-emerald-900 dark:text-emerald-200 text-xs">Pure Python Reactivity & Smooth Animations</h4>
+            <p class="text-[11px] text-emerald-800 dark:text-emerald-300 mt-1">
+              MultivarGrapher now includes a full reactive application powered by <a href="https://github.com/marimo-team/marimo" target="_blank" class="underline font-bold text-emerald-700 dark:text-emerald-300">marimo</a>. It features reactive dataflow, dynamic affine approximations, Hessian extremum classifications, 3D cylindrical extrusions, and client-side animated frames!
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-bold text-slate-800 dark:text-white text-xs">🚀 How to Run the Marimo Reactive App:</h4>
+          <div class="bg-slate-900 text-purple-200 p-3 rounded-xl font-mono text-[11px] space-y-1">
+            <div class="text-slate-400"># 1. Launch reactive web app in browser:</div>
+            <div class="text-emerald-400 select-all font-bold">python main.py --marimo</div>
+            <div class="text-slate-400 mt-2"># Or directly via marimo CLI:</div>
+            <div class="text-cyan-300 select-all font-bold">marimo run app.py</div>
+            <div class="text-slate-400 mt-2"># 2. Launch reactive notebook editor mode:</div>
+            <div class="text-purple-300 select-all">marimo edit app.py</div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-violet-50 dark:bg-purple-950/40 border border-violet-200 dark:border-purple-800 rounded-2xl space-y-2">
+          <h4 class="font-bold text-violet-900 dark:text-purple-200 text-xs">📦 Standalone Exported App (WASM / Zero-Server):</h4>
+          <p class="text-[11px]">
+            You can also open the exported standalone HTML version of the Marimo notebook directly:
+          </p>
+          <a href="marimo_app.html" target="_blank" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-sm text-xs transition">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span>Open Exported marimo_app.html</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main JavaScript Logic -->
   <script>
     lucide.createIcons();
@@ -1192,7 +1269,9 @@
       f3_expr_raw: '',
       constraint_raw: '',
       show_constraint_surface: true,
-      show_constraint_curve: true
+      show_constraint_curve: true,
+      is_orbiting: false,
+      is_slicing: false
     };
 
     const presets = {
@@ -3292,6 +3371,129 @@
       });
     }
 
+    // -------------------------------------------------------------------------
+    // Animation Loops (Orbit 3D & Slicing c)
+    // -------------------------------------------------------------------------
+    let orbitAngle = 0;
+    let orbitAnimationId = null;
+
+    function toggleOrbit3D() {
+      state.is_orbiting = !state.is_orbiting;
+      const btn = document.getElementById('orbit3DBtn');
+      const icon = document.getElementById('orbitIcon');
+      const txt = document.getElementById('orbitText');
+
+      if (state.is_orbiting) {
+        if (state.view_mode === '2d') {
+          setViewMode('split');
+        }
+        if (btn) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-violet-600 border border-violet-600 text-white transition flex items-center space-x-1 shadow-sm font-semibold";
+        }
+        if (icon) icon.setAttribute('data-lucide', 'pause');
+        if (txt) txt.textContent = 'Pause 3D';
+        lucide.createIcons();
+        startOrbitLoop();
+      } else {
+        if (btn) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-white dark:bg-purple-950 border border-violet-200 dark:border-purple-800 hover:bg-violet-100 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 transition flex items-center space-x-1 shadow-sm font-semibold";
+        }
+        if (icon) icon.setAttribute('data-lucide', 'play');
+        if (txt) txt.textContent = 'Orbit 3D';
+        lucide.createIcons();
+        stopOrbitLoop();
+      }
+    }
+
+    function startOrbitLoop() {
+      if (orbitAnimationId) cancelAnimationFrame(orbitAnimationId);
+      function step() {
+        if (!state.is_orbiting) return;
+        orbitAngle += 0.012;
+        const radius = 2.0;
+        const eyeX = radius * Math.cos(orbitAngle);
+        const eyeY = radius * Math.sin(orbitAngle);
+        const eyeZ = 1.2 + 0.25 * Math.sin(orbitAngle * 0.7);
+        const p3d = document.getElementById('plotContainer3D');
+        if (p3d && p3d._fullLayout && p3d._fullLayout.scene) {
+          Plotly.relayout(p3d, {
+            'scene.camera.eye': { x: eyeX, y: eyeY, z: eyeZ }
+          });
+        }
+        orbitAnimationId = requestAnimationFrame(step);
+      }
+      orbitAnimationId = requestAnimationFrame(step);
+    }
+
+    function stopOrbitLoop() {
+      if (orbitAnimationId) {
+        cancelAnimationFrame(orbitAnimationId);
+        orbitAnimationId = null;
+      }
+    }
+
+    let sliceDirection = 1;
+    let sliceAnimationId = null;
+
+    function toggleSliceAnimation() {
+      state.is_slicing = !state.is_slicing;
+      const btn = document.getElementById('animateSliceBtn');
+      const txt = document.getElementById('sliceText');
+
+      if (state.is_slicing) {
+        if (btn) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-purple-600 border border-purple-600 text-white transition flex items-center space-x-1 shadow-sm font-semibold";
+        }
+        if (txt) txt.textContent = 'Pause c';
+        startSliceLoop();
+      } else {
+        if (btn) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-white dark:bg-purple-950 border border-violet-200 dark:border-purple-800 hover:bg-violet-100 dark:hover:bg-purple-900 text-slate-700 dark:text-purple-200 transition flex items-center space-x-1 shadow-sm font-semibold";
+        }
+        if (txt) txt.textContent = 'Slice c';
+        stopSliceLoop();
+      }
+    }
+
+    function startSliceLoop() {
+      if (sliceAnimationId) cancelAnimationFrame(sliceAnimationId);
+      let lastTime = performance.now();
+      function step(now) {
+        if (!state.is_slicing) return;
+        const dt = Math.min((now - lastTime) / 1000, 0.1);
+        lastTime = now;
+        let nextC = state.level_c + sliceDirection * dt * 2.5;
+        if (nextC >= 7.5) {
+          nextC = 7.5;
+          sliceDirection = -1;
+        } else if (nextC <= -3.5) {
+          nextC = -3.5;
+          sliceDirection = 1;
+        }
+        state.level_c = nextC;
+        const cVal = document.getElementById('levelValueC');
+        const cSld = document.getElementById('levelSliderC');
+        if (cVal) cVal.value = nextC.toFixed(1);
+        if (cSld) cSld.value = nextC;
+        if (state.level_c >= 0) {
+          state.radius_r = Math.sqrt(state.level_c);
+          const rInp = document.getElementById('radiusInputR');
+          if (rInp) rInp.value = state.radius_r.toFixed(2);
+        }
+        updateCalculusCalculations();
+        renderPlots(true);
+        sliceAnimationId = requestAnimationFrame(step);
+      }
+      sliceAnimationId = requestAnimationFrame(step);
+    }
+
+    function stopSliceLoop() {
+      if (sliceAnimationId) {
+        cancelAnimationFrame(sliceAnimationId);
+        sliceAnimationId = null;
+      }
+    }
+
     function setViewMode(mode) {
       state.view_mode = mode;
       const div2D = document.getElementById('plotContainer2D');
@@ -3400,6 +3602,34 @@
         syncDomainInputs();
         renderPlots(false);
       });
+
+      // 3D Orbit Animation
+      const orbitBtn = document.getElementById('orbit3DBtn');
+      if (orbitBtn) {
+        orbitBtn.addEventListener('click', toggleOrbit3D);
+      }
+
+      // Slicing Animation
+      const sliceBtn = document.getElementById('animateSliceBtn');
+      if (sliceBtn) {
+        sliceBtn.addEventListener('click', toggleSliceAnimation);
+      }
+
+      // Marimo Modal Open/Close
+      const openMarimoBtn = document.getElementById('openMarimoBtn');
+      const headerMarimoBtn = document.getElementById('headerMarimoBtn');
+      const closeMarimoModal = document.getElementById('closeMarimoModal');
+      const marimoModal = document.getElementById('marimoModal');
+
+      if (openMarimoBtn && marimoModal) {
+        openMarimoBtn.addEventListener('click', () => marimoModal.classList.remove('hidden'));
+      }
+      if (headerMarimoBtn && marimoModal) {
+        headerMarimoBtn.addEventListener('click', () => marimoModal.classList.remove('hidden'));
+      }
+      if (closeMarimoModal && marimoModal) {
+        closeMarimoModal.addEventListener('click', () => marimoModal.classList.add('hidden'));
+      }
 
       // Theory modal
       document.getElementById('openTheoryBtn').addEventListener('click', () => {

@@ -88,7 +88,12 @@ def test_index_html_structure():
         "cylindrical_ellipse",
         "showConstraintSurface",
         "showConstraintCurve",
-        "tab1ConstraintBadge"
+        "tab1ConstraintBadge",
+        "orbit3DBtn",
+        "animateSliceBtn",
+        "openMarimoBtn",
+        "headerMarimoBtn",
+        "marimoModal"
     ]
     for s in required_strings:
         assert s in content, f"Missing required element/feature in index.html: {s}"
@@ -153,18 +158,21 @@ def test_server_api_endpoints():
             assert data.get("model") == "gemini-3.5-flash-lite"
             print(f" [OK] /api/status responded: {data}")
 
-        # Test /api/chat with missing GEMINI_API_KEY (expects 503 error)
-        chat_url = f"http://127.0.0.1:{test_port}/api/chat"
-        payload = json.dumps({"message": "What is the gradient?", "context": {}}).encode('utf-8')
-        chat_req = urllib.request.Request(chat_url, data=payload, headers={"Content-Type": "application/json"})
-        try:
-            with urllib.request.urlopen(chat_req, timeout=3) as resp:
-                pass
-        except urllib.error.HTTPError as he:
-            assert he.code == 503
-            err_data = json.loads(he.read().decode('utf-8'))
-            assert "GEMINI_API_KEY" in err_data.get("error", "")
-            print(f" [OK] /api/chat cleanly reported 503 missing API key requirement: {err_data}")
+        # Test /api/chat
+        if not data.get("has_gemini_key"):
+            chat_url = f"http://127.0.0.1:{test_port}/api/chat"
+            payload = json.dumps({"message": "What is the gradient?", "context": {}}).encode('utf-8')
+            chat_req = urllib.request.Request(chat_url, data=payload, headers={"Content-Type": "application/json"})
+            try:
+                with urllib.request.urlopen(chat_req, timeout=3) as resp:
+                    pass
+            except urllib.error.HTTPError as he:
+                assert he.code == 503
+                err_data = json.loads(he.read().decode('utf-8'))
+                assert "GEMINI_API_KEY" in err_data.get("error", "")
+                print(f" [OK] /api/chat cleanly reported 503 missing API key requirement: {err_data}")
+        else:
+            print(" [OK] /api/chat GEMINI_API_KEY is present in environment.")
 
         # Test static file serving /
         root_url = f"http://127.0.0.1:{test_port}/"
@@ -182,12 +190,49 @@ def test_server_api_endpoints():
             server_proc.kill()
     print("[OK] Server API endpoints verified successfully!")
 
+def test_marimo_suite():
+    print("Testing Marimo reactive application & export...")
+    app_path = BASE_DIR / "app.py"
+    assert app_path.exists(), "app.py does not exist!"
+
+    # Test marimo check app.py
+    res_check = subprocess.run(
+        [sys.executable, "-m", "marimo", "check", "app.py"],
+        cwd=BASE_DIR,
+        capture_output=True,
+        text=True,
+        encoding="utf-8"
+    )
+    assert res_check.returncode == 0, f"marimo check app.py failed: {res_check.stderr}"
+    print("[OK] marimo check app.py passed successfully!")
+
+    # Test marimo_app.html exists
+    html_path = BASE_DIR / "marimo_app.html"
+    assert html_path.exists(), "marimo_app.html was not generated!"
+    assert html_path.stat().st_size > 50000, "marimo_app.html size too small!"
+    print(f"[OK] marimo_app.html verified ({html_path.stat().st_size} bytes)!")
+
+    # Test main.py --help includes marimo options
+    res_help = subprocess.run(
+        [sys.executable, "main.py", "--help"],
+        cwd=BASE_DIR,
+        capture_output=True,
+        text=True,
+        encoding="utf-8"
+    )
+    assert res_help.returncode == 0
+    assert "--marimo" in res_help.stdout
+    assert "--marimo-edit" in res_help.stdout
+    assert "--export-marimo" in res_help.stdout
+    print("[OK] main.py CLI marimo integration options verified!")
+
 if __name__ == "__main__":
     try:
         test_index_html_structure()
         test_deploy_help()
         test_python_plotter()
         test_server_api_endpoints()
+        test_marimo_suite()
         print("\n[SUCCESS] ALL VERIFICATION TESTS PASSED SUCCESSFULLY!")
     except Exception as e:
         print(f"\n[ERROR] Test failed: {e}")

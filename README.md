@@ -1,7 +1,8 @@
-# 🌌 MultivarGrapher: Affine Functions, Normal Lines & Level Sets
+# 🌌 MultivarGrapher: Affine Functions, Normal Lines, Level Sets & Marimo Suite
 
-An advanced interactive multivariable calculus suite built with **Plotly.js**, **Math.js**, and **KaTeX**.
+An advanced interactive multivariable calculus suite built with **Plotly.js**, **Math.js**, **KaTeX**, and **[marimo](https://github.com/marimo-team/marimo)**.
 
+- ⚡ **Marimo Reactive Python App**: `python main.py --marimo` or `marimo run app.py`
 - 🌐 **Render Web Service** (Auto Gemini AI with `GEMINI_API_KEY`): Ready to deploy with `render.yaml`!
 - 🌐 **GitHub Pages (Static 100% Free)**: [https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)
 
@@ -9,7 +10,15 @@ An advanced interactive multivariable calculus suite built with **Plotly.js**, *
 
 ## ✨ Features & Theory Highlight
 
-### 1. 📐 Affine Function $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$
+### 1. ⚡ Reactive Marimo Python Suite & Animations ([marimo-team/marimo](https://github.com/marimo-team/marimo))
+- **Reactive Dataflow DAG**: Built with Marimo reactive cells (`app.py`) where sliders for evaluation point $\mathbf{a}$, level constant $c$, and preset dropdowns instantly recompute all symbolic derivatives and 3D figures in real time without browser reload.
+- **Cool Interactive Animations**:
+  - **3D Camera Auto-Orbit Spin**: Smoothly orbits camera 360° around the surface to inspect 3D manifold topology.
+  - **Level Slice Slicing $c(t)$**: Smooth animated slicing plane sweeping vertically through the 3D surface, highlighting evolving contour rings.
+  - **Gliding Point $\mathbf{a}(t)$**: Animates evaluation point movement across the surface with tangent planes and normal lines rocking dynamically along the curvature.
+- **Standalone WASM / HTML Export**: Pre-compiled zero-server HTML app `marimo_app.html` that can run anywhere.
+
+### 2. 📐 Affine Function $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$
 - **Mathematical Definition**: The affine function is the best first-order linear approximation (tangent plane) of a differentiable function $f$ near point $\mathbf{a}$:
   $$g(x_1, x_2) = f(a_1, a_2) + \frac{\partial f}{\partial x_1}(\mathbf{a})(x_1 - a_1) + \frac{\partial f}{\partial x_2}(\mathbf{a})(x_2 - a_2)$$
 - **3D Tangent Plane Visualization**: Render the affine function as a semi-transparent surface $z = g(x_1, x_2)$ touching $z = f(x_1, x_2)$ tangentially at point $\mathbf{a}$.
@@ -76,7 +85,19 @@ An advanced interactive multivariable calculus suite built with **Plotly.js**, *
 
 ## 💻 Run Locally
 
+### Standard Web App (index.html + Gemini AI backend)
 ```bash
 python main.py
 ```
 Open [http://localhost:8000/index.html](http://localhost:8000/index.html) in your browser.
+
+### Reactive Marimo Python App (marimo-team/marimo)
+```bash
+python main.py --marimo          # Launches interactive Marimo app in browser
+python main.py --marimo-edit     # Launches Marimo notebook editor
+python main.py --export-marimo   # Re-exports standalone HTML (marimo_app.html)
+```
+Or with the marimo CLI directly:
+```bash
+marimo run app.py
+```

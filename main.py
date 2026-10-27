@@ -447,6 +447,17 @@ GITHUB PAGES hosts the visualizer directly from your repository:
 4. Click "Save".
 
 Your URL: https://<YOUR-USERNAME>.github.io/<REPO-NAME>/
+
+------------------------------------------------------------------------
+OPTION 3: REACTIVE MARIMO NOTEBOOK & APP (https://github.com/marimo-team/marimo)
+------------------------------------------------------------------------
+Run the fully reactive Python multivariable app powered by Marimo:
+    python main.py --marimo          # Launches interactive app in browser
+    python main.py --marimo-edit     # Launches Marimo reactive notebook editor
+    python main.py --export-marimo   # Exports self-contained HTML (marimo_app.html)
+
+To deploy Marimo directly on Render:
+    Set Start Command: marimo run app.py --host 0.0.0.0 --port $PORT --no-token
 ========================================================================
 """
     print(instructions)
@@ -465,6 +476,26 @@ def init_git_repo():
     except FileNotFoundError:
         print("❌ 'git' is not installed or not in PATH.")
 
+def run_marimo_app(port: int = 8000, host: str = "127.0.0.1", edit_mode: bool = False, open_browser: bool = True):
+    """Launches the reactive Marimo application (app.py)."""
+    import subprocess
+    action = "edit" if edit_mode else "run"
+    cmd = [sys.executable, "-m", "marimo", action, "app.py", "--port", str(port), "--host", host]
+    if not open_browser:
+        cmd.append("--headless")
+    if not edit_mode:
+        cmd.append("--no-token")
+    print(f"🚀 Launching Marimo Reactive App ({action}) on http://{host}:{port} ...")
+    subprocess.run(cmd, cwd=BASE_DIR)
+
+def export_marimo_html(out_file: str = "marimo_app.html"):
+    """Exports app.py to a self-contained interactive HTML file using Marimo."""
+    import subprocess
+    cmd = [sys.executable, "-m", "marimo", "export", "html", "app.py", "-o", out_file]
+    print(f"📦 Exporting reactive Marimo application to {out_file}...")
+    subprocess.run(cmd, cwd=BASE_DIR, check=True)
+    print(f"✅ Exported successfully to {out_file}!")
+
 def main():
     default_port = int(os.environ.get("PORT", 8000))
     default_host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
@@ -475,6 +506,9 @@ def main():
     parser.add_argument("--host", type=str, default=default_host, help=f"Interface to bind to (default: {default_host})")
     parser.add_argument("--port", type=int, default=default_port, help=f"Port for web server (default: {default_port})")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open the browser")
+    parser.add_argument("--marimo", action="store_true", help="Launch the reactive Marimo application (app.py)")
+    parser.add_argument("--marimo-edit", action="store_true", help="Launch Marimo in interactive notebook edit mode")
+    parser.add_argument("--export-marimo", action="store_true", help="Export the Marimo reactive notebook to standalone HTML")
     parser.add_argument("--plot", action="store_true", help="Plot directly with Python/SymPy/Plotly instead of web server")
     parser.add_argument("--formula", type=str, default="sin(sqrt(x**2 + y**2) * a) * b / (sqrt(x**2 + y**2) + 0.1)",
                         help="Mathematical formula for Python plotter")
@@ -489,6 +523,12 @@ def main():
         print_deploy_help()
     elif args.init_git:
         init_git_repo()
+    elif args.marimo:
+        run_marimo_app(port=args.port, host=args.host, edit_mode=False, open_browser=not args.no_browser)
+    elif args.marimo_edit:
+        run_marimo_app(port=args.port, host=args.host, edit_mode=True, open_browser=not args.no_browser)
+    elif args.export_marimo:
+        export_marimo_html()
     elif args.plot:
         plot_with_python(
             formula=args.formula,
