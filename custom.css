@@ -1,147 +1,97 @@
 /* ==========================================================================
-   MultivarGrapher 3D — Marimo Custom Theme (Modern Violet-White & Cosmic Dark)
+   MultivarGrapher 3D — Clean Studio Theme for Marimo (Desmos 3D / Math3d style)
+   Calm slate-white & soft violet accents for zero eye strain
    ========================================================================== */
 
 :root {
-  --mvg-accent: #7c3aed;
-  --mvg-accent-light: #a78bfa;
-  --mvg-accent-bg: rgba(124, 58, 237, 0.06);
-  --mvg-border: rgba(139, 92, 246, 0.22);
-  --mvg-card-bg: rgba(255, 255, 255, 0.92);
-  --mvg-text: #1e1b4b;
+  --mvg-bg: #f8fafc;
+  --mvg-card: #ffffff;
+  --mvg-border: #e2e8f0;
+  --mvg-accent: #6d28d9;
+  --mvg-accent-soft: #ede9fe;
+  --mvg-text: #0f172a;
+  --mvg-muted: #475569;
 }
 
-.dark, [data-theme="dark"] {
-  --mvg-accent: #a855f7;
-  --mvg-accent-light: #22d3ee;
-  --mvg-accent-bg: rgba(168, 85, 247, 0.12);
-  --mvg-border: rgba(168, 85, 247, 0.32);
-  --mvg-card-bg: rgba(15, 10, 35, 0.88);
-  --mvg-text: #f3e8ff;
+.mvg-topbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #7c3aed;
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
-.mvg-hero-banner {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(ec, 72, 153, 0.08) 50%, rgba(6, 182, 212, 0.10) 100%);
-  border: 1px solid var(--mvg-border);
-  border-radius: 18px;
-  padding: 16px 22px;
-  box-shadow: 0 8px 30px -10px rgba(124, 58, 237, 0.15);
-  backdrop-filter: blur(12px);
+.mvg-panel-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
 }
 
-.mvg-card {
-  background: var(--mvg-card-bg);
-  border: 1px solid var(--mvg-border);
-  border-radius: 16px;
-  padding: 14px 18px;
-  box-shadow: 0 4px 20px -6px rgba(124, 58, 237, 0.10);
-  transition: all 0.2s ease;
-}
-
-.mvg-card:hover {
-  border-color: var(--mvg-accent);
-  box-shadow: 0 8px 25px -6px rgba(124, 58, 237, 0.18);
+.mvg-math-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
 }
 
 .mvg-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 4px;
+  padding: 2px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #7c3aed, #9333ea);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
-}
-
-.mvg-badge-cyan {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #0891b2, #2563eb);
-  color: #ffffff;
+  font-weight: 600;
+  background: #ede9fe;
+  color: #5b21b6;
 }
 
 .mvg-badge-emerald {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #059669, #0d9488);
-  color: #ffffff;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .mvg-badge-amber {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #d97706, #ea580c);
-  color: #ffffff;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .mvg-badge-rose {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #e11d48, #db2777);
-  color: #ffffff;
+  font-weight: 600;
+  background: #ffe4e6;
+  color: #9f1239;
 }
 
-.mvg-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-.mvg-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.mvg-stat-box {
-  background: var(--mvg-accent-bg);
-  border: 1px solid var(--mvg-border);
-  border-radius: 14px;
-  padding: 10px 14px;
-}
-
-.mvg-stat-label {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.75;
-  font-weight: 700;
-}
-
-.mvg-stat-val {
-  font-size: 1.15rem;
-  font-weight: 800;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  margin-top: 2px;
-}
-
-.mvg-equation-banner {
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0.09), rgba(6, 182, 212, 0.07));
-  border-left: 4px solid #7c3aed;
-  border-radius: 12px;
-  padding: 10px 16px;
-  margin-bottom: 8px;
+.mvg-badge-cyan {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #cffafe;
+  color: #155e75;
 }

@@ -116,7 +116,19 @@ def test_calculus_engine():
     )
     assert "```graph_action" not in reply_md, "Raw graph_action block was not stripped from chat reply!"
     assert action is not None and action.get("constraint", "").replace(" ", "") == "x1^2/4+x2=1"
-    print(f"   [OK] AI Calculus Tutor ({model_label}) action extraction & clean markdown verified!")
+
+    # Verify Flow Line γ(t) computation & AI Tutor flow line request
+    reply_flow, action_flow, _ = ce.ask_ai_tutor(
+        message="bro create me pls flow line of gamma t",
+        calc=saddle_calc,
+        a1=1.2,
+        a2=2.0,
+        a3=0.0,
+    )
+    assert action_flow is not None and action_flow.get("show_flow_line") is True
+    fx_l, fy_l, fz_l = ce.compute_flow_line(saddle_calc, 1.2, 2.0)
+    assert len(fx_l) > 5 and len(fy_l) == len(fx_l) and len(fz_l) == len(fx_l)
+    print(f"   [OK] AI Calculus Tutor ({model_label}) & Flow Line γ(t) verified!")
 
 
 def test_marimo_check_and_exports():

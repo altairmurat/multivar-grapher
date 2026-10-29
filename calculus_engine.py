@@ -253,6 +253,20 @@ PRESETS: Dict[str, Dict[str, Any]] = {
         "yr": [-2.0, 4.0],
         "view_mode": "Split Dual View",
     },
+    "flow_line": {
+        "label": "🌊 Flow Line γ(t) of Gradient Field: γ'(t) = ∇f(γ(t))",
+        "f": "x1^2 / 4 + x2^2 / 9",
+        "constraint": "",
+        "c": 1.0,
+        "r": 1.0,
+        "a1": 1.2,
+        "a2": 2.4,
+        "a3": 0.0,
+        "xr": [-6.0, 6.0],
+        "yr": [-6.0, 6.0],
+        "view_mode": "Split Dual View",
+        "show_flow_line": True,
+    },
 }
 
 
@@ -980,6 +994,104 @@ def snap_point_to_critical(calc: Dict[str, Any], a1: float, a2: float) -> Tuple[
     return 0.0, 0.0
 
 
+def compute_flow_line(
+    calc: Dict[str, Any],
+    a1: float,
+    a2: float,
+    a3: float = 0.0,
+    x_range: Tuple[float, float] = (-6.0, 6.0),
+    y_range: Tuple[float, float] = (-6.0, 6.0),
+    steps: int = 85,
+) -> Tuple[List[float], List[float], List[float]]:
+    """
+    Computes the integral curve / flow line γ(t) passing through γ(0) = a = (a1, a2)
+    by solving γ'(t) = V(γ(t)) forward (t >= 0) and backward (t <= 0) using RK4:
+    - For scalar functions f(x1, x2): V(x) = ∇f(x) (steepest ascent/descent curve, orthogonal to level sets)
+    - For vector fields F(x): V(x) = F(x)
+    - For matrices A: V(x) = A x
+    Returns (xs_flow, ys_flow, zs_flow).
+    """
+    mode = calc["mode"]
+    x1_sym, x2_sym, x3_sym = sp.symbols("x1 x2 x3")
+
+    if mode == "scalar_2d":
+        f_sym = calc["f_sym"]
+        df1_fn = sp.lambdify((x1_sym, x2_sym), sp.diff(f_sym, x1_sym).subs(x3_sym, 0), "numpy")
+        df2_fn = sp.lambdify((x1_sym, x2_sym), sp.diff(f_sym, x2_sym).subs(x3_sym, 0), "numpy")
+
+        def _vec(px: float, py: float) -> Tuple[float, float]:
+            try:
+                vx = float(df1_fn(px, py))
+                vy = float(df2_fn(px, py))
+                return vx, vy
+            except Exception:
+                return 0.0, 0.0
+
+    elif mode in ("vector_2d", "vector_3d"):
+        c0 = calc["comp_fns"][0]
+        c1 = calc["comp_fns"][1]
+
+        def _vec(px: float, py: float) -> Tuple[float, float]:
+            try:
+                if mode == "vector_2d":
+                    return float(c0(px, py)), float(c1(px, py))
+                return float(c0(px, py, a3)), float(c1(px, py, a3))
+            except Exception:
+                return 0.0, 0.0
+
+    elif mode in ("matrix_2d", "matrix_3d"):
+        mat = calc["matrix"]
+
+        def _vec(px: float, py: float) -> Tuple[float, float]:
+            return float(mat[0, 0] * px + mat[0, 1] * py), float(mat[1, 0] * px + mat[1, 1] * py)
+
+    else:
+        return [a1], [a2], [a3]
+
+    dt = (x_range[1] - x_range[0]) * 0.012
+
+    def _trace_dir(sign: float) -> List[Tuple[float, float]]:
+        pts: List[Tuple[float, float]] = []
+        cx, cy = float(a1), float(a2)
+        if abs(cx) < 1e-4 and abs(cy) < 1e-4:
+            cx, cy = 0.25, 0.25
+        for _ in range(steps):
+            if not (x_range[0] <= cx <= x_range[1] and y_range[0] <= cy <= y_range[1]):
+                break
+            vx1, vy1 = _vec(cx, cy)
+            m1 = math.hypot(vx1, vy1)
+            if m1 < 1e-5:
+                break
+            ux1, uy1 = (vx1 / m1) * sign, (vy1 / m1) * sign
+
+            vx2, vy2 = _vec(cx + 0.5 * dt * ux1, cy + 0.5 * dt * uy1)
+            m2 = math.hypot(vx2, vy2) or 1.0
+            ux2, uy2 = (vx2 / m2) * sign, (vy2 / m2) * sign
+
+            cx += dt * ux2
+            cy += dt * uy2
+            pts.append((cx, cy))
+        return pts
+
+    back_pts = list(reversed(_trace_dir(-1.0)))
+    fwd_pts = _trace_dir(1.0)
+    full_xy = back_pts + [(float(a1), float(a2))] + fwd_pts
+
+    fx_list = [p[0] for p in full_xy]
+    fy_list = [p[1] for p in full_xy]
+    fz_list = []
+    for px, py in full_xy:
+        if mode == "scalar_2d":
+            try:
+                fz_list.append(float(calc["f_fn_2d"](px, py)))
+            except Exception:
+                fz_list.append(0.0)
+        else:
+            fz_list.append(float(a3))
+
+    return fx_list, fy_list, fz_list
+
+
 # =============================================================================
 # 5. INTERACTIVE PLOTLY 2D & 3D FIGURE BUILDER (WITH ANIMATIONS)
 # =============================================================================
@@ -995,8 +1107,8 @@ def build_plotly_figure(
     y_range: Tuple[float, float] = (-6.0, 6.0),
     view_mode: str = "Split Dual View",
     anim_mode: str = "none",
-    color_scale: str = "Turbo",
-    opacity: float = 0.92,
+    color_scale: str = "Viridis",
+    opacity: float = 0.85,
     theme: str = "light",
     show_gradient: bool = True,
     show_tangent_line: bool = True,
@@ -1008,6 +1120,7 @@ def build_plotly_figure(
     show_all_contours: bool = True,
     show_constraint_surface: bool = True,
     show_constraint_curve: bool = True,
+    show_flow_line: bool = False,
     grid_res: int = 48,
 ) -> go.Figure:
     """
@@ -1297,6 +1410,21 @@ def build_plotly_figure(
             )
         )
 
+    # Flow Line γ(t) in 2D
+    flow_xs, flow_ys, flow_zs = [], [], []
+    if show_flow_line:
+        flow_xs, flow_ys, flow_zs = compute_flow_line(calc, a1, a2, a3, x_range, y_range)
+        if len(flow_xs) > 1:
+            traces_2d.append(
+                go.Scatter(
+                    x=flow_xs,
+                    y=flow_ys,
+                    mode="lines",
+                    line=dict(color="#f43f5e", width=3.8),
+                    name="Flow Line γ(t)",
+                )
+            )
+
     # -------------------------------------------------------------------------
     # B. BUILD 3D TRACES
     # -------------------------------------------------------------------------
@@ -1493,7 +1621,7 @@ def build_plotly_figure(
             )
         )
 
-    # 7. Point a, 3D Surface Normal Line, 3D Gradient Vector, and Error Rod
+    # 7. Point a, 3D Surface Normal Line, 3D Gradient Vector, Flow Line γ(t), and Error Rod
     pt_z = a3 if (mode in ("scalar_3d", "vector_3d", "matrix_3d") or is_cyl_only) else fa_val
     traces_3d.append(
         go.Scatter3d(
@@ -1505,8 +1633,22 @@ def build_plotly_figure(
             text=[f"a=({a1:.1f},{a2:.1f},{pt_z:.1f})"],
             textposition="top center",
             name="Point a",
+            showlegend=(view_mode == "3D Surface"),
         )
     )
+
+    if show_flow_line and len(flow_xs) > 1:
+        traces_3d.append(
+            go.Scatter3d(
+                x=flow_xs,
+                y=flow_ys,
+                z=flow_zs,
+                mode="lines",
+                line=dict(color="#f43f5e", width=6),
+                name="Flow Line γ(t)",
+                showlegend=(view_mode == "3D Surface"),
+            )
+        )
 
     if show_3d_normal and mode == "scalar_2d":
         nx3, ny3, nz3 = calc["surface_normal_3d"]
@@ -1535,6 +1677,7 @@ def build_plotly_figure(
                 line=dict(color="#f59e0b", width=7),
                 marker=dict(size=[0, 6], symbol="diamond", color="#f59e0b"),
                 name="Gradient ∇f(a)",
+                showlegend=(view_mode == "3D Surface"),
             )
         )
 
@@ -1816,14 +1959,79 @@ def extract_graph_action(raw_text: str) -> Tuple[str, Optional[Dict[str, Any]]]:
     return clean_text, matched_action
 
 
+def load_saved_api_key() -> str:
+    """Loads Gemini API key from environment variable, .env file, or local .gemini_key file."""
+    env_k = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
+    if env_k:
+        return env_k
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    key_file = os.path.join(base_dir, ".gemini_key")
+    if os.path.exists(key_file):
+        try:
+            with open(key_file, "r", encoding="utf-8") as fh:
+                k = fh.read().strip()
+                if k:
+                    return k
+        except Exception:
+            pass
+    env_file = os.path.join(base_dir, ".env")
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    if "=" in line and not line.strip().startswith("#"):
+                        k_name, k_val = line.split("=", 1)
+                        if k_name.strip() in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
+                            return k_val.strip().strip('"').strip("'")
+        except Exception:
+            pass
+    return ""
+
+
+def save_api_key(key: str) -> None:
+    """Persists a user-entered Gemini API key locally in .gemini_key (gitignored)."""
+    k = (key or "").strip()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    key_file = os.path.join(base_dir, ".gemini_key")
+    try:
+        if k:
+            with open(key_file, "w", encoding="utf-8") as fh:
+                fh.write(k)
+        elif os.path.exists(key_file):
+            os.remove(key_file)
+    except Exception:
+        pass
+
+
 def generate_offline_tutor_response(query: str, calc: Dict[str, Any], a1: float, a2: float, a3: float) -> Tuple[str, Optional[Dict[str, Any]]]:
     """
     Intelligent built-in multivariable calculus tutor & action generator.
-    Works 100% offline and can automatically configure any shape, cylinder, matrix, or surface!
+    Works 100% offline and can automatically configure any shape, flow line γ(t), cylinder, matrix, or surface!
     """
     q = (query or "").lower()
     v1, v2 = calc["v1_tex"], calc["v2_tex"]
     fa, fx1, fx2, mag = calc["fa"], calc["fx1"], calc["fx2"], calc["grad_mag"]
+
+    # 0. Flow Line γ(t) / Integral Curve / Trajectory requests (e.g. "bro create me pls flow line of gamma t")
+    if any(k in q for k in ("flow line", "flowline", "gamma", "γ(t)", "integral curve", "trajectory", "steepest")):
+        cur_f = calc["raw_expr"] if calc["mode"] == "scalar_2d" else "x1^2 / 4 + x2^2 / 9"
+        pt_a1 = a1 if (abs(a1) > 0.1 or abs(a2) > 0.1) else 1.2
+        pt_a2 = a2 if (abs(a1) > 0.1 or abs(a2) > 0.1) else 2.4
+        reply = (
+            f"### 🌊 Flow Line $\\gamma(t)$ (Integral Curve of the Gradient Field)\n\n"
+            f"A **flow line** (or **integral curve**) $\\gamma: \\mathbb{{R}} \\to \\mathbb{{R}}^2$ starting at point $\\mathbf{{a}} = ({pt_a1:.2f}, {pt_a2:.2f})$ is the curve satisfying the initial value problem:\n"
+            f"$$\\gamma'(t) = \\nabla f(\\gamma(t)), \\qquad \\gamma(0) = \\mathbf{{a}}$$\n"
+            f"- **Tangent to the Gradient:** At every point along $\\gamma(t)$, the velocity vector $\\gamma'(t)$ equals the gradient $\\nabla f(\\gamma(t)) = \\langle {fx1:.2f}, {fx2:.2f} \\rangle$.\n"
+            f"- **Orthogonal to Level Sets ($90^\\circ$):** Because $\\nabla f$ is perpendicular to every level curve $f({v1}, {v2}) = c$, the flow line $\\gamma(t)$ crosses every contour ring at a strict **$90^\\circ$ right angle** — following the path of **steepest ascent** up the 3D surface!\n\n"
+            f"✅ *I have enabled the **Flow Line $\\gamma(t)$** trajectory (in crimson red) on both the 2D Level Set plot and the 3D Surface!*"
+        )
+        return reply, {
+            "f": cur_f,
+            "a1": pt_a1,
+            "a2": pt_a2,
+            "show_flow_line": True,
+            "view_mode": "Split Dual View",
+        }
 
     # 1. Cylinder / Free Variable / Requirement requests
     if any(k in q for k in ("cylinder", "цилиндр", "constraint", "requirement", "free variable", "x1^2/4")):
@@ -1870,7 +2078,7 @@ def generate_offline_tutor_response(query: str, calc: Dict[str, Any], a1: float,
             f"- Because the Hessian determinant is $D = (2)(-2) - 0 = -4 < 0$, $(0,0)$ is a **Saddle Point**!\n\n"
             f"✅ *Applied the saddle surface to your graph!*"
         )
-        return reply, {"f": "x1^2 - x2^2", "constraint": "", "c": 1.0, "a1": 0.0, "a2": 0.0, "view_mode": "Split Dual View"}
+        return reply, {"f": "x1^2 - x2^2", "constraint": "", "c": 1.0, "a1": 1.41, "a2": 1.0, "view_mode": "Split Dual View"}
 
     # 4. 3x3 or 2x2 Matrix request
     if any(k in q for k in ("3x3", "r3 matrix", "matrix in r3", "[1, 2, 3")):
@@ -1919,7 +2127,7 @@ def generate_offline_tutor_response(query: str, calc: Dict[str, Any], a1: float,
         f"- **Affine Tangent Plane:** $${calc['affine_numeric_latex']}$$\n"
         f"- **Hessian & Extremum Test:** {calc['extremum_label']}\n\n"
         f"💡 *Try asking me:*\n"
-        f"- *\"Make me an elliptic cylinder in R3\"*\n"
+        f"- *\"Create a flow line of gamma(t)\"*\n"
         f"- *\"Create a parabolic cylinder with x1^2/4 + x2 = 1\"*\n"
         f"- *\"Make me an ellipse\"* or *\"Show me a saddle surface\"*\n"
         f"- *\"Explain the Hessian matrix and 2nd derivative test\"*"
@@ -1940,10 +2148,12 @@ def ask_ai_tutor(
     otherwise falls back to the built-in Offline Calculus & Action Engine.
     Returns (clean_reply_markdown, graph_action_dict_or_None, model_used).
     """
-    api_key = (custom_api_key or os.environ.get("GEMINI_API_KEY", "")).strip()
+    if custom_api_key and custom_api_key.strip():
+        save_api_key(custom_api_key.strip())
+    api_key = (custom_api_key or load_saved_api_key()).strip()
     if not api_key:
         reply, action = generate_offline_tutor_response(message, calc, a1, a2, a3)
-        return reply, action, "Offline Calculus Engine"
+        return reply, action, "Built-in Calculus Engine"
 
     system_prompt = f"""You are an expert Multivariable Calculus AI Tutor in the Marimo MultivarGrapher 3D suite.
 IMPORTANT: ALWAYS RESPOND IN ENGLISH.
@@ -1962,8 +2172,10 @@ Current live graph state:
 
 Instructions:
 1. Answer the user's question directly in English using LaTeX math ($...$ and $$...$$).
-2. If the user asks to create, graph, or change a function, shape (ellipse, circle, saddle, paraboloid, cylinder, matrix, vector field), constraint, level c, or point a:
+2. If the user asks to create, graph, or change a function, flow line gamma(t) / integral curve, shape (ellipse, circle, saddle, paraboloid, cylinder, matrix, vector field), constraint, level c, or point a:
    Explain the math first, and at the very end output a ```graph_action block with valid JSON:
+   - For cylinders in R3 (e.g. x1^2/4 + x2 = 1), set "f": "[x1; x2; x3]" and "constraint": "x1^2 / 4 + x2 = 1".
+   - For flow lines gamma(t), set "show_flow_line": true.
    ```graph_action
    {{
      "f": "[x1; x2; x3]",
@@ -1972,10 +2184,13 @@ Instructions:
      "a1": 2.0,
      "a2": 0.0,
      "a3": 1.0,
+     "show_flow_line": false,
      "view_mode": "3D Surface"
    }}
    ```
 """
+    fallback_reply, fallback_action = generate_offline_tutor_response(message, calc, a1, a2, a3)
+
     candidate_models = [
         "gemini-3.5-flash-lite",
         "gemini-2.5-flash-lite",
@@ -1998,9 +2213,15 @@ Instructions:
                     raw_reply = "".join(p.get("text", "") for p in parts).strip()
                     if raw_reply:
                         clean_reply, action = extract_graph_action(raw_reply)
+                        if fallback_action:
+                            merged = dict(fallback_action)
+                            if isinstance(action, dict):
+                                for k, v in action.items():
+                                    if v not in (None, ""):
+                                        merged[k] = v
+                            action = merged
                         return clean_reply, action, model
         except Exception:
             continue
 
-    reply, action = generate_offline_tutor_response(message, calc, a1, a2, a3)
-    return reply, action, "Offline Calculus Fallback"
+    return fallback_reply, fallback_action, "Built-in Calculus Engine"

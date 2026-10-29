@@ -3,7 +3,7 @@ import marimo
 __generated_with = "0.25.2"
 app = marimo.App(
     width="full",
-    app_title="MultivarGrapher 3D — Interactive Marimo Calculus Suite",
+    app_title="MultivarGrapher 3D — Clean Studio Edition",
     css_file="custom.css",
 )
 
@@ -21,7 +21,7 @@ def _():
 
 @app.cell
 def _(ce, mo):
-    # Initialize reactive state, reading URL query parameters if present for instant link restoration
+    # Initialize reactive state, reading URL query parameters if present
     qp = mo.query_params()
 
     def _safe_float(val, default: float) -> float:
@@ -45,6 +45,7 @@ def _(ce, mo):
         "yr_min": _safe_float(qp.get("ymin"), -6.0),
         "yr_max": _safe_float(qp.get("ymax"), 6.0),
         "view_mode": str(qp.get("mode") or "Split Dual View"),
+        "show_flow_line": False,
         "toast": "",
     }
 
@@ -54,11 +55,11 @@ def _(ce, mo):
             {
                 "role": "assistant",
                 "content": (
-                    "### 👋 Welcome to the Marimo AI Calculus Tutor!\n"
-                    "Ask me about **gradients**, **affine tangent planes**, **normal lines ($90^\\circ$)**, "
-                    "**Hessian matrices**, **3D cylinders with free variables**, or ask me to graph any surface "
-                    "(e.g. *\"Make me an ellipse\"*, *\"Create a parabolic cylinder with x1^2/4 + x2 = 1\"*, "
-                    "or *\"Show a 3x3 matrix in R3\"*)!"
+                    "**👋 Welcome to the AI Calculus Tutor!**\n\n"
+                    "Type any request in the chat box below or click a quick button — for example:\n"
+                    "- *\"Create a flow line of gamma(t)\"*\n"
+                    "- *\"Create a parabolic cylinder with x1^2/4 + x2 = 1\"*\n"
+                    "- *\"Make me an ellipse\"* or *\"Show a 3x3 matrix in R3\"*"
                 ),
             }
         ],
@@ -84,7 +85,8 @@ def _(ce, mo):
                 "yr_min": p["yr"][0],
                 "yr_max": p["yr"][1],
                 "view_mode": p["view_mode"],
-                "toast": f"Loaded preset: {p['label']}",
+                "show_flow_line": bool(p.get("show_flow_line", False)),
+                "toast": f"Loaded: {p['label']}",
             }
         )
 
@@ -116,6 +118,11 @@ def _(ce, mo):
                     nxt["a1"], nxt["a2"] = float(pa[0]), float(pa[1])
                 if len(pa) >= 3:
                     nxt["a3"] = float(pa[2])
+            if "show_flow_line" in action:
+                nxt["show_flow_line"] = bool(action["show_flow_line"])
+            toggles = action.get("toggles")
+            if isinstance(toggles, dict) and "show_flow_line" in toggles:
+                nxt["show_flow_line"] = bool(toggles["show_flow_line"])
             vm = action.get("view_mode") or action.get("mode")
             if vm:
                 vm_l = str(vm).lower()
@@ -125,7 +132,7 @@ def _(ce, mo):
                     nxt["view_mode"] = "3D Surface"
                 else:
                     nxt["view_mode"] = "Split Dual View"
-            nxt["toast"] = summary or action.get("description") or f"Updated graph: f = {nxt['f']}"
+            nxt["toast"] = summary or action.get("description") or f"Updated: f = {nxt['f']}"
             return nxt
 
         set_cfg(_updater)
@@ -142,86 +149,108 @@ def _(ce, mo):
 
 
 @app.cell
-def _(apply_preset, ce, get_cfg, mo, set_cfg):
+def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
     cfg = get_cfg()
+    saved_key = ce.load_saved_api_key()
 
-    # Preset selector with on_change callback that updates reactive state
+    # 1. Expression & Preset Controls (Short, crisp 1-line labels)
     preset_options = {p["label"]: k for k, p in ce.PRESETS.items()}
     preset_selector = mo.ui.dropdown(
         options=preset_options,
         value=None,
-        label="🎯 Load Mathematical Preset (17 Built-in Examples)",
+        label="📂 Load Preset Example",
         on_change=lambda val: apply_preset(val) if val else None,
         full_width=True,
     )
 
-    # Function & Constraint Inputs bound to reactive state
     function_input = mo.ui.text(
         value=cfg["f"],
-        label="Function f(x₁, x₂), f(x₁, x₂, x₃), Vector [F₁; F₂; F₃], or Matrix [a, b; c, d]",
+        label="ƒ(x) Function, Matrix [a,b; c,d], or Vector [F₁; F₂; F₃]",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "f": v, "toast": ""}),
         full_width=True,
     )
 
     constraint_input = mo.ui.text(
         value=cfg["constraint"],
-        placeholder="e.g. x1^2/4 + x2 = 1  or  x1^2/4 + x2^2/9 = 1  or  x1^2 + x2^2 <= 4",
-        label="Optional Requirement / Constraint (Domain or Cylinder Equation)",
-        on_change=lambda v: set_cfg(lambda prev: {**prev, "constraint": v, "toast": f"Constraint: {v}" if v else "Cleared constraint"}),
+        placeholder="e.g. x1^2/4 + x2 = 1  or  x1^2/4 + x2^2/9 = 1",
+        label="🏛️ Domain / Cylinder Constraint (optional)",
+        on_change=lambda v: set_cfg(
+            lambda prev: {
+                **prev,
+                "constraint": v,
+                "toast": f"Constraint: {v}" if v else "Cleared constraint",
+            }
+        ),
         full_width=True,
     )
 
-    # Quick 1-click constraint chips
+    # Compact 1-click quick chips
+    chip_flow_line = mo.ui.button(
+        label="🌊 Flow Line γ(t)",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "show_flow_line": not prev.get("show_flow_line", False),
+                "a1": prev["a1"] if (abs(prev["a1"]) > 0.1 or abs(prev["a2"]) > 0.1) else 1.2,
+                "a2": prev["a2"] if (abs(prev["a1"]) > 0.1 or abs(prev["a2"]) > 0.1) else 2.0,
+                "toast": "Toggled Flow Line γ(t) of gradient field ∇f",
+            }
+        ),
+    )
     chip_parab_cyl = mo.ui.button(
-        label="🏛️ Parabolic Cylinder: [x₁;x₂;x₃] s.t. x₁²/4 + x₂ = 1",
+        label="🏛️ Parabolic Cyl",
         on_click=lambda _: set_cfg(
             lambda prev: {
                 **prev,
                 "f": "[x1; x2; x3]",
                 "constraint": "x1^2 / 4 + x2 = 1",
                 "view_mode": "3D Surface",
-                "toast": "Applied Parabolic Cylinder in ℝ³ (free variable x₃)",
+                "toast": "Parabolic Cylinder in ℝ³ (x₃ free)",
             }
         ),
     )
     chip_ellip_cyl = mo.ui.button(
-        label="🏛️ Elliptic Cylinder: [x₁;x₂;x₃] s.t. x₁²/4 + x₂²/9 = 1",
+        label="🏛️ Elliptic Cyl",
         on_click=lambda _: set_cfg(
             lambda prev: {
                 **prev,
                 "f": "[x1; x2; x3]",
                 "constraint": "x1^2 / 4 + x2^2 / 9 = 1",
                 "view_mode": "3D Surface",
-                "toast": "Applied Elliptic Cylinder in ℝ³ (free variable x₃)",
+                "toast": "Elliptic Cylinder in ℝ³ (x₃ free)",
             }
         ),
     )
     chip_circle_req = mo.ui.button(
-        label="⭕ Circle Cylinder: x₁² + x₂² = 4",
+        label="⭕ Circle c=4",
         on_click=lambda _: set_cfg(
-            lambda prev: {**prev, "constraint": "x1^2 + x2^2 = 4", "toast": "Applied constraint x₁² + x₂² = 4"}
-        ),
-    )
-    chip_disk_ineq = mo.ui.button(
-        label="🛡️ Disk Domain: x₁² + x₂² <= 4",
-        on_click=lambda _: set_cfg(
-            lambda prev: {**prev, "constraint": "x1^2 + x2^2 <= 4", "toast": "Applied inequality domain x₁² + x₂² <= 4"}
+            lambda prev: {
+                **prev,
+                "f": "x1^2 + x2^2",
+                "constraint": "",
+                "c": 4.0,
+                "r": 2.0,
+                "a1": 2.0,
+                "a2": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Circle x₁² + x₂² = 4",
+            }
         ),
     )
     chip_clear_req = mo.ui.button(
-        label="✖ Clear Requirement",
+        label="✖ Clear Constraint",
         on_click=lambda _: set_cfg(
-            lambda prev: {**prev, "constraint": "", "toast": "Cleared requirement"}
+            lambda prev: {**prev, "constraint": "", "toast": "Cleared constraint"}
         ),
     )
 
-    # Evaluation Point a = (a1, a2, a3) & Level Set c controls
+    # 2. Point a & Level Set c Sliders (Short labels so they never wrap)
     a1_slider = mo.ui.slider(
         start=-6.0,
         stop=6.0,
         step=0.05,
         value=float(np.clip(cfg["a1"], -6.0, 6.0)),
-        label="Point a₁ (x₁ coordinate)",
+        label="Point a₁",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "a1": float(v)}),
         full_width=True,
     )
@@ -230,7 +259,7 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         stop=6.0,
         step=0.05,
         value=float(np.clip(cfg["a2"], -6.0, 6.0)),
-        label="Point a₂ (x₂ coordinate)",
+        label="Point a₂",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "a2": float(v)}),
         full_width=True,
     )
@@ -239,7 +268,7 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         stop=6.0,
         step=0.05,
         value=float(np.clip(cfg["a3"], -6.0, 6.0)),
-        label="Point a₃ (x₃ coordinate for ℝ³)",
+        label="Point a₃ (ℝ³)",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "a3": float(v)}),
         full_width=True,
     )
@@ -249,7 +278,7 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         stop=15.0,
         step=0.1,
         value=float(np.clip(cfg["c"], -10.0, 15.0)),
-        label="Target Level Set Constant c (f = c)",
+        label="Level Set c",
         on_change=lambda v: set_cfg(
             lambda prev: {
                 **prev,
@@ -265,7 +294,7 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         stop=10.0,
         step=0.1,
         value=float(np.clip(cfg["r"], 0.0, 10.0)),
-        label="Circle Radius Helper r (sets c = r²)",
+        label="Radius r (c = r²)",
         on_change=lambda v: set_cfg(
             lambda prev: {
                 **prev,
@@ -273,18 +302,18 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
                 "c": round(float(v or 0.0) ** 2, 2),
                 "a1": float(v or 0.0),
                 "a2": 0.0,
-                "toast": f"Set radius r = {v} → level c = {float(v or 0.0)**2:.2f}",
+                "toast": f"Radius r = {v} → c = {float(v or 0.0)**2:.2f}",
             }
         ),
     )
 
-    # Linearization Test Point x_test = (test_x, test_y)
+    # Test Point Sliders
     test_x_slider = mo.ui.slider(
         start=-6.0,
         stop=6.0,
         step=0.05,
         value=float(np.clip(cfg["test_x"], -6.0, 6.0)),
-        label="Test Point x₁ (for Affine Error |f - g|)",
+        label="Test x₁",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "test_x": float(v)}),
         full_width=True,
     )
@@ -293,81 +322,101 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         stop=6.0,
         step=0.05,
         value=float(np.clip(cfg["test_y"], -6.0, 6.0)),
-        label="Test Point x₂ (for Affine Error |f - g|)",
+        label="Test x₂",
         on_change=lambda v: set_cfg(lambda prev: {**prev, "test_y": float(v)}),
         full_width=True,
     )
 
-    # Viewport, Animation, Theme & Notation Controls
+    # Top Viewport & Animation Controls
     view_mode_radio = mo.ui.radio(
         options=["Split Dual View", "2D Level Sets", "3D Surface"],
-        value=cfg["view_mode"] if cfg["view_mode"] in ("Split Dual View", "2D Level Sets", "3D Surface") else "Split Dual View",
-        label="🖥️ Viewport Mode",
+        value=(
+            cfg["view_mode"]
+            if cfg["view_mode"] in ("Split Dual View", "2D Level Sets", "3D Surface")
+            else "Split Dual View"
+        ),
+        label="View",
         inline=True,
         on_change=lambda v: set_cfg(lambda prev: {**prev, "view_mode": v}),
     )
 
     anim_mode_dropdown = mo.ui.dropdown(
         options={
-            "Static (Interactive Drag / Zoom)": "none",
-            "🎥 3D Camera Orbit 360° Spin": "orbit",
-            "🌊 Animated Level Slice Sweep c(t)": "slice",
-            "✨ Glide Point a(t) Along Surface": "glide",
+            "Static (Interactive)": "none",
+            "🎥 360° Camera Orbit": "orbit",
+            "🌊 Slice Sweep c(t)": "slice",
+            "✨ Glide Point a(t)": "glide",
         },
-        value="Static (Interactive Drag / Zoom)",
-        label="🎬 Marimo Animation Studio",
+        value="Static (Interactive)",
+        label="Animation",
     )
 
     theme_switch = mo.ui.dropdown(
-        options={"☀️ Modern Violet-White (Light)": "light", "🌙 Cosmic Purple (Dark)": "dark"},
-        value="☀️ Modern Violet-White (Light)",
-        label="🎨 Theme",
+        options={"☀️ Clean Light": "light", "🌙 Cosmic Dark": "dark"},
+        value="☀️ Clean Light",
+        label="Theme",
     )
 
     notation_switch = mo.ui.dropdown(
         options={"Subscript (x₁, x₂, x₃)": "x1x2", "Standard (x, y, z)": "xyz"},
         value="Subscript (x₁, x₂, x₃)",
-        label="🔤 Notation",
+        label="Notation",
     )
 
     colorscale_dropdown = mo.ui.dropdown(
-        options=["Turbo", "Viridis", "Plasma", "Magma", "Purples", "Spectral"],
-        value="Turbo",
-        label="🌈 Surface Colorscale",
+        options=["Viridis", "Plasma", "Turbo", "Purples", "Spectral", "Cividis"],
+        value="Viridis",
+        label="Color Palette",
     )
 
     opacity_slider = mo.ui.slider(
-        start=0.25, stop=1.0, step=0.05, value=0.92, label="Surface Opacity"
+        start=0.25, stop=1.0, step=0.05, value=0.85, label="3D Surface Opacity"
     )
 
     # Geometric Overlay Switches
-    sw_gradient = mo.ui.switch(value=True, label="Show Gradient Vector ∇f(a)")
-    sw_tangent_line = mo.ui.switch(value=True, label="Show 2D Tangent Line")
-    sw_normal_line = mo.ui.switch(value=True, label="Show 2D Normal Line")
-    sw_right_angle = mo.ui.switch(value=True, label="Show 90° Orthogonality Marker")
-    sw_affine_plane = mo.ui.switch(value=True, label="Show 3D Affine Tangent Plane g(x)")
-    sw_3d_normal = mo.ui.switch(value=True, label="Show 3D Surface Normal Vector")
-    sw_error_rod = mo.ui.switch(value=False, label="Show Linearization Error Rod at x_test")
-    sw_all_contours = mo.ui.switch(value=True, label="Show All Iso-Contour Lines")
-    sw_constraint_surf = mo.ui.switch(value=True, label="Show 3D Extruded Constraint Cylinder")
-    sw_constraint_curve = mo.ui.switch(value=True, label="Show Constraint Curve")
+    sw_flow_line = mo.ui.switch(
+        value=bool(cfg.get("show_flow_line", False)),
+        label="🌊 Flow Line γ(t) (γ' = ∇f)",
+        on_change=lambda v: set_cfg(lambda prev: {**prev, "show_flow_line": bool(v)}),
+    )
+    sw_gradient = mo.ui.switch(value=True, label="🧭 Gradient Vector ∇f(a)")
+    sw_tangent_line = mo.ui.switch(value=True, label="📏 2D Tangent Line")
+    sw_normal_line = mo.ui.switch(value=True, label="📐 2D Normal Line (90°)")
+    sw_right_angle = mo.ui.switch(value=True, label="⌞ 90° Right-Angle Marker")
+    sw_affine_plane = mo.ui.switch(value=True, label="💠 3D Affine Plane g(x)")
+    sw_3d_normal = mo.ui.switch(value=True, label="🚀 3D Surface Normal n₃D")
+    sw_error_rod = mo.ui.switch(value=False, label="🔬 Error Rod at x_test")
+    sw_all_contours = mo.ui.switch(value=True, label="🗺️ Background Contours")
+    sw_constraint_surf = mo.ui.switch(value=True, label="🏛️ 3D Constraint Cylinder")
+    sw_constraint_curve = mo.ui.switch(value=True, label="⭕ 2D Constraint Curve")
 
-    # Parameter sliders a, b, c, d for parametric formulas
-    param_a = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="Param a")
-    param_b = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="Param b")
-    param_c = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="Param c")
-    param_d = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="Param d")
+    # Parameter sliders a, b, c, d
+    param_a = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="a")
+    param_b = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="b")
+    param_c = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="c")
+    param_d = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="d")
+
+    # IMPORTANT: Define api_key_input in THIS cell so its .value can be safely read in the AI Tutor cell!
+    api_key_input = mo.ui.text(
+        value=saved_key,
+        kind="password",
+        placeholder="Paste Gemini API key (auto-saved locally) or leave blank for Built-in Engine",
+        label=f"🔑 Gemini API Key ({'🟢 Key Saved & Active' if saved_key else '⚡ Built-in Calculus Engine Active'})",
+        on_change=lambda k: ce.save_api_key(k),
+        full_width=True,
+    )
 
     return (
         a1_slider,
         a2_slider,
         a3_slider,
         anim_mode_dropdown,
+        api_key_input,
         cfg,
         chip_circle_req,
         chip_clear_req,
-        chip_disk_ineq,
         chip_ellip_cyl,
+        chip_flow_line,
         chip_parab_cyl,
         colorscale_dropdown,
         constraint_input,
@@ -387,6 +436,7 @@ def _(apply_preset, ce, get_cfg, mo, set_cfg):
         sw_constraint_curve,
         sw_constraint_surf,
         sw_error_rod,
+        sw_flow_line,
         sw_gradient,
         sw_normal_line,
         sw_right_angle,
@@ -408,9 +458,8 @@ def _(
     param_c,
     param_d,
     qp,
-    set_cfg,
 ):
-    # Sync URL query params so copying the browser link preserves state
+    # Sync URL query params for link sharing
     try:
         qp["f"] = cfg["f"]
         if cfg["constraint"]:
@@ -446,36 +495,14 @@ def _(
         notation=notation_switch.value,
     )
 
-    def _do_snap_curve(_):
-        nx1, nx2 = ce.snap_point_to_level_curve(calc, cfg["a1"], cfg["a2"], cfg["c"])
-        set_cfg(
-            lambda prev: {
-                **prev,
-                "a1": nx1,
-                "a2": nx2,
-                "toast": f"Snapped point a to ({nx1:.2f}, {nx2:.2f}) on level curve f = {cfg['c']:.2f}",
-            }
-        )
-
-    def _do_snap_critical(_):
-        cx1, cx2 = ce.snap_point_to_critical(calc, cfg["a1"], cfg["a2"])
-        set_cfg(
-            lambda prev: {
-                **prev,
-                "a1": cx1,
-                "a2": cx2,
-                "toast": f"Snapped point a to critical point ({cx1:.2f}, {cx2:.2f}) where ∇f = 0",
-            }
-        )
-
     return calc, params_dict
 
 
 @app.cell
 def _(calc, ce, cfg, mo, set_cfg):
-    # Action buttons that depend on `calc`
+    # Compact 1-line action buttons
     snap_curve_btn = mo.ui.button(
-        label="🧲 Snap Point a to Level Curve f(a) = c",
+        label="🧲 Snap a to Curve",
         on_click=lambda _: (
             lambda nx1, nx2: set_cfg(
                 lambda prev: {
@@ -489,7 +516,7 @@ def _(calc, ce, cfg, mo, set_cfg):
     )
 
     snap_critical_btn = mo.ui.button(
-        label="🎯 Find & Snap to Critical Point (∇f = 0)",
+        label="🎯 Critical Pt (∇f=0)",
         on_click=lambda _: (
             lambda cx1, cx2: set_cfg(
                 lambda prev: {
@@ -503,7 +530,7 @@ def _(calc, ce, cfg, mo, set_cfg):
     )
 
     reset_domain_btn = mo.ui.button(
-        label="🔄 Reset View & Point a",
+        label="🔄 Reset",
         on_click=lambda _: set_cfg(
             lambda prev: {
                 **prev,
@@ -514,7 +541,8 @@ def _(calc, ce, cfg, mo, set_cfg):
                 "xr_max": 6.0,
                 "yr_min": -6.0,
                 "yr_max": 6.0,
-                "toast": "Reset coordinates and domain range to [-6, 6]",
+                "show_flow_line": False,
+                "toast": "Reset coordinates and view",
             }
         ),
     )
@@ -537,6 +565,7 @@ def _(
     sw_constraint_curve,
     sw_constraint_surf,
     sw_error_rod,
+    sw_flow_line,
     sw_gradient,
     sw_normal_line,
     sw_right_angle,
@@ -569,6 +598,7 @@ def _(
         show_all_contours=sw_all_contours.value,
         show_constraint_surface=sw_constraint_surf.value,
         show_constraint_curve=sw_constraint_curve.value,
+        show_flow_line=bool(sw_flow_line.value),
     )
 
     plotly_widget = mo.ui.plotly(fig)
@@ -576,18 +606,17 @@ def _(
 
 
 @app.cell
-def _(apply_action_dict, calc, ce, cfg, get_chat_log, mo, os, set_chat_log):
-    # Built-in AI Calculus Tutor (Gemini 3.5 Flash-Lite + Offline Engine + Auto Graph Actions)
-    has_env_key = bool(os.environ.get("GEMINI_API_KEY", "").strip())
-
-    api_key_input = mo.ui.text(
-        value="",
-        kind="password",
-        placeholder="Optional if GEMINI_API_KEY is set on server (uses Offline Engine if blank)",
-        label=f"🔑 Gemini API Key ({'🟢 Connected via Render Env' if has_env_key else '⚡ Offline Math Engine Ready'})",
-        full_width=True,
-    )
-
+def _(
+    api_key_input,
+    apply_action_dict,
+    calc,
+    ce,
+    cfg,
+    get_chat_log,
+    mo,
+    set_chat_log,
+):
+    # AI Calculus Tutor Cell — receives `api_key_input` from previous cell so `.value` access is 100% legal!
     def _run_tutor_query(user_prompt: str):
         if not user_prompt or not user_prompt.strip():
             return
@@ -611,7 +640,6 @@ def _(apply_action_dict, calc, ce, cfg, get_chat_log, mo, os, set_chat_log):
             ]
         )
 
-    # Chat Model Callable for mo.ui.chat
     def _marimo_chat_model(messages):
         user_msg = messages[-1].content if messages else "Explain this graph"
         reply_md, action_dict, model_label = ce.ask_ai_tutor(
@@ -624,56 +652,56 @@ def _(apply_action_dict, calc, ce, cfg, get_chat_log, mo, os, set_chat_log):
         )
         if action_dict:
             apply_action_dict(action_dict, summary=f"AI Tutor ({model_label}) updated the graph!")
+        set_chat_log(
+            lambda prev: prev
+            + [
+                {"role": "user", "content": str(user_msg)},
+                {"role": "assistant", "content": f"*{model_label}*\n\n{reply_md}"},
+            ]
+        )
         return f"*{model_label}*\n\n{reply_md}"
 
     chat_widget = mo.ui.chat(
         _marimo_chat_model,
         prompts=[
-            "Make me an ellipse",
+            "Create a flow line of gamma(t)",
             "Create a parabolic cylinder with x1^2/4 + x2 = 1",
             "Create an elliptic cylinder in R3",
+            "Make me an ellipse",
             "Show a 3x3 matrix in R3: [1, 2, 3; 4, 5, 6; 7, 8, 9]",
             "Show me a saddle surface",
-            "Explain the Hessian matrix and 2nd derivative test at point a",
+            "Explain the Hessian matrix and 2nd derivative test",
             "Explain the affine function g(x) and tangent plane",
-            "Why is the normal line perpendicular at 90 degrees?",
         ],
     )
 
-    # Quick-Action AI Buttons for 1-click tutoring + graph generation
-    ai_btn_ellipse = mo.ui.button(
-        label="🪐 Ask AI: Make an Ellipse",
-        on_click=lambda _: _run_tutor_query("Make me an ellipse"),
+    ai_btn_flow = mo.ui.button(
+        label="🌊 Flow Line γ(t)",
+        on_click=lambda _: _run_tutor_query("Create a flow line of gamma(t)"),
     )
     ai_btn_parab_cyl = mo.ui.button(
-        label="🏛️ Ask AI: Parabolic Cylinder (x₁²/4 + x₂ = 1)",
+        label="🏛️ Parabolic Cylinder",
         on_click=lambda _: _run_tutor_query("Create a parabolic cylinder with x1^2/4 + x2 = 1"),
     )
-    ai_btn_ellip_cyl = mo.ui.button(
-        label="🏛️ Ask AI: Elliptic Cylinder in ℝ³",
-        on_click=lambda _: _run_tutor_query("Create an elliptic cylinder in R3"),
+    ai_btn_ellipse = mo.ui.button(
+        label="🪐 Make an Ellipse",
+        on_click=lambda _: _run_tutor_query("Make me an ellipse"),
     )
     ai_btn_matrix3d = mo.ui.button(
-        label="🧊 Ask AI: 3×3 Matrix in ℝ³",
+        label="🧊 3×3 Matrix in ℝ³",
         on_click=lambda _: _run_tutor_query("Show a 3x3 matrix in R3: [1, 2, 3; 4, 5, 6; 7, 8, 9]"),
     )
     ai_btn_hessian = mo.ui.button(
-        label="🔍 Ask AI: Explain Hessian & Extrema",
+        label="🔍 Explain Hessian",
         on_click=lambda _: _run_tutor_query("Explain the Hessian matrix and 2nd derivative test"),
-    )
-    ai_btn_affine = mo.ui.button(
-        label="📐 Ask AI: Explain Affine Plane g(x)",
-        on_click=lambda _: _run_tutor_query("Explain the affine function g(x) and tangent plane"),
     )
 
     return (
-        ai_btn_affine,
-        ai_btn_ellip_cyl,
         ai_btn_ellipse,
+        ai_btn_flow,
         ai_btn_hessian,
         ai_btn_matrix3d,
         ai_btn_parab_cyl,
-        api_key_input,
         chat_widget,
         get_chat_log,
     )
@@ -684,9 +712,8 @@ def _(
     a1_slider,
     a2_slider,
     a3_slider,
-    ai_btn_affine,
-    ai_btn_ellip_cyl,
     ai_btn_ellipse,
+    ai_btn_flow,
     ai_btn_hessian,
     ai_btn_matrix3d,
     ai_btn_parab_cyl,
@@ -697,8 +724,8 @@ def _(
     chat_widget,
     chip_circle_req,
     chip_clear_req,
-    chip_disk_ineq,
     chip_ellip_cyl,
+    chip_flow_line,
     chip_parab_cyl,
     colorscale_dropdown,
     constraint_input,
@@ -724,6 +751,7 @@ def _(
     sw_constraint_curve,
     sw_constraint_surf,
     sw_error_rod,
+    sw_flow_line,
     sw_gradient,
     sw_normal_line,
     sw_right_angle,
@@ -731,26 +759,12 @@ def _(
     test_x_slider,
     test_y_slider,
     theme_switch,
-    urllib,
     view_mode_radio,
 ):
     # =========================================================================
-    # BUILD THE 5 INTERACTIVE TABS & MAIN WORKSPACE LAYOUT
+    # CLEAN 2-COLUMN STUDIO LAYOUT (DESMOS 3D / MATH3D STYLE — NO SIDEBAR!)
     # =========================================================================
 
-    # Shareable URL string
-    share_params = urllib.parse.urlencode(
-        {
-            "f": cfg["f"],
-            "constraint": cfg["constraint"],
-            "c": round(cfg["c"], 2),
-            "a1": round(cfg["a1"], 2),
-            "a2": round(cfg["a2"], 2),
-            "mode": cfg["view_mode"],
-        }
-    )
-
-    # Top Hero & Equation Banner
     toast_html = (
         f'<span class="mvg-badge-emerald">✨ {cfg["toast"]}</span>' if cfg.get("toast") else ""
     )
@@ -760,28 +774,159 @@ def _(
         else ""
     )
 
-    hero_banner = mo.md(
+    # Top Studio Header Bar
+    top_header = mo.md(
         rf"""
-        <div class="mvg-hero-banner">
-          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">
-            <div>
-              <span class="mvg-badge">⚡ Powered by Marimo</span>
+        <div class="mvg-topbar">
+          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+              <strong style="font-size:1.1rem; color:#4c1d95;">🌌 MultivarGrapher 3D</strong>
               <span class="mvg-badge-{calc['extremum_badge']}">{calc['extremum_label']}</span>
               {constraint_badge_html}
               {toast_html}
             </div>
-            <div style="font-size:0.8rem; opacity:0.85; font-family:monospace;">
-              🔗 Share Query: <code>?{share_params}</code>
+            <div style="font-size:1.05rem;">
+              $${calc['f_latex']}$$
             </div>
-          </div>
-          <div style="margin-top:10px; font-size:1.05rem;">
-            $${calc['f_latex']}$$
           </div>
         </div>
         """
     )
 
-    # Top Quick KPI Row
+    # -------------------------------------------------------------------------
+    # LEFT PANEL: Expression Card + Point Sliders + 3 Clean Tabs
+    # -------------------------------------------------------------------------
+    expr_card = mo.vstack(
+        [
+            preset_selector,
+            function_input,
+            constraint_input,
+            mo.hstack(
+                [chip_flow_line, chip_parab_cyl, chip_ellip_cyl, chip_circle_req, chip_clear_req],
+                wrap=True,
+                gap=0.35,
+            ),
+        ],
+        gap=0.45,
+    )
+
+    point_card = mo.vstack(
+        [
+            mo.hstack([a1_slider, a2_slider], widths="equal"),
+            mo.hstack([level_c_slider, a3_slider], widths="equal"),
+            mo.hstack([snap_curve_btn, snap_critical_btn, reset_domain_btn], justify="start", gap=0.4),
+        ],
+        gap=0.4,
+    )
+
+    # TAB 1: Unified Calculus Sheet (All key math in one scannable view!)
+    calculus_sheet_tab = mo.vstack(
+        [
+            mo.md(
+                rf"""
+                <div class="mvg-math-box">
+                  <strong>1. Derivative Row Matrix $\mathbf{{D}}f(\mathbf{{a}})$ & Gradient $\nabla f(\mathbf{{a}})$</strong><br/>
+                  $${calc['df_symbolic_latex']} \;\Longrightarrow\; {calc['df_numeric_latex']}$$
+                  <span style="font-size:0.84rem; color:#475569;">
+                    $\|\nabla f(\mathbf{{a}})\| = {calc['grad_mag']:.3f}$ &bull;
+                    2D Normal $\mathbf{{n}} = \langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \rangle \perp$ Tangent $\mathbf{{T}} = \langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \rangle$ ($90^\circ$)
+                  </span>
+                </div>
+                <div class="mvg-math-box">
+                  <strong>2. Affine Tangent Plane $g(\mathbf{{x}})$ & 3D Surface Normal</strong><br/>
+                  $${calc['affine_numeric_latex']}$$
+                  <span style="font-size:0.84rem; color:#475569;">
+                    3D Normal $\mathbf{{n}}_{{3D}} = \langle {-calc['fx1']:.2f}, {-calc['fx2']:.2f}, 1 \rangle$
+                  </span>
+                </div>
+                <div class="mvg-math-box">
+                  <strong>3. Hessian Matrix $\mathbf{{H}}_f(\mathbf{{a}})$ & Second Derivative Test</strong><br/>
+                  $${calc['hessian_numeric_latex']}$$
+                  <span style="font-size:0.84rem; color:#475569;">
+                    $\det(\mathbf{{H}}) = {calc['hessian_det']:.2f}$ &bull; $\operatorname{{tr}}(\mathbf{{H}}) = {calc['hessian_trace']:.2f}$ &bull; Eigenvalues: <code>{calc['eigenvalues_str']}</code> &bull; <strong>{calc['extremum_label']}</strong>
+                  </span>
+                </div>
+                """
+            ),
+            mo.accordion(
+                {
+                    "🔬 Linearization Error Calculator at x_test & Radius Helper": mo.vstack(
+                        [
+                            mo.hstack([test_x_slider, test_y_slider], widths="equal"),
+                            sw_error_rod,
+                            mo.md(
+                                f"**Exact** $f(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_exact']:.4f}$ &bull; "
+                                f"**Affine** $g(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_affine']:.4f}$ &bull; "
+                                f"**Error** $|f - g| = {calc['test_error']:.4f}$"
+                            ),
+                            radius_r_input,
+                        ]
+                    ),
+                    "🎚️ Formula Parameters (a, b, c, d)": mo.hstack(
+                        [param_a, param_b, param_c, param_d], widths="equal"
+                    ),
+                }
+            ),
+        ],
+        gap=0.4,
+    )
+
+    # TAB 2: AI Calculus Tutor (Fixed & Working)
+    recent_log = get_chat_log()[-2:]
+    log_md_blocks = "\n\n---\n\n".join(
+        f"**{'🧑‍🎓 You' if m['role']=='user' else '🤖 AI Tutor'}:**\n\n{m['content']}"
+        for m in recent_log
+    )
+
+    ai_tutor_tab = mo.vstack(
+        [
+            api_key_input,
+            mo.hstack(
+                [ai_btn_flow, ai_btn_parab_cyl, ai_btn_ellipse, ai_btn_matrix3d, ai_btn_hessian],
+                wrap=True,
+                gap=0.35,
+            ),
+            mo.callout(mo.md(log_md_blocks), kind="neutral"),
+            chat_widget,
+        ],
+        gap=0.5,
+    )
+
+    # TAB 3: Layers & Visual Style
+    layers_tab = mo.vstack(
+        [
+            mo.hstack([colorscale_dropdown, opacity_slider, notation_switch], widths="equal"),
+            mo.hstack(
+                [
+                    mo.vstack([sw_flow_line, sw_gradient, sw_tangent_line, sw_normal_line, sw_right_angle]),
+                    mo.vstack([sw_affine_plane, sw_3d_normal, sw_constraint_surf, sw_constraint_curve, sw_all_contours]),
+                ],
+                widths="equal",
+            ),
+        ],
+        gap=0.6,
+    )
+
+    left_tabs = mo.ui.tabs(
+        {
+            "📐 Calculus Sheet": calculus_sheet_tab,
+            "🤖 AI Tutor": ai_tutor_tab,
+            "⚙️ Layers & Style": layers_tab,
+        }
+    )
+
+    left_panel = mo.vstack(
+        [
+            expr_card,
+            point_card,
+            left_tabs,
+        ],
+        gap=0.65,
+    )
+
+    # -------------------------------------------------------------------------
+    # RIGHT PANEL: Toolbar + KPI Strip + Spacious 2D/3D Graph
+    # -------------------------------------------------------------------------
     a_coords_str = (
         f"({cfg['a1']:.2f}, {cfg['a2']:.2f}, {cfg['a3']:.2f})"
         if calc["dim"] == 3
@@ -789,232 +934,51 @@ def _(
     )
     kpi_row = mo.hstack(
         [
-            mo.stat(
-                value=f"{calc['fa']:.3f}",
-                label="Value f(a)",
-                caption=f"At a = {a_coords_str}",
-            ),
-            mo.stat(
-                value=f"[{calc['fx1']:.2f}, {calc['fx2']:.2f}]",
-                label="Derivative Df(a)",
-                caption=f"‖∇f(a)‖ = {calc['grad_mag']:.3f}",
-            ),
-            mo.stat(
-                value=f"c = {cfg['c']:.2f}",
-                label="Level Set f⁻¹(c)",
-                caption=f"|f(a) - c| = {calc['level_diff']:.3f} (r = {cfg['r']:.2f})",
-            ),
-            mo.stat(
-                value=f"D = {calc['hessian_det']:.2f}",
-                label="Hessian Det(H)",
-                caption=f"{calc['eigenvalues_str']} • tr(H)={calc['hessian_trace']:.2f}",
-            ),
+            mo.stat(value=f"{calc['fa']:.2f}", label="Value f(a)", caption=f"a = {a_coords_str}"),
+            mo.stat(value=f"[{calc['fx1']:.2f}, {calc['fx2']:.2f}]", label="Derivative Df(a)", caption=f"‖∇f‖ = {calc['grad_mag']:.2f}"),
+            mo.stat(value=f"c = {cfg['c']:.2f}", label="Level Set f = c", caption=f"|f(a)-c| = {calc['level_diff']:.2f}"),
+            mo.stat(value=f"D = {calc['hessian_det']:.2f}", label="Hessian Det(H)", caption=f"λ: {calc['eigenvalues_str']}"),
         ],
         widths="equal",
-        gap=1.0,
+        gap=0.6,
     )
 
-    # -------------------------------------------------------------------------
-    # TAB 1: Level Sets, Point a & Derivative Matrix Df(a)
-    # -------------------------------------------------------------------------
-    tab1_content = mo.vstack(
+    right_panel = mo.vstack(
         [
-            mo.md("### 🎯 Level Set $f(x_1, x_2) = c$ & Evaluation Point $\\mathbf{a}$"),
-            mo.hstack([level_c_slider, radius_r_input], widths=[0.65, 0.35]),
-            mo.hstack([snap_curve_btn, snap_critical_btn, reset_domain_btn], justify="start", gap=0.6),
-            mo.hstack([a1_slider, a2_slider, a3_slider], widths="equal"),
-            mo.callout(
-                mo.md(
-                    rf"""
-                    #### 🔢 Total Derivative Row Matrix $\mathbf{{D}}f(\mathbf{{a}})$ & Gradient $\nabla f(\mathbf{{a}})$
-                    - **Symbolic Derivative:** $${calc['df_symbolic_latex']}$$
-                    - **Numeric Derivative at $\mathbf{{a}}$:** $${calc['df_numeric_latex']}$$
-                    - **Gradient Vector (Transpose):** $${calc['grad_latex']}$$
-                    - **2D Unit Normal & Tangent:** $\mathbf{{n}}_{{2D}} = \langle {calc['unit_normal_2d'][0]:.3f}, {calc['unit_normal_2d'][1]:.3f} \rangle$, $\quad \mathbf{{T}}_{{2D}} = \langle {calc['unit_tangent_2d'][0]:.3f}, {calc['unit_tangent_2d'][1]:.3f} \rangle$ ($\mathbf{{n}} \cdot \mathbf{{T}} = 0 \implies 90^\circ$)
-                    """
-                ),
-                kind="info",
-            ),
-        ],
-        gap=0.8,
-    )
-
-    # -------------------------------------------------------------------------
-    # TAB 2: Affine Approximation g(x) & Normal Line (90°)
-    # -------------------------------------------------------------------------
-    tab2_content = mo.vstack(
-        [
-            mo.md("### 📐 Affine Function $g(\\mathbf{x})$ (Tangent Plane) & Normal Line"),
-            mo.callout(
-                mo.md(
-                    rf"""
-                    #### Best First-Order Linear Approximation near $\mathbf{{a}} = ({cfg['a1']:.2f}, {cfg['a2']:.2f})$
-                    - **General Formula:** $${calc['affine_symbolic_latex']}$$
-                    - **Evaluated Formula:** $${calc['affine_numeric_latex']}$$
-                    - **3D Surface Normal Vector:** $$\mathbf{{n}}_{{3D}} = \left\langle -\frac{{\partial f}}{{\partial x_1}}, -\frac{{\partial f}}{{\partial x_2}}, 1 \right\rangle = \left\langle {-calc['fx1']:.3f}, {-calc['fx2']:.3f}, 1.000 \right\rangle$$
-                    """
-                ),
-                kind="success",
-            ),
-            mo.md("#### 🔬 Linearization Error Calculator at Test Point $\\mathbf{x}_{\\text{test}}$"),
-            mo.hstack([test_x_slider, test_y_slider, sw_error_rod], widths=[0.4, 0.4, 0.2]),
-            mo.hstack(
-                [
-                    mo.stat(value=f"{calc['test_exact']:.4f}", label="Exact Value f(x_test)"),
-                    mo.stat(value=f"{calc['test_affine']:.4f}", label="Affine Approx g(x_test)"),
-                    mo.stat(
-                        value=f"{calc['test_error']:.4f}",
-                        label="Approximation Error |f - g|",
-                        caption="First-order Taylor remainder",
-                    ),
-                ],
-                widths="equal",
-            ),
-        ],
-        gap=0.8,
-    )
-
-    # -------------------------------------------------------------------------
-    # TAB 3: Hessian Matrix H_f(a) & Second Derivative Extremum Test
-    # -------------------------------------------------------------------------
-    tab3_content = mo.vstack(
-        [
-            mo.md("### 🔍 Hessian Matrix $\\mathbf{H}_f(\\mathbf{a})$ & Second Derivative Test"),
-            mo.hstack([snap_critical_btn, a1_slider, a2_slider], widths=[0.34, 0.33, 0.33]),
-            mo.callout(
-                mo.md(
-                    rf"""
-                    #### Quadratic Curvature & Discriminant Analysis
-                    - **Symbolic Hessian:** $${calc['hessian_symbolic_latex']}$$
-                    - **Numeric Hessian at $\mathbf{{a}}$:** $${calc['hessian_numeric_latex']}$$
-                    - **Second Partials:** $f_{{11}} = {calc['h11']:.3f}, \quad f_{{22}} = {calc['h22']:.3f}, \quad f_{{12}} = {calc['h12']:.3f}$
-                    - **Discriminant & Trace:** $D = f_{{11}}f_{{22}} - f_{{12}}^2 = {calc['hessian_det']:.3f}, \quad \operatorname{{tr}}(\mathbf{{H}}) = {calc['hessian_trace']:.3f}, \quad \text{{Eigenvalues: }} {calc['eigenvalues_str']}$
-                    - **Classification Verdict:** **{calc['extremum_label']}**
-                    """
-                ),
-                kind="warn" if calc["extremum_type"] == "saddle" else "info",
-            ),
-        ],
-        gap=0.8,
-    )
-
-    # -------------------------------------------------------------------------
-    # TAB 4: Function Definition, Matrices, Constraints & Free-Variable Cylinders
-    # -------------------------------------------------------------------------
-    tab4_content = mo.vstack(
-        [
-            mo.md("### 🏛️ Function, Matrices in $\\mathbb{R}^2 / \\mathbb{R}^3$ & Optional Requirements"),
-            preset_selector,
-            function_input,
-            constraint_input,
-            mo.md("**Quick Constraint / Cylinder Chips (Click to Apply):**"),
-            mo.hstack(
-                [chip_parab_cyl, chip_ellip_cyl, chip_circle_req, chip_disk_ineq, chip_clear_req],
-                wrap=True,
-                gap=0.5,
-            ),
-            mo.hstack([sw_constraint_surf, sw_constraint_curve], justify="start", gap=1.5),
-            mo.md("#### 🎚️ Optional Formula Parameters $(a, b, c, d)$"),
-            mo.hstack([param_a, param_b, param_c, param_d], widths="equal"),
-        ],
-        gap=0.8,
-    )
-
-    # -------------------------------------------------------------------------
-    # TAB 5: AI Calculus Tutor (Gemini 3.5 Flash-Lite + Auto Graph Action)
-    # -------------------------------------------------------------------------
-    recent_log = get_chat_log()[-4:]
-    log_md_blocks = "\n\n---\n\n".join(
-        f"**{'🧑‍🎓 You' if m['role']=='user' else '🤖 AI Calculus Tutor'}:**\n\n{m['content']}"
-        for m in recent_log
-    )
-
-    tab5_content = mo.vstack(
-        [
-            mo.md("### 🤖 AI Calculus Tutor (`gemini-3.5-flash-lite` + Auto Graph Action Engine)"),
-            api_key_input,
-            mo.md("**⚡ 1-Click AI Graph Actions & Explanations:**"),
-            mo.hstack(
-                [
-                    ai_btn_parab_cyl,
-                    ai_btn_ellip_cyl,
-                    ai_btn_ellipse,
-                    ai_btn_matrix3d,
-                    ai_btn_hessian,
-                    ai_btn_affine,
-                ],
-                wrap=True,
-                gap=0.5,
-            ),
-            mo.callout(mo.md(log_md_blocks), kind="neutral"),
-            mo.md("#### 💬 Interactive Chat (Ask anything or request any 2D/3D surface):"),
-            chat_widget,
-        ],
-        gap=0.8,
-    )
-
-    control_tabs = mo.ui.tabs(
-        {
-            "🏛️ 1. Function & Constraints": tab4_content,
-            "🎯 2. Level Set & Point a": tab1_content,
-            "📐 3. Affine Plane & Normal": tab2_content,
-            "🔍 4. Hessian & Extrema": tab3_content,
-            "🤖 5. AI Calculus Tutor": tab5_content,
-        }
-    )
-
-    # Sidebar for Quick Global Controls & Overlays
-    sidebar = mo.sidebar(
-        [
-            mo.md("## 🌌 MultivarGrapher 3D"),
-            mo.md("*100% Marimo Reactive Calculus Suite*"),
-            preset_selector,
-            function_input,
-            constraint_input,
-            mo.md("---"),
-            mo.md("### 📍 Quick Point $\\mathbf{a}$ & Level $c$"),
-            a1_slider,
-            a2_slider,
-            a3_slider,
-            level_c_slider,
-            snap_curve_btn,
-            mo.md("---"),
-            mo.md("### 🎬 Animation & Display"),
-            view_mode_radio,
-            anim_mode_dropdown,
-            theme_switch,
-            notation_switch,
-            colorscale_dropdown,
-            opacity_slider,
-            mo.md("---"),
-            mo.md("### 👁️ Geometric Overlays"),
-            sw_gradient,
-            sw_tangent_line,
-            sw_normal_line,
-            sw_right_angle,
-            sw_affine_plane,
-            sw_3d_normal,
-            sw_error_rod,
-            sw_all_contours,
-            sw_constraint_surf,
-            sw_constraint_curve,
-        ]
-    )
-
-    # Main Workspace Layout
-    workspace = mo.vstack(
-        [
-            hero_banner,
-            kpi_row,
-            mo.hstack([view_mode_radio, anim_mode_dropdown, theme_switch, notation_switch], justify="space-between", wrap=True),
+            mo.hstack([view_mode_radio, anim_mode_dropdown, theme_switch], justify="space-between", wrap=True),
             plotly_widget,
-            control_tabs,
+            kpi_row,
         ],
-        gap=1.0,
+        gap=0.55,
     )
 
-    mo.vstack([sidebar, workspace])
-    return control_tabs, hero_banner, kpi_row, sidebar, workspace
+    studio_layout = mo.vstack(
+        [
+            top_header,
+            mo.hstack([left_panel, right_panel], widths=[0.38, 0.62], gap=1.2, align="start"),
+        ],
+        gap=0.75,
+    )
+
+    studio_layout
+    return (
+        a_coords_str,
+        ai_tutor_tab,
+        calculus_sheet_tab,
+        constraint_badge_html,
+        expr_card,
+        kpi_row,
+        layers_tab,
+        left_panel,
+        left_tabs,
+        log_md_blocks,
+        point_card,
+        recent_log,
+        right_panel,
+        studio_layout,
+        toast_html,
+        top_header,
+    )
 
 
 if __name__ == "__main__":

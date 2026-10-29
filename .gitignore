@@ -9,3 +9,6 @@ multivar_plot.html
 .DS_Store
 Thumbs.db
 __marimo__/
+.env
+.gemini_key
+
