@@ -1,103 +1,55 @@
-# 🌌 MultivarGrapher: Affine Functions, Normal Lines, Level Sets & Marimo Suite
+# 🌌 MultivarGrapher 3D — 100% Marimo Reactive Calculus & Linear Algebra Suite
 
-An advanced interactive multivariable calculus suite built with **Plotly.js**, **Math.js**, **KaTeX**, and **[marimo](https://github.com/marimo-team/marimo)**.
+An interactive multivariable calculus, linear algebra, and constrained 3D surface visualizer powered natively by **[marimo](https://github.com/marimo-team/marimo)** (`app.py` + `calculus_engine.py` + `custom.css`).
 
-- ⚡ **Marimo Reactive Python App**: `python main.py --marimo` or `marimo run app.py`
+- ⚡ **Launch Reactive Marimo App**: `python main.py` or `marimo run app.py`
+- ✏️ **Open Marimo Reactive Editor**: `python main.py --marimo-edit` or `marimo edit app.py`
 - 🌐 **Render Web Service** (Auto Gemini AI with `GEMINI_API_KEY`): Ready to deploy with `render.yaml`!
-- 🌐 **GitHub Pages (Static 100% Free)**: [https://altairmurat.github.io/multivar-grapher/](https://altairmurat.github.io/multivar-grapher/)
+- 📦 **Legacy HTML/JS/CSS Backup**: Preserved safely in [`legacy_backup/`](legacy_backup/) (`index.html`, `styles.css`, `app.js`).
 
 ---
 
-## ✨ Features & Theory Highlight
+## ✨ Architecture & Features
 
-### 1. ⚡ Reactive Marimo Python Suite & Animations ([marimo-team/marimo](https://github.com/marimo-team/marimo))
-- **Reactive Dataflow DAG**: Built with Marimo reactive cells (`app.py`) where sliders for evaluation point $\mathbf{a}$, level constant $c$, and preset dropdowns instantly recompute all symbolic derivatives and 3D figures in real time without browser reload.
-- **Cool Interactive Animations**:
-  - **3D Camera Auto-Orbit Spin**: Smoothly orbits camera 360° around the surface to inspect 3D manifold topology.
-  - **Level Slice Slicing $c(t)$**: Smooth animated slicing plane sweeping vertically through the 3D surface, highlighting evolving contour rings.
-  - **Gliding Point $\mathbf{a}(t)$**: Animates evaluation point movement across the surface with tangent planes and normal lines rocking dynamically along the curvature.
-- **Standalone WASM / HTML Export**: Pre-compiled zero-server HTML app `marimo_app.html` that can run anywhere.
+### 1. ⚡ 100% Reactive Marimo Application (`app.py` + `calculus_engine.py`)
+- **Pure Reactive Dataflow DAG**: Every slider, preset selector, constraint chip, and AI Tutor action automatically updates the underlying reactive state (`mo.state` + `mo.query_params`) and re-renders the 2D/3D Plotly figures and symbolic LaTeX derivations in real time.
+- **5 Dedicated Interactive Tabs + Global Sidebar**:
+  1. **🏛️ Function & Constraints**: 17 built-in presets, custom formulas, matrices in $\mathbb{R}^2/\mathbb{R}^3$, vector fields, and 1-click free-variable cylinder chips.
+  2. **🎯 Level Set & Point $\mathbf{a}$**: Level constant $c$ & radius $r = \sqrt{c}$ sync, **Snap Point $\mathbf{a}$ to Level Curve**, **Snap to Critical Point ($\nabla f = \mathbf{0}$)**, and Total Derivative row matrix $\mathbf{D}f(\mathbf{a})$.
+  3. **📐 Affine Plane & Normal**: Best first-order linear approximation $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$, 2D/3D orthogonal normal vectors ($90^\circ$ right-angle marker), and Taylor linearization error calculator at $\mathbf{x}_{\text{test}}$.
+  4. **🔍 Hessian & Extrema**: Symbolic and numeric Hessian matrix $\mathbf{H}_f(\mathbf{a})$, eigenvalues $\lambda_i$, trace, discriminant $D = f_{11}f_{22} - f_{12}^2$, and Second Derivative Test classification.
+  5. **🤖 AI Calculus Tutor**: Powered by `gemini-3.5-flash-lite` (with automatic Offline Calculus Engine fallback). Supports 1-click and natural-language **Auto Graph Actions** that configure functions, constraints, and 3D views automatically (with raw JSON code blocks cleanly hidden from chat).
 
-### 2. 📐 Affine Function $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$
-- **Mathematical Definition**: The affine function is the best first-order linear approximation (tangent plane) of a differentiable function $f$ near point $\mathbf{a}$:
-  $$g(x_1, x_2) = f(a_1, a_2) + \frac{\partial f}{\partial x_1}(\mathbf{a})(x_1 - a_1) + \frac{\partial f}{\partial x_2}(\mathbf{a})(x_2 - a_2)$$
-- **3D Tangent Plane Visualization**: Render the affine function as a semi-transparent surface $z = g(x_1, x_2)$ touching $z = f(x_1, x_2)$ tangentially at point $\mathbf{a}$.
-- **Approximation Error Calculator**: Test any nearby point $\mathbf{x}$ to compare the exact nonlinear value $f(\mathbf{x})$, the affine approximation $g(\mathbf{x})$, and the error $|f(\mathbf{x}) - g(\mathbf{x})|$.
+### 2. 🏛️ Optional Requirements & Free-Variable 3D Cylinders
+- Enter any equality or inequality requirement in the **Optional Requirement / Domain Constraint** box:
+  - Example: `F(x1, x2, x3) = [x1; x2; x3]` with requirement `x1^2/4 + x2 = 1` or `x1^2/4 + x2^2/9 = 1`.
+  - Because $x_3$ is a free variable ($x_3 \in (-\infty, \infty)$), the engine automatically extrudes the 2D Marching-Squares curve along the vertical $x_3$-axis to render a **3D Parabolic or Elliptic Cylinder**!
 
-### 2. 🧭 The Normal Line (2D & 3D Explained)
-- **What is the Normal Line?**
-  - **In 2D (Level Sets)**: The Normal Line is the line passing through point $\mathbf{a}$ in the direction of the gradient $\nabla f(\mathbf{a})$. It is **strictly perpendicular (at 90 degrees)** to the tangent line of the level curve! Along this line, the function changes fastest (steepest ascent).
-  - **In 3D (Surface)**: The Surface Normal Line is the 3D line perpendicular to the tangent plane (affine surface $z = g(\mathbf{x})$) pointing in direction $\mathbf{n} = \langle -f_{x_1}, -f_{x_2}, 1 \rangle$.
-- **90° Right-Angle Symbol**: Visually demonstrates orthogonality between the Normal Line and the Tangent Line on the graph.
+### 3. 🧊 Matrices & Vector Fields in $\mathbb{R}^2$ and $\mathbb{R}^3$
+- Enter $2 \times 2$ matrices (e.g. `[2, 1; 1, 2]`) or $3 \times 3$ matrices (e.g. `[1, 2, 3; 4, 5, 6; 7, 8, 9]`) to visualize transformed basis arrows $\mathbf{A}\mathbf{e}_i$, evaluation vector $\mathbf{a} \mapsto \mathbf{A}\mathbf{a}$, unit sphere/circle deformation, determinant $\det(\mathbf{A})$, trace, and eigenvalues.
 
-### 3. 🎯 Level Sets $f^{-1}(c)$ & Circle Radius $r$
-- **Level Set Definition**: Set any level constant $c$ to view $f(x_1, x_2) = c$.
-- **Radius Helper**: For circle functions $f = x_1^2 + x_2^2$, enter radius $r$ (e.g. $r = 2$) and click **Set $r^2$** to draw the circle $c = 4$.
-- **Snap to Curve**: Instantly project point $\mathbf{a}$ onto the level set.
-
-### 4. 🔢 Derivative Matrix $\mathbf{D}f$ $[1 \times n]$
-- View both symbolic and numeric evaluations of the total derivative row matrix $\mathbf{D}f(\mathbf{a}) = [ \frac{\partial f}{\partial x_1} \;\; \frac{\partial f}{\partial x_2} ]$ and gradient column vector $\nabla f = (\mathbf{D}f)^T$.
-
-### 5. 🔗 URL Hash State Sharing & Instant Restoration
-- Clicking **Share** serializes the entire state (function formula, level set $c$, radius $r$, evaluation point $\mathbf{a}$, domain ranges, toggles, notation, and theme) into the URL hash `#...`.
-- Opening or sharing the link instantly restores the exact mathematical configuration and recalculates all derivatives and graphs without resetting to defaults.
-
-### 6. 📱 Mobile & Smartphone Full Compatibility
-- **Dedicated Mobile Viewport**: Mobile segmented switch (`[📊 График]` vs `[⚙️ Параметры]`) providing a 100% full-height graph viewing experience on phones.
-- **Touch Navigation**: Fluid pinch-to-zoom, touch pan, surface rotation, and tap-friendly on-screen zoom toolbar (`[+]`, `[-]`, `[Pan]`, `[Reset]`).
-- **Responsive Controls**: Full-screen parameter workspace with large touch sliders, inputs, and a 1-tap "👉 Show Graph" button.
-
-### 7. 🤖 AI Calculus Tutor Chatbot (`gemini-3.5-flash-lite`)
-- **Live Graph Context Awareness**: Automatically parses and extracts your current function $f(x_1, x_2)$, evaluation point $\mathbf{a}$, gradient $\nabla f(\mathbf{a})$, derivative matrix $Df(\mathbf{a})$, affine approximation $g(\mathbf{x})$, level set $c$, and Hessian determinant $D$.
-- **Render Backend Proxy (No Client API Key Needed)**: When deployed on Render with `GEMINI_API_KEY`, the server proxy handles queries automatically using `gemini-3.5-flash-lite` strictly in English.
-- **Offline Math Intelligence Fallback**: 100% free offline calculus engine with rich KaTeX math equation rendering in chat.
-
----
-
-## 🚀 Deployment
-
-### Option A: Render Deployment (Recommended for AI Key Setup)
-
-1. Push your repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "Deploy to Render"
-   git push origin main
-   ```
-2. Go to [Render Dashboard](https://dashboard.render.com/) -> **New +** -> **Web Service**.
-3. Select your repository `altairmurat/multivar-grapher`.
-4. Configure service settings:
-   - **Environment**: Python 3
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python main.py --host 0.0.0.0 --no-browser`
-5. In **Environment Variables**:
-   - Add `GEMINI_API_KEY` = `<your-api-key>`
-6. Click **Deploy Web Service**! Render will generate your public URL where Gemini AI is immediately available to all visitors without them needing to input any API key.
-
-### Option B: GitHub Pages (Free Static Hosting)
-
-1. In your GitHub repo, go to **Settings** -> **Pages**.
-2. Under **Build and deployment** -> **Branch**, select `main` and folder `/ (root)`.
-3. Click **Save**.
-4. Access at: `https://altairmurat.github.io/multivar-grapher/`
+### 4. 🎬 Interactive 3D Animations
+- **360° Camera Orbit**, **Animated Level Slice $c(t)$**, and **Gliding Point $\mathbf{a}(t)$** with dynamic tangent planes built directly into the Plotly WebGL viewport.
 
 ---
 
 ## 💻 Run Locally
 
-### Standard Web App (index.html + Gemini AI backend)
 ```bash
-python main.py
-```
-Open [http://localhost:8000/index.html](http://localhost:8000/index.html) in your browser.
+# 1. Install dependencies
+pip install -r requirements.txt
 
-### Reactive Marimo Python App (marimo-team/marimo)
-```bash
-python main.py --marimo          # Launches interactive Marimo app in browser
-python main.py --marimo-edit     # Launches Marimo notebook editor
-python main.py --export-marimo   # Re-exports standalone HTML (marimo_app.html)
-```
-Or with the marimo CLI directly:
-```bash
+# 2. Launch the reactive Marimo web app (default)
+python main.py
+
+# Or run directly with the marimo CLI:
 marimo run app.py
+```
+
+### Additional CLI Commands
+```bash
+python main.py --marimo-edit     # Open Marimo notebook editor
+python main.py --export-marimo   # Export standalone HTML snapshots (index.html & marimo_app.html)
+python main.py --legacy-server   # Serve the backed-up vanilla HTML/JS/CSS version from legacy_backup/
+python test_grapher.py           # Run the full verification test suite
 ```
