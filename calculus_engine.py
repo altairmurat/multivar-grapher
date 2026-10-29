@@ -1897,6 +1897,7 @@ def build_plotly_figure(
         fig.update_layout(
             template=template_name,
             dragmode="pan",
+            clickmode="event+select",
             paper_bgcolor=paper_bg,
             plot_bgcolor=bg_2d,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),
@@ -1911,6 +1912,7 @@ def build_plotly_figure(
         fig.update_layout(
             template=template_name,
             dragmode="turntable",
+            clickmode="event+select",
             paper_bgcolor=paper_bg,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),
             scene=scene_cfg,
@@ -1940,6 +1942,7 @@ def build_plotly_figure(
         fig.update_layout(
             template=template_name,
             dragmode="pan",
+            clickmode="event+select",
             paper_bgcolor=paper_bg,
             plot_bgcolor=bg_2d,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),
@@ -2182,20 +2185,22 @@ def ask_ai_tutor(
     custom_api_key: str = "",
 ) -> Tuple[str, Optional[Dict[str, Any]], str]:
     """
-    Calls Gemini API (gemini-3.5-flash-lite with fallbacks) if an API key is available,
-    otherwise falls back to the built-in Offline Calculus & Action Engine.
+    Calls Gemini API (gemini-2.5-flash-lite / gemini-2.0-flash) if a valid API key is available,
+    otherwise instantly falls back to the deterministic Built-in Calculus & Action Engine.
     Returns (clean_reply_markdown, graph_action_dict_or_None, model_used).
     """
     if custom_api_key and custom_api_key.strip():
         save_api_key(custom_api_key.strip())
     api_key = (custom_api_key or load_saved_api_key()).strip()
-    if not api_key:
+    
+    # If key is empty or not formatted as a Gemini API key (which begins with AIza), use Built-in Engine
+    if not api_key or not api_key.startswith("AIza"):
         reply, action = generate_offline_tutor_response(message, calc, a1, a2, a3)
         return reply, action, "Built-in Calculus Engine"
 
     system_prompt = f"""You are an expert Multivariable Calculus AI Tutor in the Marimo MultivarGrapher 3D suite.
 IMPORTANT: ALWAYS RESPOND IN ENGLISH.
-Use clear, pedagogical explanations with formatted LaTeX math ($...$ for inline and $$...$$ for block equations).
+Use clear, pedagogical explanations with formatted LaTeX math: $...$ for inline and \\[ ... \\] for block display equations. Never output unrendered dollar blocks.
 
 Current live graph state:
 - Function: {calc['raw_expr']}
@@ -2209,7 +2214,7 @@ Current live graph state:
 - Extremum classification: {calc['extremum_label']}
 
 Instructions:
-1. Answer the user's question directly in English using LaTeX math ($...$ and $$...$$).
+1. Answer the user's question directly in English using LaTeX math ($...$ and \\[ ... \\]).
 2. If the user asks to create, graph, or change a function, flow line gamma(t) / integral curve, shape (ellipse, circle, saddle, paraboloid, cylinder, matrix, vector field), constraint, level c, or point a:
    Explain the math first, and at the very end output a ```graph_action block with valid JSON:
    - For cylinders in R3 (e.g. x1^2/4 + x2 = 1), set "f": "[x1; x2; x3]" and "constraint": "x1^2 / 4 + x2 = 1".
@@ -2230,7 +2235,6 @@ Instructions:
     fallback_reply, fallback_action = generate_offline_tutor_response(message, calc, a1, a2, a3)
 
     candidate_models = [
-        "gemini-3.5-flash-lite",
         "gemini-2.5-flash-lite",
         "gemini-2.0-flash",
     ]
@@ -2243,7 +2247,7 @@ Instructions:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         req = urllib.request.Request(url, data=payload_bytes, headers={"Content-Type": "application/json"})
         try:
-            with urllib.request.urlopen(req, context=ssl_ctx, timeout=12) as resp:
+            with urllib.request.urlopen(req, context=ssl_ctx, timeout=6) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 candidates = data.get("candidates", [])
                 if candidates:

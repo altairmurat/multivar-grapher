@@ -406,6 +406,12 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
         full_width=True,
     )
 
+    click_bridge_input = mo.ui.text(
+        value="",
+        label="",
+        full_width=False,
+    )
+
     return (
         a1_slider,
         a2_slider,
@@ -418,6 +424,7 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
         chip_ellip_cyl,
         chip_flow_line,
         chip_parab_cyl,
+        click_bridge_input,
         colorscale_dropdown,
         constraint_input,
         function_input,
@@ -556,6 +563,7 @@ def _(
     calc,
     ce,
     cfg,
+    click_bridge_input,
     colorscale_dropdown,
     mo,
     opacity_slider,
@@ -649,23 +657,40 @@ def _(
 
     plotly_widget = mo.ui.plotly(fig, on_change=_on_plot_click)
 
-    # Shadow-DOM Bridge so 3D Surface & 3D Scatter clicks also trigger mo.ui.plotly's onClick handler
+    # Robust Client-Side Click Listener for both 2D Heatmap & 3D Surface / Mesh
     click_bridge_js = (
-        "if(!window.__mvg3dBridge){window.__mvg3dBridge=setInterval(function(){"
-        "document.querySelectorAll('marimo-plotly').forEach(function(mp){"
-        "var r=mp.shadowRoot||mp;"
-        "r.querySelectorAll('.js-plotly-plot').forEach(function(p){"
-        "if(!p.__mvgHook&&typeof p.emit==='function'){"
-        "p.__mvgHook=true;var orig=p.emit.bind(p);"
-        "p.emit=function(ev,d){"
-        "if(ev==='plotly_click'&&d&&Array.isArray(d.points)){"
-        "d.points.forEach(function(pt){if(pt){"
-        "pt.data=Object.assign({},pt.data||{},{type:'heatmap'});"
-        "if(pt.fullData)pt.fullData=Object.assign({},pt.fullData,{type:'heatmap'});"
-        "}});}"
-        "return orig(ev,d);};}});});},350);}"
+        "if(!window.__mvgClickListenerAttached){"
+        "window.__mvgClickListenerAttached=true;"
+        "function attachPlotlyClicks(){"
+        "document.querySelectorAll('.js-plotly-plot').forEach(function(gd){"
+        "if(!gd.__mvgBound&&typeof gd.on==='function'){"
+        "gd.__mvgBound=true;"
+        "gd.on('plotly_click',function(data){"
+        "if(!data||!data.points||!data.points.length)return;"
+        "var pt=data.points[0];"
+        "var rx=(pt.x!==undefined)?Number(pt.x):null;"
+        "var ry=(pt.y!==undefined)?Number(pt.y):null;"
+        "var rz=(pt.z!==undefined)?Number(pt.z):null;"
+        "if(rx===null||ry===null||isNaN(rx)||isNaN(ry))return;"
+        "var target=document.querySelector('.mvg-bridge-input input');"
+        "if(target){"
+        "var payload=JSON.stringify({x:Math.round(rx*1000)/1000,y:Math.round(ry*1000)/1000,z:(rz!==null&&!isNaN(rz))?Math.round(rz*1000)/1000:null,t:Date.now()});"
+        "var setter=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;"
+        "setter.call(target,payload);"
+        "target.dispatchEvent(new Event('input',{bubbles:true}));"
+        "target.dispatchEvent(new Event('change',{bubbles:true}));"
+        "}"
+        "});"
+        "}"
+        "});"
+        "}"
+        "setInterval(attachPlotlyClicks,300);"
+        "}"
     )
     click_bridge_html = mo.Html(
+        f'<div class="mvg-bridge-input" style="position:fixed;bottom:-9999px;left:-9999px;opacity:0;pointer-events:none;">'
+        f'{click_bridge_input.text}'
+        f'</div>'
         f'<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" '
         f'onload="{click_bridge_js}" style="display:none;" />'
     )
@@ -680,11 +705,44 @@ def _(
     calc,
     ce,
     cfg,
+    click_bridge_input,
     get_chat_log,
     mo,
+    set_cfg,
     set_chat_log,
 ):
-    # Ergonomic Top-Mounted AI Tutor (Input Box is at the VERY TOP — Zero Scrolling Required!)
+    # 1. Process incoming clicks from JS Bridge (both 2D & 3D clicks)
+    raw_click = click_bridge_input.value
+    if raw_click and str(raw_click).strip():
+        import json
+        try:
+            pt = json.loads(str(raw_click).strip())
+            cx = float(pt["x"])
+            cy = float(pt["y"])
+            cz = float(pt["z"]) if pt.get("z") is not None else None
+            if abs(cx - cfg["a1"]) > 1e-3 or abs(cy - cfg["a2"]) > 1e-3:
+                exact_val = calc["fa"]
+                if calc["mode"] == "scalar_2d":
+                    try:
+                        exact_val = float(calc["f_fn_2d"](cx, cy))
+                    except Exception:
+                        exact_val = cz if cz is not None else calc["fa"]
+                elif cz is not None:
+                    exact_val = cz
+
+                set_cfg(
+                    lambda prev: {
+                        **prev,
+                        "a1": round(cx, 3),
+                        "a2": round(cy, 3),
+                        "a3": round(cz, 3) if (cz is not None and calc["dim"] == 3) else prev["a3"],
+                        "toast": f"📍 Point a = ({cx:.2f}, {cy:.2f})  ⟹  Exact f(a) = {exact_val:.4f}",
+                    }
+                )
+        except Exception:
+            pass
+
+    # 2. Ergonomic Top-Mounted AI Tutor (Input Box is at the VERY TOP — Zero Scrolling Required!)
     def _run_tutor_query(user_prompt):
         if not user_prompt or not str(user_prompt).strip():
             return
@@ -834,7 +892,7 @@ def _(
                     f"{status_line_md}"
                 ),
                 mo.md(
-                    f"$${calc['f_latex']}$$\n"
+                    f"\\[ {calc['f_latex']} \\]\n\n"
                     f"**Selected Point:** $\\mathbf{{a}} = {a_coords_str} \\;\\Longrightarrow\\; f(\\mathbf{{a}}) = {calc['fa']:.4f}$"
                 ),
             ],
@@ -871,14 +929,15 @@ def _(
         gap=0.4,
     )
 
-    # TAB 1: Unified Calculus Sheet — Pure Markdown (NO <div> tags around LaTeX!)
+    # TAB 1: Unified Calculus Sheet — Pure Markdown (\[ ... \] so KaTeX renders 100%!)
     calculus_sheet_tab = mo.vstack(
         [
             mo.callout(
                 mo.md(
                     f"#### 1. Derivative Row Matrix $\\mathbf{{D}}f(\\mathbf{{a}})$ & Gradient $\\nabla f(\\mathbf{{a}})$\n\n"
-                    f"$${calc['df_symbolic_latex']} \\;\\Longrightarrow\\; {calc['df_numeric_latex']}$$\n\n"
-                    f"- **Gradient Column Vector:** $${calc['grad_latex']}$$\n"
+                    f"\\[ {calc['df_symbolic_latex']} \\;\\Longrightarrow\\; {calc['df_numeric_latex']} \\]\n\n"
+                    f"- **Gradient Column Vector:**\n"
+                    f"\\[ {calc['grad_latex']} \\]\n\n"
                     f"- **Magnitude & $90^\\circ$ Frame:** $\\|\\nabla f(\\mathbf{{a}})\\| = {calc['grad_mag']:.3f}$ &nbsp;|&nbsp; "
                     f"Unit Normal $\\mathbf{{n}} = \\langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \\rangle \\perp$ "
                     f"Unit Tangent $\\mathbf{{T}} = \\langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \\rangle$ ($90^\\circ$)"
@@ -888,8 +947,8 @@ def _(
             mo.callout(
                 mo.md(
                     f"#### 2. Affine Tangent Plane $g(\\mathbf{{x}})$ & 3D Surface Normal\n\n"
-                    f"$${calc['affine_symbolic_latex']}$$\n\n"
-                    f"$${calc['affine_numeric_latex']}$$\n\n"
+                    f"\\[ {calc['affine_symbolic_latex']} \\]\n\n"
+                    f"\\[ {calc['affine_numeric_latex']} \\]\n\n"
                     f"- **3D Surface Normal Vector:** $\\mathbf{{n}}_{{3D}} = \\langle {-calc['fx1']:.3f}, {-calc['fx2']:.3f}, 1.000 \\rangle$"
                 ),
                 kind="success",
@@ -897,11 +956,11 @@ def _(
             mo.callout(
                 mo.md(
                     f"#### 3. Hessian Matrix $\\mathbf{{H}}_f(\\mathbf{{a}})$ & Second Derivative Test\n\n"
-                    f"$${calc['hessian_symbolic_latex']}$$\n\n"
-                    f"$${calc['hessian_numeric_latex']}$$\n\n"
+                    f"\\[ {calc['hessian_symbolic_latex']} \\]\n\n"
+                    f"\\[ {calc['hessian_numeric_latex']} \\]\n\n"
                     f"- **Invariants:** $\\det(\\mathbf{{H}}) = {calc['hessian_det']:.3f}$ &nbsp;|&nbsp; "
                     f"$\\operatorname{{tr}}(\\mathbf{{H}}) = {calc['hessian_trace']:.3f}$ &nbsp;|&nbsp; "
-                    f"Eigenvalues: `{calc['eigenvalues_str']}`\n"
+                    f"Eigenvalues: `{calc['eigenvalues_str']}`\n\n"
                     f"- **Classification Verdict:** **{calc['extremum_label']}**"
                 ),
                 kind="warn" if calc["extremum_type"] == "saddle" else "neutral",
@@ -958,7 +1017,7 @@ def _(
                     r"""
                     #### 1. Level Sets $f^{-1}(c)$ & Orthogonality ($90^\circ$)
                     For a scalar function $f: \mathbb{R}^2 \to \mathbb{R}$, the **level curve** at height $c$ is the set:
-                    $$f^{-1}(c) = \{ (x_1, x_2) \in \mathbb{R}^2 \mid f(x_1, x_2) = c \}$$
+                    \[ f^{-1}(c) = \{ (x_1, x_2) \in \mathbb{R}^2 \mid f(x_1, x_2) = c \} \]
                     - **Gradient Orthogonality Theorem:** At any non-critical point $\mathbf{a}$, the gradient $\nabla f(\mathbf{a})$ is **strictly perpendicular ($90^\circ$)** to the tangent line of the level curve passing through $\mathbf{a}$.
                     - **Flow Line $\gamma(t)$:** The trajectory solving $\gamma'(t) = \nabla f(\gamma(t))$ with $\gamma(0) = \mathbf{a}$ follows the path of **steepest ascent** and crosses every level curve at a $90^\circ$ angle.
                     """
@@ -970,9 +1029,9 @@ def _(
                     r"""
                     #### 2. Total Derivative $\mathbf{D}f(\mathbf{a})$ & Affine Function $g(\mathbf{x})$
                     The **total derivative** at $\mathbf{a} = (a_1, a_2)$ is the $1 \times 2$ row matrix of partial derivatives:
-                    $$\mathbf{D}f(\mathbf{a}) = \begin{bmatrix} \frac{\partial f}{\partial x_1}(\mathbf{a}) & \frac{\partial f}{\partial x_2}(\mathbf{a}) \end{bmatrix}_{1 \times 2}, \qquad \nabla f(\mathbf{a}) = \mathbf{D}f(\mathbf{a})^T$$
+                    \[ \mathbf{D}f(\mathbf{a}) = \begin{bmatrix} \frac{\partial f}{\partial x_1}(\mathbf{a}) & \frac{\partial f}{\partial x_2}(\mathbf{a}) \end{bmatrix}_{1 \times 2}, \qquad \nabla f(\mathbf{a}) = \mathbf{D}f(\mathbf{a})^T \]
                     The **affine approximation** $g(\mathbf{x})$ defines the 3D **tangent plane** touching $z = f(\mathbf{x})$ at $\mathbf{a}$:
-                    $$g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a}) = f(a_1, a_2) + f_{x_1}(\mathbf{a})(x_1 - a_1) + f_{x_2}(\mathbf{a})(x_2 - a_2)$$
+                    \[ g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a}) = f(a_1, a_2) + f_{x_1}(\mathbf{a})(x_1 - a_1) + f_{x_2}(\mathbf{a})(x_2 - a_2) \]
                     """
                 ),
                 kind="success",
@@ -982,7 +1041,7 @@ def _(
                     r"""
                     #### 3. Hessian Matrix $\mathbf{H}_f(\mathbf{a})$ & Second Derivative Test
                     The **Hessian matrix** captures the second-order quadratic curvature of $f$ at $\mathbf{a}$:
-                    $$\mathbf{H}_f(\mathbf{a}) = \begin{bmatrix} f_{11}(\mathbf{a}) & f_{12}(\mathbf{a}) \\ f_{21}(\mathbf{a}) & f_{22}(\mathbf{a}) \end{bmatrix}, \qquad D = \det(\mathbf{H}_f(\mathbf{a})) = f_{11}f_{22} - f_{12}^2$$
+                    \[ \mathbf{H}_f(\mathbf{a}) = \begin{bmatrix} f_{11}(\mathbf{a}) & f_{12}(\mathbf{a}) \\ f_{21}(\mathbf{a}) & f_{22}(\mathbf{a}) \end{bmatrix}, \qquad D = \det(\mathbf{H}_f(\mathbf{a})) = f_{11}f_{22} - f_{12}^2 \]
                     At a critical point ($\nabla f(\mathbf{a}) = \mathbf{0}$):
                     - $D > 0$ and $f_{11} > 0 \implies$ **Strict Local Minimum** (both eigenvalues $\lambda_1, \lambda_2 > 0$).
                     - $D > 0$ and $f_{11} < 0 \implies$ **Strict Local Maximum** (both eigenvalues $\lambda_1, \lambda_2 < 0$).
