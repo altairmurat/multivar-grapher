@@ -1192,23 +1192,42 @@ def build_plotly_figure(
     # -------------------------------------------------------------------------
     traces_2d: List[Any] = []
 
-    # 1. Background Contour / Heatmap
+    # 1. Interactive Clickable 2D Heatmap + Iso-Contour Lines
     traces_2d.append(
-        go.Contour(
+        go.Heatmap(
             x=xs,
             y=ys,
             z=Z,
             colorscale=color_scale,
-            opacity=0.82,
-            contours=dict(
-                coloring="heatmap" if show_all_contours else "none",
-                showlabels=show_all_contours,
-                labelfont=dict(size=10, color="#ffffff"),
+            zsmooth="best",
+            opacity=0.84,
+            colorbar=(
+                dict(title="f(x)", len=0.85, thickness=14)
+                if view_mode == "2D Level Sets"
+                else dict(len=0.75, thickness=12, x=1.02)
             ),
-            colorbar=dict(title="f(x)", len=0.85, thickness=14) if view_mode == "2D Level Sets" else dict(len=0.75, thickness=12, x=1.02),
-            name="Surface Contours",
+            hovertemplate="x₁ = %{x:.3f}<br>x₂ = %{y:.3f}<br>Exact f = %{z:.4f}<extra>Click to set Point a</extra>",
+            name="Surface Field (Click to set a)",
         )
     )
+    if show_all_contours:
+        traces_2d.append(
+            go.Contour(
+                x=xs,
+                y=ys,
+                z=Z,
+                contours=dict(
+                    coloring="none",
+                    showlabels=True,
+                    labelfont=dict(size=10, color="#ffffff"),
+                ),
+                line=dict(color="rgba(255,255,255,0.42)", width=1.1),
+                showscale=False,
+                hoverinfo="skip",
+                showlegend=False,
+                name="Iso-Contours",
+            )
+        )
 
     # 2. Highlighted Level Curve f(x1, x2) = c
     if mode in ("scalar_2d", "scalar_3d"):
@@ -1384,15 +1403,17 @@ def build_plotly_figure(
             )
         )
 
-    # Evaluation Point a & Test Point x_test in 2D
+    # Evaluation Point a & Test Point x_test in 2D (Shows exact value f(a))
     traces_2d.append(
         go.Scatter(
             x=[a1],
             y=[a2],
             mode="markers+text",
-            marker=dict(size=12, color="#00ffff", line=dict(color="#1e1b4b", width=2.5)),
-            text=[f"a=({a1:.2f},{a2:.2f})"],
+            marker=dict(size=13, color="#00ffff", line=dict(color="#1e1b4b", width=2.5)),
+            text=[f"a=({a1:.2f}, {a2:.2f}) | f={calc['fa']:.3f}"],
+            textfont=dict(size=11, color="#0f172a" if not is_dark else "#f8fafc"),
             textposition="bottom right",
+            hovertemplate=f"<b>Point a</b><br>x₁ = {a1:.4f}<br>x₂ = {a2:.4f}<br>Exact f(a) = {calc['fa']:.4f}<extra></extra>",
             name="Point a",
         )
     )
@@ -1621,17 +1642,31 @@ def build_plotly_figure(
             )
         )
 
-    # 7. Point a, 3D Surface Normal Line, 3D Gradient Vector, Flow Line γ(t), and Error Rod
+    # 7. Point a, Vertical 2D<->3D Projection Stem, 3D Surface Normal Line, 3D Gradient, Flow Line γ(t), and Error Rod
     pt_z = a3 if (mode in ("scalar_3d", "vector_3d", "matrix_3d") or is_cyl_only) else fa_val
+    traces_3d.append(
+        go.Scatter3d(
+            x=[a1, a1],
+            y=[a2, a2],
+            z=[z_min_plot, pt_z],
+            mode="lines+markers",
+            line=dict(color="#00ffff", width=3, dash="dot"),
+            marker=dict(size=[4, 0], color="#00ffff"),
+            showlegend=False,
+            hoverinfo="skip",
+            name="2D↔3D Link",
+        )
+    )
     traces_3d.append(
         go.Scatter3d(
             x=[a1],
             y=[a2],
             z=[pt_z],
             mode="markers+text",
-            marker=dict(size=7, color="#00ffff", symbol="diamond", line=dict(color="#ffffff", width=2)),
-            text=[f"a=({a1:.1f},{a2:.1f},{pt_z:.1f})"],
+            marker=dict(size=8, color="#00ffff", symbol="diamond", line=dict(color="#ffffff", width=2)),
+            text=[f"a=({a1:.2f},{a2:.2f}) • f={pt_z:.3f}"],
             textposition="top center",
+            hovertemplate=f"<b>Point a (3D)</b><br>x₁ = {a1:.4f}<br>x₂ = {a2:.4f}<br>Exact f(a) = {pt_z:.4f}<extra></extra>",
             name="Point a",
             showlegend=(view_mode == "3D Surface"),
         )
@@ -1861,6 +1896,7 @@ def build_plotly_figure(
         fig = go.Figure(data=traces_2d)
         fig.update_layout(
             template=template_name,
+            dragmode="pan",
             paper_bgcolor=paper_bg,
             plot_bgcolor=bg_2d,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),
@@ -1874,6 +1910,7 @@ def build_plotly_figure(
         fig = go.Figure(data=traces_3d, frames=frames)
         fig.update_layout(
             template=template_name,
+            dragmode="turntable",
             paper_bgcolor=paper_bg,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),
             scene=scene_cfg,
@@ -1888,7 +1925,7 @@ def build_plotly_figure(
             rows=1,
             cols=2,
             specs=[[{"type": "scene"}, {"type": "xy"}]],
-            subplot_titles=("🌌 3D Manifold, Tangent Plane & Normal", "🎯 2D Level Sets, Gradient & 90° Normal"),
+            subplot_titles=("🌌 3D Manifold (Click Surface to Set Point a)", "🎯 2D Level Sets (Click Map to Set Point a)"),
             column_widths=[0.54, 0.46],
             horizontal_spacing=0.06,
         )
@@ -1902,6 +1939,7 @@ def build_plotly_figure(
 
         fig.update_layout(
             template=template_name,
+            dragmode="pan",
             paper_bgcolor=paper_bg,
             plot_bgcolor=bg_2d,
             font=dict(color=text_col, family="Plus Jakarta Sans, Inter, system-ui, sans-serif"),

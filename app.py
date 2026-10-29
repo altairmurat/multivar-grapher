@@ -56,7 +56,7 @@ def _(ce, mo):
                 "role": "assistant",
                 "content": (
                     "**👋 Welcome to the AI Calculus Tutor!**\n\n"
-                    "Type any request in the chat box below or click a quick button — for example:\n"
+                    "Type any request in the box **above** (and press **Enter** or click **🚀 Ask AI / Plot**), or click a quick button:\n"
                     "- *\"Create a flow line of gamma(t)\"*\n"
                     "- *\"Create a parabolic cylinder with x1^2/4 + x2 = 1\"*\n"
                     "- *\"Make me an ellipse\"* or *\"Show a 3x3 matrix in R3\"*"
@@ -244,7 +244,7 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
         ),
     )
 
-    # 2. Point a & Level Set c Sliders (Short labels so they never wrap)
+    # 2. Point a & Level Set c Sliders
     a1_slider = mo.ui.slider(
         start=-6.0,
         stop=6.0,
@@ -396,7 +396,7 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
     param_c = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="c")
     param_d = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="d")
 
-    # IMPORTANT: Define api_key_input in THIS cell so its .value can be safely read in the AI Tutor cell!
+    # Define api_key_input in THIS cell so its .value can be safely read in the AI Tutor cell!
     api_key_input = mo.ui.text(
         value=saved_key,
         kind="password",
@@ -559,6 +559,7 @@ def _(
     colorscale_dropdown,
     mo,
     opacity_slider,
+    set_cfg,
     sw_3d_normal,
     sw_affine_plane,
     sw_all_contours,
@@ -601,8 +602,75 @@ def _(
         show_flow_line=bool(sw_flow_line.value),
     )
 
-    plotly_widget = mo.ui.plotly(fig)
-    return fig, plotly_widget
+    # Synchronized 2D & 3D Click Handler: clicking ANY point on 2D or 3D updates Point a in both views!
+    def _on_plot_click(points):
+        if not points or not isinstance(points, list):
+            return
+        pt = points[-1]
+        if not isinstance(pt, dict):
+            return
+        raw_x = pt.get("x")
+        raw_y = pt.get("y")
+        raw_z = pt.get("z")
+        if raw_x is None or raw_y is None:
+            return
+        try:
+            cx = round(float(raw_x), 3)
+            cy = round(float(raw_y), 3)
+        except Exception:
+            return
+
+        # Compute exact value f(cx, cy) so toast shows the exact value immediately
+        exact_val = calc["fa"]
+        if calc["mode"] == "scalar_2d":
+            try:
+                exact_val = float(calc["f_fn_2d"](cx, cy))
+            except Exception:
+                if raw_z is not None:
+                    try:
+                        exact_val = float(raw_z)
+                    except Exception:
+                        pass
+        elif raw_z is not None:
+            try:
+                exact_val = float(raw_z)
+            except Exception:
+                pass
+
+        set_cfg(
+            lambda prev: {
+                **prev,
+                "a1": cx,
+                "a2": cy,
+                "a3": round(float(raw_z), 3) if (raw_z is not None and calc["dim"] == 3) else prev["a3"],
+                "toast": f"📍 Point a = ({cx:.2f}, {cy:.2f})  ⟹  Exact f(a) = {exact_val:.4f}",
+            }
+        )
+
+    plotly_widget = mo.ui.plotly(fig, on_change=_on_plot_click)
+
+    # Shadow-DOM Bridge so 3D Surface & 3D Scatter clicks also trigger mo.ui.plotly's onClick handler
+    click_bridge_js = (
+        "if(!window.__mvg3dBridge){window.__mvg3dBridge=setInterval(function(){"
+        "document.querySelectorAll('marimo-plotly').forEach(function(mp){"
+        "var r=mp.shadowRoot||mp;"
+        "r.querySelectorAll('.js-plotly-plot').forEach(function(p){"
+        "if(!p.__mvgHook&&typeof p.emit==='function'){"
+        "p.__mvgHook=true;var orig=p.emit.bind(p);"
+        "p.emit=function(ev,d){"
+        "if(ev==='plotly_click'&&d&&Array.isArray(d.points)){"
+        "d.points.forEach(function(pt){if(pt){"
+        "pt.data=Object.assign({},pt.data||{},{type:'heatmap'});"
+        "if(pt.fullData)pt.fullData=Object.assign({},pt.fullData,{type:'heatmap'});"
+        "}});}"
+        "return orig(ev,d);};}});});},350);}"
+    )
+    click_bridge_html = mo.Html(
+        f'<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" '
+        f'onload="{click_bridge_js}" style="display:none;" />'
+    )
+
+    return click_bridge_html, fig, plotly_widget
 
 
 @app.cell
@@ -616,11 +684,11 @@ def _(
     mo,
     set_chat_log,
 ):
-    # AI Calculus Tutor Cell — receives `api_key_input` from previous cell so `.value` access is 100% legal!
-    def _run_tutor_query(user_prompt: str):
-        if not user_prompt or not user_prompt.strip():
+    # Ergonomic Top-Mounted AI Tutor (Input Box is at the VERY TOP — Zero Scrolling Required!)
+    def _run_tutor_query(user_prompt):
+        if not user_prompt or not str(user_prompt).strip():
             return
-        q_clean = user_prompt.strip()
+        q_clean = str(user_prompt).strip()
         reply_md, action_dict, model_label = ce.ask_ai_tutor(
             message=q_clean,
             calc=calc,
@@ -636,43 +704,21 @@ def _(
             lambda prev: prev
             + [
                 {"role": "user", "content": q_clean},
-                {"role": "assistant", "content": f"*{model_label}*\n\n{reply_md}"},
+                {"role": "assistant", "content": f"*({model_label})*\n\n{reply_md}"},
             ]
         )
 
-    def _marimo_chat_model(messages):
-        user_msg = messages[-1].content if messages else "Explain this graph"
-        reply_md, action_dict, model_label = ce.ask_ai_tutor(
-            message=str(user_msg),
-            calc=calc,
-            a1=cfg["a1"],
-            a2=cfg["a2"],
-            a3=cfg["a3"],
-            custom_api_key=api_key_input.value,
-        )
-        if action_dict:
-            apply_action_dict(action_dict, summary=f"AI Tutor ({model_label}) updated the graph!")
-        set_chat_log(
-            lambda prev: prev
-            + [
-                {"role": "user", "content": str(user_msg)},
-                {"role": "assistant", "content": f"*{model_label}*\n\n{reply_md}"},
-            ]
-        )
-        return f"*{model_label}*\n\n{reply_md}"
-
-    chat_widget = mo.ui.chat(
-        _marimo_chat_model,
-        prompts=[
-            "Create a flow line of gamma(t)",
-            "Create a parabolic cylinder with x1^2/4 + x2 = 1",
-            "Create an elliptic cylinder in R3",
-            "Make me an ellipse",
-            "Show a 3x3 matrix in R3: [1, 2, 3; 4, 5, 6; 7, 8, 9]",
-            "Show me a saddle surface",
-            "Explain the Hessian matrix and 2nd derivative test",
-            "Explain the affine function g(x) and tangent plane",
-        ],
+    # Top-mounted prompt form: press Enter or click "🚀 Ask AI / Plot" right at the top!
+    ai_prompt_form = mo.ui.text(
+        value="",
+        placeholder="Ask AI or command a graph (e.g. 'flow line of gamma(t)', 'make an ellipse', 'parabolic cylinder')...",
+        label="💬 Ask AI Calculus Tutor (Press Enter or Click Button)",
+        full_width=True,
+    ).form(
+        submit_button_label="🚀 Ask AI / Plot",
+        clear_on_submit=True,
+        bordered=False,
+        on_change=_run_tutor_query,
     )
 
     ai_btn_flow = mo.ui.button(
@@ -702,7 +748,7 @@ def _(
         ai_btn_hessian,
         ai_btn_matrix3d,
         ai_btn_parab_cyl,
-        chat_widget,
+        ai_prompt_form,
         get_chat_log,
     )
 
@@ -717,16 +763,17 @@ def _(
     ai_btn_hessian,
     ai_btn_matrix3d,
     ai_btn_parab_cyl,
+    ai_prompt_form,
     anim_mode_dropdown,
     api_key_input,
     calc,
     cfg,
-    chat_widget,
     chip_circle_req,
     chip_clear_req,
     chip_ellip_cyl,
     chip_flow_line,
     chip_parab_cyl,
+    click_bridge_html,
     colorscale_dropdown,
     constraint_input,
     function_input,
@@ -762,39 +809,44 @@ def _(
     view_mode_radio,
 ):
     # =========================================================================
-    # CLEAN 2-COLUMN STUDIO LAYOUT (DESMOS 3D / MATH3D STYLE — NO SIDEBAR!)
+    # CLEAN 2-COLUMN STUDIO LAYOUT (PURE MARKDOWN MATH SO KATEX RENDERS 100%)
     # =========================================================================
 
-    toast_html = (
-        f'<span class="mvg-badge-emerald">✨ {cfg["toast"]}</span>' if cfg.get("toast") else ""
-    )
-    constraint_badge_html = (
-        f'<span class="mvg-badge-cyan">🏛️ {calc["constraint"]["status_text"]}</span>'
-        if calc["constraint"]["active"]
-        else ""
+    a_coords_str = (
+        f"({cfg['a1']:.2f}, {cfg['a2']:.2f}, {cfg['a3']:.2f})"
+        if calc["dim"] == 3
+        else f"({cfg['a1']:.2f}, {cfg['a2']:.2f})"
     )
 
-    # Top Studio Header Bar
-    top_header = mo.md(
-        rf"""
-        <div class="mvg-topbar">
-          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
-            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
-              <strong style="font-size:1.1rem; color:#4c1d95;">🌌 MultivarGrapher 3D</strong>
-              <span class="mvg-badge-{calc['extremum_badge']}">{calc['extremum_label']}</span>
-              {constraint_badge_html}
-              {toast_html}
-            </div>
-            <div style="font-size:1.05rem;">
-              $${calc['f_latex']}$$
-            </div>
-          </div>
-        </div>
-        """
+    status_parts = [f"**{calc['extremum_label']}**"]
+    if calc["constraint"]["active"]:
+        status_parts.append(f"🏛️ `{calc['constraint']['status_text']}`")
+    if cfg.get("toast"):
+        status_parts.append(f"✨ `{cfg['toast']}`")
+    status_line_md = " &nbsp;•&nbsp; ".join(status_parts)
+
+    # Top Studio Header Bar (Pure Markdown inside mo.md so KaTeX renders f_latex!)
+    top_header = mo.callout(
+        mo.hstack(
+            [
+                mo.md(
+                    f"### 🌌 MultivarGrapher 3D\n"
+                    f"{status_line_md}"
+                ),
+                mo.md(
+                    f"$${calc['f_latex']}$$\n"
+                    f"**Selected Point:** $\\mathbf{{a}} = {a_coords_str} \\;\\Longrightarrow\\; f(\\mathbf{{a}}) = {calc['fa']:.4f}$"
+                ),
+            ],
+            justify="space-between",
+            align="center",
+            wrap=True,
+        ),
+        kind="neutral",
     )
 
     # -------------------------------------------------------------------------
-    # LEFT PANEL: Expression Card + Point Sliders + 3 Clean Tabs
+    # LEFT PANEL: Expression Card + Point Sliders + 4 Clean Tabs
     # -------------------------------------------------------------------------
     expr_card = mo.vstack(
         [
@@ -819,34 +871,40 @@ def _(
         gap=0.4,
     )
 
-    # TAB 1: Unified Calculus Sheet (All key math in one scannable view!)
+    # TAB 1: Unified Calculus Sheet — Pure Markdown (NO <div> tags around LaTeX!)
     calculus_sheet_tab = mo.vstack(
         [
-            mo.md(
-                rf"""
-                <div class="mvg-math-box">
-                  <strong>1. Derivative Row Matrix $\mathbf{{D}}f(\mathbf{{a}})$ & Gradient $\nabla f(\mathbf{{a}})$</strong><br/>
-                  $${calc['df_symbolic_latex']} \;\Longrightarrow\; {calc['df_numeric_latex']}$$
-                  <span style="font-size:0.84rem; color:#475569;">
-                    $\|\nabla f(\mathbf{{a}})\| = {calc['grad_mag']:.3f}$ &bull;
-                    2D Normal $\mathbf{{n}} = \langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \rangle \perp$ Tangent $\mathbf{{T}} = \langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \rangle$ ($90^\circ$)
-                  </span>
-                </div>
-                <div class="mvg-math-box">
-                  <strong>2. Affine Tangent Plane $g(\mathbf{{x}})$ & 3D Surface Normal</strong><br/>
-                  $${calc['affine_numeric_latex']}$$
-                  <span style="font-size:0.84rem; color:#475569;">
-                    3D Normal $\mathbf{{n}}_{{3D}} = \langle {-calc['fx1']:.2f}, {-calc['fx2']:.2f}, 1 \rangle$
-                  </span>
-                </div>
-                <div class="mvg-math-box">
-                  <strong>3. Hessian Matrix $\mathbf{{H}}_f(\mathbf{{a}})$ & Second Derivative Test</strong><br/>
-                  $${calc['hessian_numeric_latex']}$$
-                  <span style="font-size:0.84rem; color:#475569;">
-                    $\det(\mathbf{{H}}) = {calc['hessian_det']:.2f}$ &bull; $\operatorname{{tr}}(\mathbf{{H}}) = {calc['hessian_trace']:.2f}$ &bull; Eigenvalues: <code>{calc['eigenvalues_str']}</code> &bull; <strong>{calc['extremum_label']}</strong>
-                  </span>
-                </div>
-                """
+            mo.callout(
+                mo.md(
+                    f"#### 1. Derivative Row Matrix $\\mathbf{{D}}f(\\mathbf{{a}})$ & Gradient $\\nabla f(\\mathbf{{a}})$\n\n"
+                    f"$${calc['df_symbolic_latex']} \\;\\Longrightarrow\\; {calc['df_numeric_latex']}$$\n\n"
+                    f"- **Gradient Column Vector:** $${calc['grad_latex']}$$\n"
+                    f"- **Magnitude & $90^\\circ$ Frame:** $\\|\\nabla f(\\mathbf{{a}})\\| = {calc['grad_mag']:.3f}$ &nbsp;|&nbsp; "
+                    f"Unit Normal $\\mathbf{{n}} = \\langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \\rangle \\perp$ "
+                    f"Unit Tangent $\\mathbf{{T}} = \\langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \\rangle$ ($90^\\circ$)"
+                ),
+                kind="info",
+            ),
+            mo.callout(
+                mo.md(
+                    f"#### 2. Affine Tangent Plane $g(\\mathbf{{x}})$ & 3D Surface Normal\n\n"
+                    f"$${calc['affine_symbolic_latex']}$$\n\n"
+                    f"$${calc['affine_numeric_latex']}$$\n\n"
+                    f"- **3D Surface Normal Vector:** $\\mathbf{{n}}_{{3D}} = \\langle {-calc['fx1']:.3f}, {-calc['fx2']:.3f}, 1.000 \\rangle$"
+                ),
+                kind="success",
+            ),
+            mo.callout(
+                mo.md(
+                    f"#### 3. Hessian Matrix $\\mathbf{{H}}_f(\\mathbf{{a}})$ & Second Derivative Test\n\n"
+                    f"$${calc['hessian_symbolic_latex']}$$\n\n"
+                    f"$${calc['hessian_numeric_latex']}$$\n\n"
+                    f"- **Invariants:** $\\det(\\mathbf{{H}}) = {calc['hessian_det']:.3f}$ &nbsp;|&nbsp; "
+                    f"$\\operatorname{{tr}}(\\mathbf{{H}}) = {calc['hessian_trace']:.3f}$ &nbsp;|&nbsp; "
+                    f"Eigenvalues: `{calc['eigenvalues_str']}`\n"
+                    f"- **Classification Verdict:** **{calc['extremum_label']}**"
+                ),
+                kind="warn" if calc["extremum_type"] == "saddle" else "neutral",
             ),
             mo.accordion(
                 {
@@ -855,9 +913,9 @@ def _(
                             mo.hstack([test_x_slider, test_y_slider], widths="equal"),
                             sw_error_rod,
                             mo.md(
-                                f"**Exact** $f(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_exact']:.4f}$ &bull; "
-                                f"**Affine** $g(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_affine']:.4f}$ &bull; "
-                                f"**Error** $|f - g| = {calc['test_error']:.4f}$"
+                                f"- **Exact Value:** $f(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_exact']:.4f}$\n"
+                                f"- **Affine Approx:** $g(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_affine']:.4f}$\n"
+                                f"- **First-Order Error:** $|f(\\mathbf{{x}}_{{\\text{{test}}}}) - g(\\mathbf{{x}}_{{\\text{{test}}}})| = {calc['test_error']:.4f}$"
                             ),
                             radius_r_input,
                         ]
@@ -868,31 +926,86 @@ def _(
                 }
             ),
         ],
-        gap=0.4,
+        gap=0.45,
     )
 
-    # TAB 2: AI Calculus Tutor (Fixed & Working)
-    recent_log = get_chat_log()[-2:]
+    # TAB 2: AI Calculus Tutor — Input Form is AT THE TOP, Newest Reply First!
+    recent_msgs = list(reversed(get_chat_log()[-6:]))
     log_md_blocks = "\n\n---\n\n".join(
-        f"**{'🧑‍🎓 You' if m['role']=='user' else '🤖 AI Tutor'}:**\n\n{m['content']}"
-        for m in recent_log
+        f"**{'🧑‍🎓 You' if m['role']=='user' else '🤖 AI Calculus Tutor'}:**\n\n{m['content']}"
+        for m in recent_msgs
     )
 
     ai_tutor_tab = mo.vstack(
         [
-            api_key_input,
+            ai_prompt_form,
             mo.hstack(
                 [ai_btn_flow, ai_btn_parab_cyl, ai_btn_ellipse, ai_btn_matrix3d, ai_btn_hessian],
                 wrap=True,
                 gap=0.35,
             ),
             mo.callout(mo.md(log_md_blocks), kind="neutral"),
-            chat_widget,
+            mo.accordion({"🔑 Gemini API Key Settings (Optional)": api_key_input}),
         ],
         gap=0.5,
     )
 
-    # TAB 3: Layers & Visual Style
+    # TAB 3: Complete Multivariable Calculus Theory Guide (Pure Markdown + KaTeX!)
+    theory_tab = mo.vstack(
+        [
+            mo.callout(
+                mo.md(
+                    r"""
+                    #### 1. Level Sets $f^{-1}(c)$ & Orthogonality ($90^\circ$)
+                    For a scalar function $f: \mathbb{R}^2 \to \mathbb{R}$, the **level curve** at height $c$ is the set:
+                    $$f^{-1}(c) = \{ (x_1, x_2) \in \mathbb{R}^2 \mid f(x_1, x_2) = c \}$$
+                    - **Gradient Orthogonality Theorem:** At any non-critical point $\mathbf{a}$, the gradient $\nabla f(\mathbf{a})$ is **strictly perpendicular ($90^\circ$)** to the tangent line of the level curve passing through $\mathbf{a}$.
+                    - **Flow Line $\gamma(t)$:** The trajectory solving $\gamma'(t) = \nabla f(\gamma(t))$ with $\gamma(0) = \mathbf{a}$ follows the path of **steepest ascent** and crosses every level curve at a $90^\circ$ angle.
+                    """
+                ),
+                kind="info",
+            ),
+            mo.callout(
+                mo.md(
+                    r"""
+                    #### 2. Total Derivative $\mathbf{D}f(\mathbf{a})$ & Affine Function $g(\mathbf{x})$
+                    The **total derivative** at $\mathbf{a} = (a_1, a_2)$ is the $1 \times 2$ row matrix of partial derivatives:
+                    $$\mathbf{D}f(\mathbf{a}) = \begin{bmatrix} \frac{\partial f}{\partial x_1}(\mathbf{a}) & \frac{\partial f}{\partial x_2}(\mathbf{a}) \end{bmatrix}_{1 \times 2}, \qquad \nabla f(\mathbf{a}) = \mathbf{D}f(\mathbf{a})^T$$
+                    The **affine approximation** $g(\mathbf{x})$ defines the 3D **tangent plane** touching $z = f(\mathbf{x})$ at $\mathbf{a}$:
+                    $$g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a}) = f(a_1, a_2) + f_{x_1}(\mathbf{a})(x_1 - a_1) + f_{x_2}(\mathbf{a})(x_2 - a_2)$$
+                    """
+                ),
+                kind="success",
+            ),
+            mo.callout(
+                mo.md(
+                    r"""
+                    #### 3. Hessian Matrix $\mathbf{H}_f(\mathbf{a})$ & Second Derivative Test
+                    The **Hessian matrix** captures the second-order quadratic curvature of $f$ at $\mathbf{a}$:
+                    $$\mathbf{H}_f(\mathbf{a}) = \begin{bmatrix} f_{11}(\mathbf{a}) & f_{12}(\mathbf{a}) \\ f_{21}(\mathbf{a}) & f_{22}(\mathbf{a}) \end{bmatrix}, \qquad D = \det(\mathbf{H}_f(\mathbf{a})) = f_{11}f_{22} - f_{12}^2$$
+                    At a critical point ($\nabla f(\mathbf{a}) = \mathbf{0}$):
+                    - $D > 0$ and $f_{11} > 0 \implies$ **Strict Local Minimum** (both eigenvalues $\lambda_1, \lambda_2 > 0$).
+                    - $D > 0$ and $f_{11} < 0 \implies$ **Strict Local Maximum** (both eigenvalues $\lambda_1, \lambda_2 < 0$).
+                    - $D < 0 \implies$ **Saddle Point** (eigenvalues have opposite signs).
+                    """
+                ),
+                kind="warn",
+            ),
+            mo.callout(
+                mo.md(
+                    r"""
+                    #### 4. Free-Variable 3D Cylinders & Linear Matrices in $\mathbb{R}^2 / \mathbb{R}^3$
+                    - **3D Cylinders:** When $\mathbf{F}(x_1, x_2, x_3) = [x_1; x_2; x_3]$ is paired with a constraint like $\frac{x_1^2}{4} + x_2 = 1$, the variable $x_3$ is **free** ($x_3 \in (-\infty, \infty)$), extruding the 2D curve vertically into a **3D cylinder** parallel to the $x_3$-axis.
+                    - **Matrices:** Entering `[a, b; c, d]` or a $3 \times 3$ matrix `[1, 2, 3; 4, 5, 6; 7, 8, 9]` visualizes the column basis vectors $\mathbf{A}\mathbf{e}_i$ and transformed vector $\mathbf{A}\mathbf{a}$.
+                    """
+                ),
+                kind="neutral",
+            ),
+        ],
+        gap=0.45,
+    )
+
+    # TAB 4: Layers & Visual Style
     layers_tab = mo.vstack(
         [
             mo.hstack([colorscale_dropdown, opacity_slider, notation_switch], widths="equal"),
@@ -911,6 +1024,7 @@ def _(
         {
             "📐 Calculus Sheet": calculus_sheet_tab,
             "🤖 AI Tutor": ai_tutor_tab,
+            "📖 Theory": theory_tab,
             "⚙️ Layers & Style": layers_tab,
         }
     )
@@ -921,20 +1035,15 @@ def _(
             point_card,
             left_tabs,
         ],
-        gap=0.65,
+        gap=0.6,
     )
 
     # -------------------------------------------------------------------------
-    # RIGHT PANEL: Toolbar + KPI Strip + Spacious 2D/3D Graph
+    # RIGHT PANEL: Toolbar + Interactive 2D/3D Graph (Click to set Point a!) + KPIs
     # -------------------------------------------------------------------------
-    a_coords_str = (
-        f"({cfg['a1']:.2f}, {cfg['a2']:.2f}, {cfg['a3']:.2f})"
-        if calc["dim"] == 3
-        else f"({cfg['a1']:.2f}, {cfg['a2']:.2f})"
-    )
     kpi_row = mo.hstack(
         [
-            mo.stat(value=f"{calc['fa']:.2f}", label="Value f(a)", caption=f"a = {a_coords_str}"),
+            mo.stat(value=f"{calc['fa']:.3f}", label="Exact Value f(a)", caption=f"At a = {a_coords_str}"),
             mo.stat(value=f"[{calc['fx1']:.2f}, {calc['fx2']:.2f}]", label="Derivative Df(a)", caption=f"‖∇f‖ = {calc['grad_mag']:.2f}"),
             mo.stat(value=f"c = {cfg['c']:.2f}", label="Level Set f = c", caption=f"|f(a)-c| = {calc['level_diff']:.2f}"),
             mo.stat(value=f"D = {calc['hessian_det']:.2f}", label="Hessian Det(H)", caption=f"λ: {calc['eigenvalues_str']}"),
@@ -945,19 +1054,29 @@ def _(
 
     right_panel = mo.vstack(
         [
-            mo.hstack([view_mode_radio, anim_mode_dropdown, theme_switch], justify="space-between", wrap=True),
+            mo.hstack(
+                [
+                    view_mode_radio,
+                    anim_mode_dropdown,
+                    theme_switch,
+                ],
+                justify="space-between",
+                wrap=True,
+            ),
+            mo.md("💡 *Tip: Click anywhere on the **2D Map** or **3D Surface** to move Point $\\mathbf{a}$ synchronously in both views!*"),
             plotly_widget,
             kpi_row,
+            click_bridge_html,
         ],
-        gap=0.55,
+        gap=0.45,
     )
 
     studio_layout = mo.vstack(
         [
             top_header,
-            mo.hstack([left_panel, right_panel], widths=[0.38, 0.62], gap=1.2, align="start"),
+            mo.hstack([left_panel, right_panel], widths=[0.39, 0.61], gap=1.1, align="start"),
         ],
-        gap=0.75,
+        gap=0.65,
     )
 
     studio_layout
@@ -965,7 +1084,6 @@ def _(
         a_coords_str,
         ai_tutor_tab,
         calculus_sheet_tab,
-        constraint_badge_html,
         expr_card,
         kpi_row,
         layers_tab,
@@ -973,10 +1091,12 @@ def _(
         left_tabs,
         log_md_blocks,
         point_card,
-        recent_log,
+        recent_msgs,
         right_panel,
+        status_line_md,
+        status_parts,
         studio_layout,
-        toast_html,
+        theory_tab,
         top_header,
     )
 
