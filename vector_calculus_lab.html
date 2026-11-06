@@ -1070,7 +1070,7 @@
           if (d.curlMag > 0.05) {
             // Draw 3D Curl Vector Arrow pointing along axis of rotation
             const curlLen = Math.min(2.5, Math.max(0.8, d.curlMag * 0.7));
-            const cAxis = d.curlMag > 0.01 ? { x: d.curlX / d.curlMag, y: d.curlY / d.curlMag, z: d.curlZ / d.curlMag } : { x: 0, y: 0, 1 };
+            const cAxis = d.curlMag > 0.01 ? { x: d.curlX / d.curlMag, y: d.curlY / d.curlMag, z: d.curlZ / d.curlMag } : { x: 0, y: 0, z: 1 };
             const curlTip = project3D(probe.x + cAxis.x * curlLen, probe.y + cAxis.y * curlLen, probeZ + cAxis.z * curlLen);
 
             ctx.strokeStyle = "#f59e0b";
