@@ -220,12 +220,26 @@ def test_marimo_check_and_exports():
     assert res_check.returncode == 0, f"marimo check app.py failed: {res_check.stderr}"
     print("   [OK] `marimo check app.py` passed with 0 errors!")
 
-    for html_name in ("index.html", "marimo_app.html"):
-        p = BASE_DIR / html_name
-        assert p.exists(), f"{html_name} does not exist!"
-        text = p.read_text(encoding="utf-8")
-        assert "<marimo-filename" in text, f"{html_name} is not a Marimo exported HTML file!"
-        print(f"   [OK] {html_name} verified as standalone Marimo export ({p.stat().st_size} bytes)")
+    # Verify Marimo standalone export
+    marimo_p = BASE_DIR / "marimo_app.html"
+    assert marimo_p.exists(), "marimo_app.html does not exist!"
+    marimo_text = marimo_p.read_text(encoding="utf-8")
+    assert "<marimo-filename" in marimo_text, "marimo_app.html is not a Marimo exported HTML file!"
+    print(f"   [OK] marimo_app.html verified as standalone Marimo export ({marimo_p.stat().st_size} bytes)")
+
+    # Verify GitHub Pages root client-side Vector Studio app
+    index_p = BASE_DIR / "index.html"
+    assert index_p.exists(), "index.html does not exist!"
+    index_text = index_p.read_text(encoding="utf-8")
+    assert "tabNavVector" in index_text and "[-x2, x1]" in index_text, "index.html does not contain Vector Studio components!"
+    print(f"   [OK] index.html verified as standalone GitHub Pages Vector Studio ({index_p.stat().st_size} bytes)")
+
+    # Verify 60-FPS 3D Vector Calculus Lab
+    lab_p = BASE_DIR / "vector_calculus_lab.html"
+    assert lab_p.exists(), "vector_calculus_lab.html does not exist!"
+    lab_text = lab_p.read_text(encoding="utf-8")
+    assert "simCanvas" in lab_text and "curl" in lab_text.lower(), "vector_calculus_lab.html incomplete!"
+    print(f"   [OK] vector_calculus_lab.html verified as 60-FPS 3D Lab ({lab_p.stat().st_size} bytes)")
 
 
 def test_marimo_live_server():

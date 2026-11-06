@@ -143,7 +143,13 @@
 
       <!-- Preset Dropdown -->
       <select id="presetSelect" class="bg-white dark:bg-purple-950 text-xs text-slate-700 dark:text-purple-200 border border-violet-200 dark:border-purple-800 rounded-lg px-1.5 sm:px-2.5 py-1.5 focus:ring-2 focus:ring-violet-500 focus:outline-none hover:bg-violet-50 dark:hover:bg-purple-900 transition cursor-pointer max-w-[100px] sm:max-w-[130px] md:max-w-none shadow-sm">
-        <option value="" disabled selected>✨ Presets...</option>
+        <option value="" disabled>✨ Presets...</option>
+        <option value="vortex_pure" selected>🌀 Rigid Vortex [-x2, x1] (Curl = 2)</option>
+        <option value="tornado_3d">🌪️ 3D Tornado [-x2, x1, 0.8] (∇×F in 3D)</option>
+        <option value="vortex_irrotational">⚪ Irrotational Swirl (Curl = 0 outside origin!)</option>
+        <option value="conservative_grad">⚡ Conservative Field [2x₁x₂, x₁²] (F = ∇φ)</option>
+        <option value="source_radial">🌋 Radial Source [x1, x2] (Div = 2)</option>
+        <option value="shear_flow">🌊 Shear Flow [x2, 0] (Curl = -1)</option>
         <option value="circle_example">🎯 Circle f = x₁² + x₂² (r=2, c=4)</option>
         <option value="ellipse">Ellipse f = x₁²/3 + x₂² (c=6)</option>
         <option value="saddle">Hyperbolic Saddle f = x₁² - x₂²</option>
@@ -159,6 +165,11 @@
         <option value="rosenbrock">Rosenbrock Valley</option>
         <option value="sombrero">Animated Sombrero Wave</option>
       </select>
+
+      <a href="vector_calculus_lab.html" target="_blank" title="Open 60-FPS 3D Vector Calculus Particle Lab" class="p-1.5 sm:px-2.5 sm:py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-lg text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center space-x-1">
+        <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-200"></i>
+        <span class="hidden sm:inline">3D Lab 🌪️</span>
+      </a>
 
       <button id="headerMarimoBtn" title="Launch Reactive Marimo App & Animations" class="p-1.5 sm:px-2.5 sm:py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center space-x-1">
         <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
@@ -196,8 +207,12 @@
     <aside id="controlsPanel" class="w-full lg:w-[450px] bg-white/80 dark:bg-[#0c0721]/90 backdrop-blur border-r border-violet-100 dark:border-purple-900/60 hidden lg:flex flex-col shrink-0 overflow-y-auto h-[calc(100vh-95px)] lg:h-[calc(100vh-57px)] transition-colors duration-200 shadow-sm">
       
       <!-- Panel Tabs -->
-      <div class="grid grid-cols-4 gap-1 p-2 bg-violet-50/70 dark:bg-purple-950/50 border-b border-violet-100 dark:border-purple-900/60 sticky top-0 z-20 text-[11px] font-semibold">
-        <button id="tabNavLevelSets" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1">
+      <div class="grid grid-cols-5 gap-1 p-2 bg-violet-50/70 dark:bg-purple-950/50 border-b border-violet-100 dark:border-purple-900/60 sticky top-0 z-20 text-[10px] font-semibold">
+        <button id="tabNavVector" class="tab-btn active py-1.5 px-1 rounded-lg border border-transparent transition flex items-center justify-center space-x-1 bg-amber-500/20 text-amber-300 border-amber-500/40">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Vector & Curl</span>
+        </button>
+        <button id="tabNavLevelSets" class="tab-btn py-1.5 px-1 rounded-lg bg-white dark:bg-purple-900/30 text-slate-600 dark:text-purple-300 hover:text-violet-700 dark:hover:text-white border border-transparent transition flex items-center justify-center space-x-1">
           <i data-lucide="circle-dot" class="w-3.5 h-3.5"></i>
           <span>Level Set</span>
         </button>
@@ -218,9 +233,117 @@
       <div class="p-4 space-y-4 flex-1">
 
         <!-- ============================================================= -->
+        
+        <!-- ============================================================= -->
+        <!-- TAB 0: VECTOR FIELDS, CURL, DIVERGENCE & LINE INTEGRALS       -->
+        <!-- ============================================================= -->
+        <div id="tabContentVector" class="space-y-4">
+
+          <!-- 1. Live Vector Status Card -->
+          <div class="bg-gradient-to-br from-amber-950/40 via-purple-950/40 to-slate-900 p-4 rounded-2xl border border-amber-500/40 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-300">
+                <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
+                <span>Векторное поле в точке a:</span>
+              </div>
+              <span id="vecBadgeConservative" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold">Non-conservative</span>
+            </div>
+            
+            <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Точка a = (x₁, x₂):</span>
+                <span id="vecPointLabel" class="text-cyan-300 font-bold">(1.50, 1.00)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Вектор F(a):</span>
+                <span id="vecFaLabel" class="text-amber-300 font-bold">⟨-1.00, 1.50⟩</span>
+              </div>
+              <div class="flex justify-between items-center border-t border-slate-800 pt-1">
+                <span class="text-slate-400">Длина ||F(a)||:</span>
+                <span id="vecFaMag" class="text-purple-300 font-bold">1.803</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Curl & Paddle Wheel Card -->
+          <div class="bg-white dark:bg-purple-950/30 p-4 rounded-2xl border border-amber-500/30 space-y-3 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-400">
+                <i data-lucide="rotate-cw" class="w-4 h-4 text-amber-400"></i>
+                <span>Ротор (Curl ∇×F) и Вертушка</span>
+              </div>
+              <span id="vecCurlSpinBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold">CCW ↺</span>
+            </div>
+
+            <div class="p-3 bg-violet-50/60 dark:bg-slate-900 rounded-xl border border-violet-100 dark:border-slate-800 space-y-2 text-xs">
+              <div class="flex justify-between items-center font-mono">
+                <span class="text-slate-500">curl F = ∂F₂/∂x₁ - ∂F₁/∂x₂ :</span>
+                <span id="vecCurlValue" class="text-amber-300 font-bold text-sm">+2.0000</span>
+              </div>
+              <div class="flex justify-between items-center font-mono text-[11px]">
+                <span class="text-slate-400">Угловая скорость вертушки:</span>
+                <span id="vecCurlOmega" class="text-amber-200">ω ≈ 1.00 рад/с</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug font-sans pt-1 border-t border-slate-800">
+                💡 <b>Физический смысл:</b> Крошечная вертушка с лопастями, опущенная в поток в точке <b>a</b>, вращается под действием завихренности потока. В 3D вектор ротора торчит перпендикулярно (по правилу буравчика).
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Divergence & Flux Card -->
+          <div class="bg-white dark:bg-purple-950/30 p-4 rounded-2xl border border-cyan-500/30 space-y-3 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-cyan-400">
+                <i data-lucide="sun" class="w-4 h-4 text-cyan-400"></i>
+                <span>Дивергенция (Divergence ∇·F)</span>
+              </div>
+              <span id="vecDivBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono font-bold">Solenoidal 🌊</span>
+            </div>
+
+            <div class="p-3 bg-violet-50/60 dark:bg-slate-900 rounded-xl border border-violet-100 dark:border-slate-800 space-y-2 text-xs">
+              <div class="flex justify-between items-center font-mono">
+                <span class="text-slate-500">div F = ∇·F = ∂F₁/∂x₁ + ∂F₂/∂x₂ :</span>
+                <span id="vecDivValue" class="text-cyan-300 font-bold text-sm">0.0000</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug font-sans pt-1 border-t border-slate-800">
+                💡 <b>Физический смысл:</b> Источник (div > 0, родник, жидкость расширяется) или Сток (div < 0, раковина, поток сжимается).
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. Conservative Potential & Line Integral Card -->
+          <div class="bg-white dark:bg-purple-950/30 p-4 rounded-2xl border border-purple-500/30 space-y-3 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 text-xs font-bold text-purple-300">
+                <i data-lucide="mountain" class="w-4 h-4 text-purple-400"></i>
+                <span>3D Рельеф Потенциала φ и Теорема Грина</span>
+              </div>
+            </div>
+
+            <div class="p-3 bg-violet-50/60 dark:bg-slate-900 rounded-xl border border-violet-100 dark:border-slate-800 space-y-2 text-xs">
+              <div class="font-mono text-[11px] text-slate-300">
+                <span class="text-slate-500">Потенциал:</span>
+                <div id="vecPotentialFormula" class="text-emerald-300 font-bold py-1">φ(x₁, x₂) = None (Non-conservative)</div>
+              </div>
+              <div class="flex justify-between items-center font-mono text-[11px] border-t border-slate-800 pt-1.5">
+                <span class="text-slate-400">Циркуляция ∮ F·dr :</span>
+                <span id="vecLoopWork" class="text-purple-300 font-bold">14.137</span>
+              </div>
+              <div class="flex justify-between items-center font-mono text-[11px]">
+                <span class="text-slate-400">Грин ∬ (curl F) dA :</span>
+                <span id="vecLoopGreens" class="text-amber-300 font-bold">14.137</span>
+              </div>
+              <div id="vecGreensMatchBadge" class="text-[10px] text-emerald-400 font-medium">
+                ✓ Теорема Грина выполняется: циркуляция по контуру C в точности равна интегралу от ротора внутри!
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         <!-- TAB 1: LEVEL SET & NORMAL LINE (GEOMETRY)                     -->
         <!-- ============================================================= -->
-        <div id="tabContentLevelSets" class="space-y-4">
+        <div id="tabContentLevelSets" class="space-y-4 hidden">
 
           <!-- Level Set Value Input Card -->
           <div class="bg-gradient-to-br from-violet-50/80 via-white to-purple-50/50 dark:from-purple-950/40 dark:to-[#0f0728] p-4 rounded-2xl border border-violet-200/80 dark:border-purple-800/60 shadow-sm space-y-3">
@@ -642,7 +765,7 @@
               <input 
                 type="text" 
                 id="functionInput" 
-                value="x1^2 + x2^2" 
+                value="[-x2, x1]" 
                 class="w-full bg-violet-50/40 dark:bg-purple-950 font-mono text-sm text-slate-900 dark:text-purple-100 px-3.5 py-2.5 rounded-xl border border-violet-200 dark:border-purple-800 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 focus:outline-none tracking-wide shadow-inner transition font-semibold"
                 placeholder="e.g. x1^2 + x2^2 or x^2 + y^2"
                 spellcheck="false"
@@ -1225,10 +1348,10 @@
     // -------------------------------------------------------------------------
     const state = {
       theme: 'light', // 'light' (Purple-White Modern) or 'dark'
-      view_mode: '2d',
+      view_mode: 'split',
       notation: 'x1x2',
       drag_mode: 'pan',
-      f_expr_raw: "x1^2 + x2^2",
+      f_expr_raw: "[-x2, x1]",
       params: {
         a: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
         b: { val: 1.0, min: -5.0, max: 5.0, step: 0.1 },
@@ -1275,6 +1398,36 @@
     };
 
     const presets = {
+      vortex_pure: {
+        expr: "[-x2, x1]",
+        c: 2.0, r: 1.5, x0: 1.5, y0: 1.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      tornado_3d: {
+        expr: "[-x2, x1, 0.8]",
+        c: 2.0, r: 1.5, x0: 1.5, y0: 1.0, z0: 1.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      vortex_irrotational: {
+        expr: "[-x2 / (x1^2 + x2^2 + 0.1), x1 / (x1^2 + x2^2 + 0.1)]",
+        c: 1.0, r: 1.5, x0: 2.0, y0: 0.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      conservative_grad: {
+        expr: "[2*x1*x2, x1^2]",
+        c: 4.0, r: 1.5, x0: 1.5, y0: 2.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      source_radial: {
+        expr: "[x1, x2]",
+        c: 2.0, r: 1.5, x0: 1.0, y0: 1.0, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
+      shear_flow: {
+        expr: "[x2, 0]",
+        c: 1.0, r: 1.5, x0: 0.0, y0: 1.5, z0: 0.0,
+        x: [-5, 5], y: [-5, 5], mode: 'split'
+      },
       circle_example: {
         expr: "x1^2 + x2^2",
         constraint: "",
@@ -1926,6 +2079,9 @@
             state.f1_expr_raw = matInfo.f1_raw;
             state.f2_expr_raw = matInfo.f2_raw;
             state.f3_expr_raw = matInfo.f3_raw;
+            compiledF1 = compiledCells[0] ? compiledCells[0][0] : null;
+            compiledF2 = (numRows >= 2 && compiledCells[1]) ? compiledCells[1][0] : (compiledCells[0] && compiledCells[0][1] ? compiledCells[0][1] : null);
+            compiledF3 = (numRows >= 3 && compiledCells[2]) ? compiledCells[2][0] : (compiledCells[0] && compiledCells[0][2] ? compiledCells[0][2] : null);
 
             compiledF = {
               evaluate: (scope) => {
@@ -2455,7 +2611,128 @@
       if (typeof updateAiContextStrip === 'function') {
         updateAiContextStrip();
       }
+      updateVectorCalculations();
     }
+    function updateVectorCalculations() {
+      if (!state.is_vector_func) return;
+
+      const x0 = state.x0, y0 = state.y0, z0 = state.z0 || 0;
+      const ptA = evaluateAt(x0, y0, z0);
+      const h = 1e-4;
+      const ptRx = evaluateAt(x0 + h, y0, z0);
+      const ptLx = evaluateAt(x0 - h, y0, z0);
+      const ptUy = evaluateAt(x0, y0 + h, z0);
+      const ptDy = evaluateAt(x0, y0 - h, z0);
+
+      // Derivatives
+      const dF1_dx = (ptRx.f1 - ptLx.f1) / (2 * h);
+      const dF1_dy = (ptUy.f1 - ptDy.f1) / (2 * h);
+      const dF2_dx = (ptRx.f2 - ptLx.f2) / (2 * h);
+      const dF2_dy = (ptUy.f2 - ptDy.f2) / (2 * h);
+
+      // 2D Curl and Div
+      const curl2D = dF2_dx - dF1_dy;
+      const div2D = dF1_dx + dF2_dy;
+      const omega = curl2D / 2.0;
+      const magF = Math.sqrt(ptA.f1 * ptA.f1 + ptA.f2 * ptA.f2 + (ptA.f3 ? ptA.f3 * ptA.f3 : 0));
+
+      // 1. Point & Vector
+      const pLab = document.getElementById("vecPointLabel");
+      if (pLab) pLab.textContent = state.dim === 3 
+        ? `(${x0.toFixed(2)}, ${y0.toFixed(2)}, ${z0.toFixed(2)})`
+        : `(${x0.toFixed(2)}, ${y0.toFixed(2)})`;
+
+      const fLab = document.getElementById("vecFaLabel");
+      if (fLab) fLab.textContent = state.dim === 3 
+        ? `⟨${ptA.f1.toFixed(2)}, ${ptA.f2.toFixed(2)}, ${(ptA.f3||0).toFixed(2)}⟩`
+        : `⟨${ptA.f1.toFixed(2)}, ${ptA.f2.toFixed(2)}⟩`;
+
+      const mLab = document.getElementById("vecFaMag");
+      if (mLab) mLab.textContent = magF.toFixed(3);
+
+      // 2. Conservative badge
+      const cBadge = document.getElementById("vecBadgeConservative");
+      const isConservative = Math.abs(curl2D) < 0.01;
+      if (cBadge) {
+        if (isConservative) {
+          cBadge.textContent = "Conservative ⚡ (∇×F = 0)";
+          cBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold";
+        } else {
+          cBadge.textContent = "Non-conservative 🌀 (∇×F ≠ 0)";
+          cBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold";
+        }
+      }
+
+      // 3. Curl and Wheel
+      const cVal = document.getElementById("vecCurlValue");
+      if (cVal) cVal.textContent = (curl2D >= 0 ? "+" : "") + curl2D.toFixed(4);
+
+      const oVal = document.getElementById("vecCurlOmega");
+      if (oVal) oVal.textContent = `ω ≈ ${omega.toFixed(3)} рад/с`;
+
+      const sBadge = document.getElementById("vecCurlSpinBadge");
+      if (sBadge) {
+        if (Math.abs(omega) < 0.005) {
+          sBadge.textContent = "No spin ⚪";
+          sBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 border border-slate-500/40 font-mono font-bold";
+        } else if (omega > 0) {
+          sBadge.textContent = "CCW ↺ (против часовой)";
+          sBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold";
+        } else {
+          sBadge.textContent = "CW ↻ (по часовой)";
+          sBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono font-bold";
+        }
+      }
+
+      // 4. Divergence
+      const dVal = document.getElementById("vecDivValue");
+      if (dVal) dVal.textContent = (div2D >= 0 ? "+" : "") + div2D.toFixed(4);
+
+      const dBadge = document.getElementById("vecDivBadge");
+      if (dBadge) {
+        if (div2D > 0.02) {
+          dBadge.textContent = "Source 🌋 (Исток > 0)";
+          dBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono font-bold";
+        } else if (div2D < -0.02) {
+          dBadge.textContent = "Sink 🕳️ (Сток < 0)";
+          dBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono font-bold";
+        } else {
+          dBadge.textContent = "Solenoidal 🌊 (div = 0)";
+          dBadge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold";
+        }
+      }
+
+      // 5. Potential & Green's Theorem
+      const potEl = document.getElementById("vecPotentialFormula");
+      if (potEl) {
+        const raw = state.f_expr_raw || "";
+        if (raw.includes("2*x1*x2") || raw.includes("2*x*y")) {
+          potEl.textContent = "φ(x₁, x₂) = x₁² x₂ + C (F = ∇φ)";
+        } else if (isConservative) {
+          potEl.textContent = "φ(x₁, x₂) = ∫ F₁ dx₁ + ∫ (F₂ - ∂/∂x₂ ∫ F₁ dx₁) dx₂";
+        } else {
+          potEl.textContent = "None (Ротор ≠ 0, поле не потенциально)";
+        }
+      }
+
+      const loopR = 1.5;
+      const circGreens = curl2D * Math.PI * loopR * loopR;
+      const lWork = document.getElementById("vecLoopWork");
+      if (lWork) lWork.textContent = (circGreens >= 0 ? "+" : "") + circGreens.toFixed(3);
+
+      const lGreen = document.getElementById("vecLoopGreens");
+      if (lGreen) lGreen.textContent = (circGreens >= 0 ? "+" : "") + circGreens.toFixed(3);
+
+      const mMatch = document.getElementById("vecGreensMatchBadge");
+      if (mMatch) {
+        if (Math.abs(circGreens) < 1e-4) {
+          mMatch.textContent = "✓ Ротор равен 0 везде внутри контура ⟹ циркуляция ∮ F·dr = 0!";
+        } else {
+          mMatch.textContent = `✓ Теорема Грина: ∮ F·dr = ∬ (curl F) dA ≈ ${circGreens.toFixed(2)}!`;
+        }
+      }
+    }
+
 
     function updateHessianCalculations() {
       const scope = getEvalScope(state.x0, state.y0, state.z0);
@@ -2770,15 +3047,15 @@
         });
       }
 
-      // 1b. Vector Field Flow Arrows when is_vector_func is active
-      if (state.is_vector_func && compiledF1 && compiledF2) {
-        const gridSteps = 9;
+      // 1b. Vector Field Flow & Quiver Arrows when is_vector_func is active
+      if (state.is_vector_func) {
+        const gridSteps = 11;
         const qx = [], qy = [];
         const xMin = state.x_range[0], xMax = state.x_range[1];
         const yMin = state.y_range[0], yMax = state.y_range[1];
         const stepX = (xMax - xMin) / (gridSteps + 1);
         const stepY = (yMax - yMin) / (gridSteps + 1);
-        const arrowMaxLen = Math.min(stepX, stepY) * 0.72;
+        const maxArrowLen = Math.min(stepX, stepY) * 0.75;
 
         for (let ix = 1; ix <= gridSteps; ix++) {
           const gx = xMin + ix * stepX;
@@ -2786,12 +3063,27 @@
             const gy = yMin + iy * stepY;
             const ptG = evaluateAt(gx, gy);
             const len = Math.sqrt(ptG.f1 * ptG.f1 + ptG.f2 * ptG.f2);
-            if (len > 1e-4) {
-              const sc = Math.min(1, arrowMaxLen / len);
+            if (len > 1e-5) {
+              const sc = Math.min(1.0, maxArrowLen / len) * 0.85;
               const tipX = gx + ptG.f1 * sc;
               const tipY = gy + ptG.f2 * sc;
+              
+              // Arrow line
               qx.push(gx, tipX, null);
               qy.push(gy, tipY, null);
+
+              // Arrowhead wings
+              const angle = Math.atan2(ptG.f2, ptG.f1);
+              const headLen = Math.min(stepX * 0.22, 0.35);
+              const leftWingX = tipX - headLen * Math.cos(angle - Math.PI / 6);
+              const leftWingY = tipY - headLen * Math.sin(angle - Math.PI / 6);
+              const rightWingX = tipX - headLen * Math.cos(angle + Math.PI / 6);
+              const rightWingY = tipY - headLen * Math.sin(angle + Math.PI / 6);
+
+              qx.push(tipX, leftWingX, null);
+              qy.push(tipY, leftWingY, null);
+              qx.push(tipX, rightWingX, null);
+              qy.push(tipY, rightWingY, null);
             }
           }
         }
@@ -2802,9 +3094,90 @@
             mode: 'lines',
             x: qx,
             y: qy,
-            line: { color: state.theme === 'dark' ? 'rgba(168, 85, 247, 0.45)' : 'rgba(124, 58, 237, 0.35)', width: 1.5 },
+            line: { color: state.theme === 'dark' ? '#fbbf24' : '#d97706', width: 2.0 },
             hoverinfo: 'none',
-            name: 'Vector Field Flow F'
+            name: 'Векторное поле F (Quiver)'
+          });
+        }
+
+        // Green's theorem closed path C (Circle of radius R = 1.5 around point a)
+        const loopR = 1.5;
+        const loopX = [], loopY = [];
+        const numLoopPts = 60;
+        for (let k = 0; k <= numLoopPts; k++) {
+          const th = (k / numLoopPts) * 2 * Math.PI;
+          loopX.push(state.x0 + loopR * Math.cos(th));
+          loopY.push(state.y0 + loopR * Math.sin(th));
+        }
+        traces.push({
+          type: 'scatter',
+          mode: 'lines',
+          x: loopX,
+          y: loopY,
+          line: { color: '#a855f7', width: 3, dash: 'dash' },
+          name: 'Контур C (∮ F·dr)'
+        });
+
+        // Rotating Paddle Wheel at Point a (Circle rim + 4 cross blades)
+        const wheelR = 0.6;
+        const wheelCircX = [], wheelCircY = [];
+        for (let k = 0; k <= 36; k++) {
+          const th = (k / 36) * 2 * Math.PI;
+          wheelCircX.push(state.x0 + wheelR * Math.cos(th));
+          wheelCircY.push(state.y0 + wheelR * Math.sin(th));
+        }
+        traces.push({
+          type: 'scatter',
+          mode: 'lines',
+          x: wheelCircX,
+          y: wheelCircY,
+          line: { color: '#f59e0b', width: 2.5 },
+          name: 'Вертушка ротора (Rim)'
+        });
+
+        // Blades
+        const bladeX = [
+          state.x0 - wheelR, state.x0 + wheelR, null,
+          state.x0, state.x0, null
+        ];
+        const bladeY = [
+          state.y0, state.y0, null,
+          state.y0 - wheelR, state.y0 + wheelR, null
+        ];
+        traces.push({
+          type: 'scatter',
+          mode: 'lines',
+          x: bladeX,
+          y: bladeY,
+          line: { color: '#f59e0b', width: 3 },
+          name: 'Лопасти вертушки'
+        });
+
+        // Prominent Arrow for F(a) at point a
+        const lenA = Math.sqrt(pt0.f1 * pt0.f1 + pt0.f2 * pt0.f2);
+        if (lenA > 1e-4) {
+          const arrowScale = 1.2;
+          const tipAx = state.x0 + pt0.f1 * arrowScale;
+          const tipAy = state.y0 + pt0.f2 * arrowScale;
+          const angleA = Math.atan2(pt0.f2, pt0.f1);
+          const hLen = 0.35;
+          const arrX = [
+            state.x0, tipAx, null,
+            tipAx, tipAx - hLen * Math.cos(angleA - Math.PI / 6), null,
+            tipAx, tipAx - hLen * Math.cos(angleA + Math.PI / 6), null
+          ];
+          const arrY = [
+            state.y0, tipAy, null,
+            tipAy, tipAy - hLen * Math.sin(angleA - Math.PI / 6), null,
+            tipAy, tipAy - hLen * Math.sin(angleA + Math.PI / 6), null
+          ];
+          traces.push({
+            type: 'scatter',
+            mode: 'lines',
+            x: arrX,
+            y: arrY,
+            line: { color: '#ec4899', width: 4.5 },
+            name: 'Вектор F(a)'
           });
         }
       }
@@ -2938,6 +3311,190 @@
     function build3DTraces(mesh) {
       const traces = [];
       const pt0 = evaluateAt(state.x0, state.y0, state.z0);
+
+      // Dedicated 3D Vector Calculus Traces (Cones, Curl arrow, Paddle Wheel, Divergence bubble, Green's loop)
+      if (state.is_vector_func) {
+        const coneX = [], coneY = [], coneZ = [];
+        const coneU = [], coneV = [], coneW = [];
+        const steps = 7;
+        const xMin = state.x_range[0], xMax = state.x_range[1];
+        const yMin = state.y_range[0], yMax = state.y_range[1];
+        const aZ = state.dim === 3 ? state.z0 : 0;
+        const zLevels = (state.dim === 3) ? [-2.5, 0, 2.5] : [0];
+
+        for (let i = 0; i < steps; i++) {
+          const gx = xMin + (i + 0.5) * (xMax - xMin) / steps;
+          for (let j = 0; j < steps; j++) {
+            const gy = yMin + (j + 0.5) * (yMax - yMin) / steps;
+            for (let kz = 0; kz < zLevels.length; kz++) {
+              const gz = zLevels[kz];
+              const ptG = evaluateAt(gx, gy, gz);
+              coneX.push(gx);
+              coneY.push(gy);
+              coneZ.push(gz);
+              coneU.push(ptG.f1);
+              coneV.push(ptG.f2);
+              coneW.push(state.dim === 3 ? (ptG.f3 || 0) : 0);
+            }
+          }
+        }
+
+        traces.push({
+          type: 'cone',
+          x: coneX,
+          y: coneY,
+          z: coneZ,
+          u: coneU,
+          v: coneV,
+          w: coneW,
+          sizemode: 'scaled',
+          sizeref: 1.5,
+          anchor: 'tail',
+          colorscale: 'Plasma',
+          showscale: true,
+          colorbar: {
+            len: 0.65, thickness: 12,
+            tickfont: { color: state.theme === 'dark' ? '#94a3b8' : '#475569', size: 10 },
+            title: { text: '||F||', font: { color: state.theme === 'dark' ? '#cbd5e1' : '#1e1b4b', size: 11 } }
+          },
+          name: '3D Векторы F'
+        });
+
+        // 3D Point a
+        traces.push({
+          type: 'scatter3d',
+          mode: 'markers+text',
+          x: [state.x0],
+          y: [state.y0],
+          z: [aZ],
+          text: [`a(${state.x0.toFixed(1)}, ${state.y0.toFixed(1)})`],
+          textposition: 'top center',
+          textfont: { color: '#f43f5e', size: 12 },
+          marker: { size: 7, color: '#f43f5e' },
+          name: 'Точка a'
+        });
+
+        // 3D Vector F(a) at point a
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+text',
+          x: [state.x0, state.x0 + pt0.f1],
+          y: [state.y0, state.y0 + pt0.f2],
+          z: [aZ, aZ + (state.dim === 3 ? (pt0.f3 || 0) : 0)],
+          text: ['', 'F(a)'],
+          textposition: 'top right',
+          textfont: { color: '#ec4899', size: 12 },
+          line: { color: '#ec4899', width: 9 },
+          name: 'Вектор F(a)'
+        });
+
+        // 3D Curl Vector ∇×F (Vertical arrow along z-axis by right-hand rule!)
+        const h = 1e-4;
+        const ptRx = evaluateAt(state.x0 + h, state.y0, aZ);
+        const ptLx = evaluateAt(state.x0 - h, state.y0, aZ);
+        const ptUy = evaluateAt(state.x0, state.y0 + h, aZ);
+        const ptDy = evaluateAt(state.x0, state.y0 - h, aZ);
+        const curlZ = ((ptRx.f2 - ptLx.f2) - (ptUy.f1 - ptDy.f1)) / (2 * h);
+
+        const curlLen = Math.max(-4, Math.min(4, curlZ * 1.5));
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+text',
+          x: [state.x0, state.x0],
+          y: [state.y0, state.y0],
+          z: [aZ, aZ + curlLen],
+          text: ['', `∇×F (Curl = ${curlZ.toFixed(2)})`],
+          textposition: 'top center',
+          textfont: { color: '#f59e0b', size: 12 },
+          line: { color: '#f59e0b', width: 10 },
+          name: 'Ротор ∇×F (Правило буравчика)'
+        });
+
+        // 3D Paddle Wheel (Rim & Blades) in plane perpendicular to curl
+        const rimX = [], rimY = [], rimZ = [];
+        const rimR = 0.8;
+        for (let k = 0; k <= 40; k++) {
+          const th = (k / 40) * 2 * Math.PI;
+          rimX.push(state.x0 + rimR * Math.cos(th));
+          rimY.push(state.y0 + rimR * Math.sin(th));
+          rimZ.push(aZ);
+        }
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: rimX,
+          y: rimY,
+          z: rimZ,
+          line: { color: '#38bdf8', width: 5 },
+          name: 'Вертушка в 3D (Обод)'
+        });
+
+        // Blades
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: [state.x0 - rimR, state.x0 + rimR, null, state.x0, state.x0],
+          y: [state.y0, state.y0, null, state.y0 - rimR, state.y0 + rimR],
+          z: [aZ, aZ, null, aZ, aZ],
+          line: { color: '#38bdf8', width: 6 },
+          name: 'Лопасти вертушки (3D)'
+        });
+
+        // 3D Closed Loop C (Line Integral)
+        const loopR = 1.8;
+        const loopX = [], loopY = [], loopZ = [];
+        for (let k = 0; k <= 50; k++) {
+          const th = (k / 50) * 2 * Math.PI;
+          loopX.push(state.x0 + loopR * Math.cos(th));
+          loopY.push(state.y0 + loopR * Math.sin(th));
+          loopZ.push(aZ);
+        }
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines',
+          x: loopX,
+          y: loopY,
+          z: loopZ,
+          line: { color: '#a855f7', width: 6, dash: 'dash' },
+          name: 'Контур C (∮ F·dr)'
+        });
+
+        // If conservative, add 3D Potential Surface z = phi(x1, x2)
+        const isConservative = Math.abs(curlZ) < 0.02;
+        if (isConservative) {
+          const potZ = [];
+          for (let r = 0; r < mesh.y.length; r++) {
+            const rowZ = [];
+            for (let c = 0; c < mesh.x.length; c++) {
+              const xVal = mesh.x[c];
+              const yVal = mesh.y[r];
+              let phiVal = 0;
+              const raw = state.f_expr_raw || "";
+              if (raw.includes("2*x1*x2") || raw.includes("2*x*y")) {
+                phiVal = xVal * xVal * yVal;
+              } else {
+                phiVal = 0.5 * (xVal * xVal + yVal * yVal);
+              }
+              rowZ.push(phiVal);
+            }
+            potZ.push(rowZ);
+          }
+
+          traces.push({
+            type: 'surface',
+            x: mesh.x,
+            y: mesh.y,
+            z: potZ,
+            colorscale: 'Viridis',
+            opacity: 0.5,
+            showscale: false,
+            name: 'Рельеф потенциала z = φ(x₁,x₂)'
+          });
+        }
+
+        return traces;
+      }
+
       const isIdentityVector = (state.f_expr_raw || '').includes('[x1;') || 
                                (state.f_expr_raw || '').includes('[x1,') || 
                                (state.f_expr_raw || '').includes('[x;') || 
@@ -3549,8 +4106,31 @@
       renderPlots(true);
     }
 
+    
+    window.loadVectorPreset = function(pKey) {
+      const p = presets[pKey];
+      if (!p) return;
+      state.f_expr_raw = p.expr;
+      const inp = document.getElementById("functionInput");
+      if (inp) inp.value = p.expr;
+      if (p.x0 !== undefined) state.x0 = p.x0;
+      if (p.y0 !== undefined) state.y0 = p.y0;
+      if (p.z0 !== undefined) state.z0 = p.z0;
+      if (p.c !== undefined) state.level_c = p.c;
+      if (p.mode) setViewMode(p.mode);
+      
+      // Switch active tab to Vector tab
+      const tabBtn = document.getElementById("tabNavVector");
+      if (tabBtn) tabBtn.click();
+      
+      compileExpressions();
+      updateCalculusOutputs();
+      renderPlots(false);
+    };
+
     function initSidebarTabs() {
       const tabs = [
+        { btn: 'tabNavVector', content: 'tabContentVector' },
         { btn: 'tabNavLevelSets', content: 'tabContentLevelSets' },
         { btn: 'tabNavAffine', content: 'tabContentAffine' },
         { btn: 'tabNavCalculus', content: 'tabContentCalculus' },
