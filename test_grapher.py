@@ -131,6 +131,78 @@ def test_calculus_engine():
     print(f"   [OK] AI Calculus Tutor ({model_label}) & Flow Line γ(t) verified!")
 
 
+def test_vector_calculus():
+    print("2b. Testing Vector Calculus (Curl, Divergence, Potential, Line Integrals, Green's Theorem)...")
+    import calculus_engine as ce
+    import math
+
+    # 1. Pure rigid vortex F = [-x2, x1]
+    vortex_calc = ce.analyze_calculus(raw_expr="[-x2, x1]", a1=1.0, a2=2.0, level_c=0.0)
+    assert vortex_calc["is_vector_field"] is True
+    assert vortex_calc["curl_scalar_val"] is not None
+    assert abs(vortex_calc["curl_scalar_val"] - 2.0) < 1e-7, f"Expected curl 2.0, got {vortex_calc['curl_scalar_val']}"
+    assert abs(vortex_calc["div_val"] - 0.0) < 1e-7, f"Expected div 0.0, got {vortex_calc['div_val']}"
+    assert vortex_calc["is_conservative"] is False
+    assert ("counter-clockwise" in vortex_calc["curl_interpretation"].lower() or "ccw" in vortex_calc["curl_interpretation"].lower())
+    
+    # Line integral of [-x2, x1] along unit circle loop should equal 2*pi (Green's theorem)
+    line_loop = vortex_calc["line_integral"]
+    assert line_loop["curve_type"] == "circle"
+    # The default radius is 1.5, so area = pi * 1.5^2 = 2.25 * pi, curl = 2 => circulation = 2 * 2.25 * pi = 4.5 * pi
+    expected_circulation = vortex_calc["curl_val"] * math.pi * (1.5**2)
+    assert abs(line_loop["work"] - expected_circulation) < 0.1, f"Expected circulation ~{expected_circulation}, got {line_loop['work']}"
+    assert abs(line_loop["greens_circulation"] - expected_circulation) < 0.01
+    print("   [OK] Pure Vortex curl=2, paddle wheel CCW, and Green's Theorem loop circulation verified!")
+
+    # 2. Irrotational swirl vortex F = [-x2/(x1^2+x2^2), x1/(x1^2+x2^2)]
+    irrot_calc = ce.analyze_calculus(raw_expr="[-x2/(x1^2 + x2^2), x1/(x1^2 + x2^2)]", a1=2.0, a2=0.0, level_c=0.0)
+    assert irrot_calc["is_vector_field"] is True
+    assert abs(irrot_calc["curl_scalar_val"] - 0.0) < 1e-5, f"Expected curl ~0, got {irrot_calc['curl_scalar_val']}"
+    assert "irrotational" in irrot_calc["curl_interpretation"].lower() or "0" in irrot_calc["curl_interpretation"]
+    print("   [OK] Irrotational Swirl curl=0 at (2,0) verified (paddle wheel does not spin)!")
+
+    # 3. Conservative Field F = [2*x1*x2, x1^2] with potential phi = x1^2 * x2
+    cons_calc = ce.analyze_calculus(raw_expr="[2*x1*x2, x1^2]", a1=1.5, a2=2.0, level_c=0.0)
+    assert cons_calc["is_vector_field"] is True
+    assert cons_calc["is_conservative"] is True
+    assert cons_calc["potential_latex"] != ""
+    assert "x_{1}^{2}" in cons_calc["potential_latex"] and "x_{2}" in cons_calc["potential_latex"]
+    
+    # Path independence check on line integral from (0,0) to (2,3): Delta phi = 2^2 * 3 = 12
+    p_line = ce.compute_line_integral(
+        comp_fns=cons_calc["comp_fns"],
+        dim=2,
+        curve_type="segment",
+        p0=(0.0, 0.0),
+        p1=(2.0, 3.0),
+        potential_fn=cons_calc["potential_fn"],
+        is_conservative=True,
+    )
+    assert p_line["delta_phi"] is not None
+    assert abs(p_line["delta_phi"] - 12.0) < 1e-7, f"Expected Delta phi = 12.0, got {p_line['delta_phi']}"
+    assert abs(p_line["work"] - 12.0) < 0.05, f"Expected work ~12.0, got {p_line['work']}"
+    print("   [OK] Conservative potential function phi = x1^2*x2 and path-independent line integral Delta phi=12 verified!")
+
+    # 4. Radial Source F = [x1, x2]
+    source_calc = ce.analyze_calculus(raw_expr="[x1, x2]", a1=1.0, a2=1.0, level_c=0.0)
+    assert abs(source_calc["div_val"] - 2.0) < 1e-7
+    assert "source" in source_calc["div_interpretation"].lower()
+    print("   [OK] Radial source div=2 and outward flux expansion verified!")
+
+    # 5. 3D Vector field F = [-x2, x1, 1]
+    v3d_calc = ce.analyze_calculus(raw_expr="[-x2, x1, 1]", a1=1.0, a2=0.0, a3=2.0, level_c=0.0)
+    assert v3d_calc["is_vector_field"] is True
+    assert v3d_calc["dim"] == 3
+    assert v3d_calc["curl_vector_vals"] is not None
+    assert abs(v3d_calc["curl_vector_vals"][0]) < 1e-7
+    assert abs(v3d_calc["curl_vector_vals"][1]) < 1e-7
+    assert abs(v3d_calc["curl_vector_vals"][2] - 2.0) < 1e-7
+    fig_v3d = ce.build_plotly_figure(calc=v3d_calc, a1=1.0, a2=0.0, a3=2.0, view_mode="3d", show_curl_wheel=True)
+    assert len(fig_v3d.data) > 0
+    print("   [OK] 3D Vector Field curl vector [0, 0, 2] verified!")
+
+
+
 def test_marimo_check_and_exports():
     print("3. Testing Marimo app check (`marimo check app.py`) and exported HTML files...")
     app_path = BASE_DIR / "app.py"
@@ -218,6 +290,7 @@ if __name__ == "__main__":
     try:
         test_legacy_backup()
         test_calculus_engine()
+        test_vector_calculus()
         test_marimo_check_and_exports()
         test_marimo_live_server()
         test_cli_helpers()

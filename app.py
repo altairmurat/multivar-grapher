@@ -243,6 +243,81 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
             lambda prev: {**prev, "constraint": "", "toast": "Cleared constraint"}
         ),
     )
+    chip_vortex = mo.ui.button(
+        label="🌀 Vortex [-x₂, x₁]",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "f": "[-x2, x1]",
+                "constraint": "",
+                "a1": 1.5,
+                "a2": 1.0,
+                "a3": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Loaded: Rotational Vortex Field [-x₂, x₁] (curl = 2)",
+            }
+        ),
+    )
+    chip_swirl = mo.ui.button(
+        label="🌪️ Swirl (curl=0)",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "f": "[-x2/(x1^2 + x2^2 + 0.05), x1/(x1^2 + x2^2 + 0.05)]",
+                "constraint": "",
+                "a1": 1.5,
+                "a2": 1.0,
+                "a3": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Loaded: Irrotational Swirl (0 curl outside origin!)",
+            }
+        ),
+    )
+    chip_conservative = mo.ui.button(
+        label="⚡ Conservative ∇φ",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "f": "[2*x1*x2, x1^2]",
+                "constraint": "",
+                "a1": 1.5,
+                "a2": 1.5,
+                "a3": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Loaded: Conservative Field [2x₁x₂, x₁²] (φ = x₁²x₂)",
+            }
+        ),
+    )
+    chip_loop_int = mo.ui.button(
+        label="∮ Green's Loop",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "f": "[-x2, x1]",
+                "constraint": "",
+                "a1": 0.0,
+                "a2": 0.0,
+                "a3": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Loaded: Closed Loop Line Integral & Green's Theorem",
+            }
+        ),
+    )
+    chip_source = mo.ui.button(
+        label="🌋 Source [x₁, x₂]",
+        on_click=lambda _: set_cfg(
+            lambda prev: {
+                **prev,
+                "f": "[x1, x2]",
+                "constraint": "",
+                "a1": 1.5,
+                "a2": 1.0,
+                "a3": 0.0,
+                "view_mode": "Split Dual View",
+                "toast": "Loaded: Radial Source Field [x₁, x₂] (div = +2)",
+            }
+        ),
+    )
 
     # 2. Point a & Level Set c Sliders
     a1_slider = mo.ui.slider(
@@ -389,6 +464,10 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
     sw_all_contours = mo.ui.switch(value=True, label="🗺️ Background Contours")
     sw_constraint_surf = mo.ui.switch(value=True, label="🏛️ 3D Constraint Cylinder")
     sw_constraint_curve = mo.ui.switch(value=True, label="⭕ 2D Constraint Curve")
+    sw_curl_wheel = mo.ui.switch(value=True, label="🔄 Paddle Wheel (Curl Spin)")
+    sw_div_bubble = mo.ui.switch(value=True, label="💥 Flux Ring (Div Source/Sink)")
+    sw_equipotential = mo.ui.switch(value=True, label="🏞️ Equipotential Contours φ(x)=c")
+    sw_line_integral = mo.ui.switch(value=True, label="➰ Line Integral Path C")
 
     # Parameter sliders a, b, c, d
     param_a = mo.ui.slider(-5.0, 5.0, 0.1, 1.0, label="a")
@@ -421,9 +500,14 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
         cfg,
         chip_circle_req,
         chip_clear_req,
+        chip_conservative,
         chip_ellip_cyl,
         chip_flow_line,
+        chip_loop_int,
         chip_parab_cyl,
+        chip_source,
+        chip_swirl,
+        chip_vortex,
         click_bridge_input,
         colorscale_dropdown,
         constraint_input,
@@ -442,9 +526,13 @@ def _(apply_preset, ce, get_cfg, mo, np, set_cfg):
         sw_all_contours,
         sw_constraint_curve,
         sw_constraint_surf,
+        sw_curl_wheel,
+        sw_div_bubble,
+        sw_equipotential,
         sw_error_rod,
         sw_flow_line,
         sw_gradient,
+        sw_line_integral,
         sw_normal_line,
         sw_right_angle,
         sw_tangent_line,
@@ -573,9 +661,13 @@ def _(
     sw_all_contours,
     sw_constraint_curve,
     sw_constraint_surf,
+    sw_curl_wheel,
+    sw_div_bubble,
+    sw_equipotential,
     sw_error_rod,
     sw_flow_line,
     sw_gradient,
+    sw_line_integral,
     sw_normal_line,
     sw_right_angle,
     sw_tangent_line,
@@ -608,6 +700,10 @@ def _(
         show_constraint_surface=sw_constraint_surf.value,
         show_constraint_curve=sw_constraint_curve.value,
         show_flow_line=bool(sw_flow_line.value),
+        show_curl_wheel=sw_curl_wheel.value,
+        show_div_bubble=sw_div_bubble.value,
+        show_equipotential=sw_equipotential.value,
+        show_line_integral=sw_line_integral.value,
     )
 
     # Synchronized 2D & 3D Click Handler: clicking ANY point on 2D or 3D updates Point a in both views!
@@ -828,9 +924,14 @@ def _(
     cfg,
     chip_circle_req,
     chip_clear_req,
+    chip_conservative,
     chip_ellip_cyl,
     chip_flow_line,
+    chip_loop_int,
     chip_parab_cyl,
+    chip_source,
+    chip_swirl,
+    chip_vortex,
     click_bridge_html,
     colorscale_dropdown,
     constraint_input,
@@ -855,9 +956,13 @@ def _(
     sw_all_contours,
     sw_constraint_curve,
     sw_constraint_surf,
+    sw_curl_wheel,
+    sw_div_bubble,
+    sw_equipotential,
     sw_error_rod,
     sw_flow_line,
     sw_gradient,
+    sw_line_integral,
     sw_normal_line,
     sw_right_angle,
     sw_tangent_line,
@@ -912,7 +1017,18 @@ def _(
             function_input,
             constraint_input,
             mo.hstack(
-                [chip_flow_line, chip_parab_cyl, chip_ellip_cyl, chip_circle_req, chip_clear_req],
+                [
+                    chip_vortex,
+                    chip_swirl,
+                    chip_conservative,
+                    chip_loop_int,
+                    chip_source,
+                    chip_flow_line,
+                    chip_parab_cyl,
+                    chip_ellip_cyl,
+                    chip_circle_req,
+                    chip_clear_req,
+                ],
                 wrap=True,
                 gap=0.35,
             ),
@@ -930,63 +1046,143 @@ def _(
     )
 
     # TAB 1: Unified Calculus Sheet — Pure Markdown (\[ ... \] so KaTeX renders 100%!)
-    calculus_sheet_tab = mo.vstack(
-        [
-            mo.callout(
-                mo.md(
-                    f"#### 1. Derivative Row Matrix $\\mathbf{{D}}f(\\mathbf{{a}})$ & Gradient $\\nabla f(\\mathbf{{a}})$\n\n"
-                    f"\\[ {calc['df_symbolic_latex']} \\;\\Longrightarrow\\; {calc['df_numeric_latex']} \\]\n\n"
-                    f"- **Gradient Column Vector:**\n"
-                    f"\\[ {calc['grad_latex']} \\]\n\n"
-                    f"- **Magnitude & $90^\\circ$ Frame:** $\\|\\nabla f(\\mathbf{{a}})\\| = {calc['grad_mag']:.3f}$ &nbsp;|&nbsp; "
-                    f"Unit Normal $\\mathbf{{n}} = \\langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \\rangle \\perp$ "
-                    f"Unit Tangent $\\mathbf{{T}} = \\langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \\rangle$ ($90^\\circ$)"
-                ),
-                kind="info",
-            ),
-            mo.callout(
-                mo.md(
-                    f"#### 2. Affine Tangent Plane $g(\\mathbf{{x}})$ & 3D Surface Normal\n\n"
-                    f"\\[ {calc['affine_symbolic_latex']} \\]\n\n"
-                    f"\\[ {calc['affine_numeric_latex']} \\]\n\n"
-                    f"- **3D Surface Normal Vector:** $\\mathbf{{n}}_{{3D}} = \\langle {-calc['fx1']:.3f}, {-calc['fx2']:.3f}, 1.000 \\rangle$"
-                ),
-                kind="success",
-            ),
-            mo.callout(
-                mo.md(
-                    f"#### 3. Hessian Matrix $\\mathbf{{H}}_f(\\mathbf{{a}})$ & Second Derivative Test\n\n"
-                    f"\\[ {calc['hessian_symbolic_latex']} \\]\n\n"
-                    f"\\[ {calc['hessian_numeric_latex']} \\]\n\n"
-                    f"- **Invariants:** $\\det(\\mathbf{{H}}) = {calc['hessian_det']:.3f}$ &nbsp;|&nbsp; "
-                    f"$\\operatorname{{tr}}(\\mathbf{{H}}) = {calc['hessian_trace']:.3f}$ &nbsp;|&nbsp; "
-                    f"Eigenvalues: `{calc['eigenvalues_str']}`\n\n"
-                    f"- **Classification Verdict:** **{calc['extremum_label']}**"
-                ),
-                kind="warn" if calc["extremum_type"] == "saddle" else "neutral",
-            ),
-            mo.accordion(
-                {
-                    "🔬 Linearization Error Calculator at x_test & Radius Helper": mo.vstack(
-                        [
-                            mo.hstack([test_x_slider, test_y_slider], widths="equal"),
-                            sw_error_rod,
-                            mo.md(
-                                f"- **Exact Value:** $f(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_exact']:.4f}$\n"
-                                f"- **Affine Approx:** $g(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_affine']:.4f}$\n"
-                                f"- **First-Order Error:** $|f(\\mathbf{{x}}_{{\\text{{test}}}}) - g(\\mathbf{{x}}_{{\\text{{test}}}})| = {calc['test_error']:.4f}$"
-                            ),
-                            radius_r_input,
-                        ]
+    if calc["mode"] in ("vector_2d", "vector_3d"):
+        li = calc.get("line_integral", {})
+        curl_v = calc.get("curl_val", 0.0)
+        div_v = calc.get("div_val", 0.0)
+        is_cons = calc.get("is_conservative", False)
+
+        calculus_sheet_tab = mo.vstack(
+            [
+                mo.callout(
+                    mo.md(
+                        f"#### 1. 🌊 Vector Field $\\mathbf{{F}}$ at Point $\\mathbf{{a}}$ & Jacobian $\\mathbf{{J}}_F$\n\n"
+                        f"\\[ {calc['grad_latex']} \\]\n\n"
+                        f"- **Jacobian Matrix $\\mathbf{{J}}_F$:**\n"
+                        f"\\[ {calc['df_numeric_latex']} \\]\n\n"
+                        f"- **Linearization:** $\\mathbf{{g}}(\\mathbf{{x}}) = \\mathbf{{F}}(\\mathbf{{a}}) + \\mathbf{{J}}_F(\\mathbf{{a}})(\\mathbf{{x}} - \\mathbf{{a}})$"
                     ),
-                    "🎚️ Formula Parameters (a, b, c, d)": mo.hstack(
-                        [param_a, param_b, param_c, param_d], widths="equal"
+                    kind="info",
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 2. 🔄 Curl $\\nabla \\times \\mathbf{{F}}$ (Vorticity & Microscopic Paddle Wheel)\n\n"
+                        f"\\[ {calc['curl_latex']} \\]\n\n"
+                        f"- **Physical Meaning:** {calc['curl_meaning']}\n\n"
+                        f"- **Angular Velocity:** $\\omega = \\frac{{1}}{{2}}\\operatorname{{curl}}\\mathbf{{F}} = {abs(curl_v)/2:.3f} \\text{{ rad/s}}$"
                     ),
-                }
-            ),
-        ],
-        gap=0.45,
-    )
+                    kind="warn" if abs(curl_v) > 0.02 else "neutral",
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 3. 💥 Divergence $\\nabla \\cdot \\mathbf{{F}}$ (Flux Density: Sources & Sinks)\n\n"
+                        f"\\[ {calc['div_latex']} \\]\n\n"
+                        f"- **Physical Meaning:** {calc['div_meaning']}"
+                    ),
+                    kind="success" if div_v > 0.02 else ("danger" if div_v < -0.02 else "neutral"),
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 4. ⚡ Conservative Field Test & Potential Function $\\phi(\\mathbf{{x}})$\n\n"
+                        f"- **Is $\\mathbf{{F}}$ Conservative?** {'✅ **YES!** (curl = 0)' if is_cons else '❌ **NO** (curl ≠ 0)'}\n\n"
+                        f"\\[ {calc['potential_derivation_latex']} \\]\n\n"
+                        + (
+                            f"- **Equipotential Contours:** Level curves $\\phi(x_1, x_2) = c$ are strictly perpendicular ($90^\\circ$) to vector arrows $\\mathbf{{F}}$!\n"
+                            f"- **Fundamental Theorem of Line Integrals:** $\\int_C \\mathbf{{F}} \\cdot d\\mathbf{{r}} = \\phi(\\mathbf{{b}}) - \\phi(\\mathbf{{a}})$ (Path-Independent!)\n\n"
+                            if is_cons
+                            else "- **Consequence:** Work depends on the chosen path! Closed loops can have non-zero circulation.\n\n"
+                        )
+                        + f"- **Intuition:** {calc['potential_meaning']}"
+                    ),
+                    kind="success" if is_cons else "neutral",
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 5. ➰ Line Integral $\\int_C \\mathbf{{F}} \\cdot d\\mathbf{{r}}$ & Green's Theorem\n\n"
+                        f"- **Path:** `{li.get('curve_name', 'Closed Loop')}`\n\n"
+                        f"- **Total Work / Circulation:** $W = \\int_C \\mathbf{{F}} \\cdot d\\mathbf{{r}} = \\mathbf{{{li.get('work', 0.0):.4f}}}$\n\n"
+                        + (
+                            f"- **Green's Theorem Verification:** $\\iint_D (\\operatorname{{curl}}\\mathbf{{F}})\\,dA = \\mathbf{{{li.get('greens_circulation', 0.0):.4f}}}$ (Circulation matches double integral!)\n\n"
+                            if li.get("greens_circulation") is not None
+                            else ""
+                        )
+                        + (
+                            f"- **Potential Difference Comparison:** $\\Delta\\phi = \\phi(\\mathbf{{r}}(1)) - \\phi(\\mathbf{{r}}(0)) = \\mathbf{{{li.get('delta_phi', 0.0):.4f}}}$\n\n"
+                            if li.get("delta_phi") is not None
+                            else ""
+                        )
+                        + f"- **Work Interpretation:** {'Field assists motion along path (positive work).' if li.get('work', 0) > 0.01 else ('Field opposes motion along path (negative work).' if li.get('work', 0) < -0.01 else 'Zero net work along path.')}"
+                    ),
+                    kind="info",
+                ),
+                mo.accordion(
+                    {
+                        "🎚️ Formula Parameters (a, b, c, d)": mo.hstack(
+                            [param_a, param_b, param_c, param_d], widths="equal"
+                        ),
+                    }
+                ),
+            ],
+            gap=0.45,
+        )
+    else:
+        calculus_sheet_tab = mo.vstack(
+            [
+                mo.callout(
+                    mo.md(
+                        f"#### 1. Derivative Row Matrix $\\mathbf{{D}}f(\\mathbf{{a}})$ & Gradient $\\nabla f(\\mathbf{{a}})$\n\n"
+                        f"\\[ {calc['df_symbolic_latex']} \\;\\Longrightarrow\\; {calc['df_numeric_latex']} \\]\n\n"
+                        f"- **Gradient Column Vector:**\n"
+                        f"\\[ {calc['grad_latex']} \\]\n\n"
+                        f"- **Magnitude & $90^\\circ$ Frame:** $\\|\\nabla f(\\mathbf{{a}})\\| = {calc['grad_mag']:.3f}$ &nbsp;|&nbsp; "
+                        f"Unit Normal $\\mathbf{{n}} = \\langle {calc['unit_normal_2d'][0]:.2f}, {calc['unit_normal_2d'][1]:.2f} \\rangle \\perp$ "
+                        f"Unit Tangent $\\mathbf{{T}} = \\langle {calc['unit_tangent_2d'][0]:.2f}, {calc['unit_tangent_2d'][1]:.2f} \\rangle$ ($90^\\circ$)"
+                    ),
+                    kind="info",
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 2. Affine Tangent Plane $g(\\mathbf{{x}})$ & 3D Surface Normal\n\n"
+                        f"\\[ {calc['affine_symbolic_latex']} \\]\n\n"
+                        f"\\[ {calc['affine_numeric_latex']} \\]\n\n"
+                        f"- **3D Surface Normal Vector:** $\\mathbf{{n}}_{{3D}} = \\langle {-calc['fx1']:.3f}, {-calc['fx2']:.3f}, 1.000 \\rangle$"
+                    ),
+                    kind="success",
+                ),
+                mo.callout(
+                    mo.md(
+                        f"#### 3. Hessian Matrix $\\mathbf{{H}}_f(\\mathbf{{a}})$ & Second Derivative Test\n\n"
+                        f"\\[ {calc['hessian_symbolic_latex']} \\]\n\n"
+                        f"\\[ {calc['hessian_numeric_latex']} \\]\n\n"
+                        f"- **Invariants:** $\\det(\\mathbf{{H}}) = {calc['hessian_det']:.3f}$ &nbsp;|&nbsp; "
+                        f"$\\operatorname{{tr}}(\\mathbf{{H}}) = {calc['hessian_trace']:.3f}$ &nbsp;|&nbsp; "
+                        f"Eigenvalues: `{calc['eigenvalues_str']}`\n\n"
+                        f"- **Classification Verdict:** **{calc['extremum_label']}**"
+                    ),
+                    kind="warn" if calc["extremum_type"] == "saddle" else "neutral",
+                ),
+                mo.accordion(
+                    {
+                        "🔬 Linearization Error Calculator at x_test & Radius Helper": mo.vstack(
+                            [
+                                mo.hstack([test_x_slider, test_y_slider], widths="equal"),
+                                sw_error_rod,
+                                mo.md(
+                                    f"- **Exact Value:** $f(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_exact']:.4f}$\n"
+                                    f"- **Affine Approx:** $g(\\mathbf{{x}}_{{\\text{{test}}}}) = {calc['test_affine']:.4f}$\n"
+                                    f"- **First-Order Error:** $|f(\\mathbf{{x}}_{{\\text{{test}}}}) - g(\\mathbf{{x}}_{{\\text{{test}}}})| = {calc['test_error']:.4f}$"
+                                ),
+                                radius_r_input,
+                            ]
+                        ),
+                        "🎚️ Formula Parameters (a, b, c, d)": mo.hstack(
+                            [param_a, param_b, param_c, param_d], widths="equal"
+                        ),
+                    }
+                ),
+            ],
+            gap=0.45,
+        )
 
     # TAB 2: AI Calculus Tutor — Input Form is AT THE TOP, Newest Reply First!
     recent_msgs = list(reversed(get_chat_log()[-6:]))
@@ -1053,12 +1249,32 @@ def _(
             mo.callout(
                 mo.md(
                     r"""
-                    #### 4. Free-Variable 3D Cylinders & Linear Matrices in $\mathbb{R}^2 / \mathbb{R}^3$
-                    - **3D Cylinders:** When $\mathbf{F}(x_1, x_2, x_3) = [x_1; x_2; x_3]$ is paired with a constraint like $\frac{x_1^2}{4} + x_2 = 1$, the variable $x_3$ is **free** ($x_3 \in (-\infty, \infty)$), extruding the 2D curve vertically into a **3D cylinder** parallel to the $x_3$-axis.
-                    - **Matrices:** Entering `[a, b; c, d]` or a $3 \times 3$ matrix `[1, 2, 3; 4, 5, 6; 7, 8, 9]` visualizes the column basis vectors $\mathbf{A}\mathbf{e}_i$ and transformed vector $\mathbf{A}\mathbf{a}$.
+                    #### 5. Vector Fields, Curl ($\nabla \times \mathbf{F}$) & The Microscopic Paddle Wheel
+                    - **Vector Field:** A rule assigning a vector arrow $\mathbf{F}(\mathbf{x})$ to every point $\mathbf{x}$.
+                    - **Curl in 2D:** Measures local rotational vorticity:
+                    \[ \operatorname{curl}\mathbf{F} = \frac{\partial F_2}{\partial x_1} - \frac{\partial F_1}{\partial x_2} = Q_x - P_y \]
+                    - **Microscopic Paddle Wheel:** If placed at $\mathbf{a}$:
+                      - $\operatorname{curl} > 0 \implies$ Spins **Counter-Clockwise (CCW)** with angular speed $\omega = \frac{1}{2}\operatorname{curl}\mathbf{F}$.
+                      - $\operatorname{curl} < 0 \implies$ Spins **Clockwise (CW)**.
+                      - $\operatorname{curl} = 0 \implies$ **Irrotational / Curl-Free!** (Paddle wheel stays still!).
+                    - **Divergence:** Measures expansion / compression flux density:
+                    \[ \operatorname{div}\mathbf{F} = \nabla \cdot \mathbf{F} = \frac{\partial F_1}{\partial x_1} + \frac{\partial F_2}{\partial x_2} \]
                     """
                 ),
-                kind="neutral",
+                kind="warn",
+            ),
+            mo.callout(
+                mo.md(
+                    r"""
+                    #### 6. Conservative Fields ($\mathbf{F} = \nabla \phi$), Line Integrals & Green's Theorem
+                    - **Conservative Criterion:** On a simply connected domain, $\mathbf{F}$ has a scalar potential $\phi$ ($\mathbf{F} = \nabla \phi$) $\iff \operatorname{curl}\mathbf{F} = \mathbf{0}$.
+                    - **Fundamental Theorem of Line Integrals:** Work is strictly **path-independent**:
+                    \[ \int_C \mathbf{F} \cdot d\mathbf{r} = \phi(\mathbf{r}(b)) - \phi(\mathbf{r}(a)) \]
+                    - **Green's Theorem:** Circulation along closed boundary $C = \partial D$ equals double integral of curl:
+                    \[ \oint_C (P\,dx_1 + Q\,dx_2) = \iint_D (\operatorname{curl}\mathbf{F})\,dA \]
+                    """
+                ),
+                kind="success",
             ),
         ],
         gap=0.45,
@@ -1070,8 +1286,8 @@ def _(
             mo.hstack([colorscale_dropdown, opacity_slider, notation_switch], widths="equal"),
             mo.hstack(
                 [
-                    mo.vstack([sw_flow_line, sw_gradient, sw_tangent_line, sw_normal_line, sw_right_angle]),
-                    mo.vstack([sw_affine_plane, sw_3d_normal, sw_constraint_surf, sw_constraint_curve, sw_all_contours]),
+                    mo.vstack([sw_flow_line, sw_gradient, sw_tangent_line, sw_normal_line, sw_right_angle, sw_all_contours]),
+                    mo.vstack([sw_affine_plane, sw_3d_normal, sw_constraint_surf, sw_constraint_curve, sw_curl_wheel, sw_div_bubble, sw_equipotential, sw_line_integral]),
                 ],
                 widths="equal",
             ),
@@ -1100,16 +1316,35 @@ def _(
     # -------------------------------------------------------------------------
     # RIGHT PANEL: Toolbar + Interactive 2D/3D Graph (Click to set Point a!) + KPIs
     # -------------------------------------------------------------------------
-    kpi_row = mo.hstack(
-        [
-            mo.stat(value=f"{calc['fa']:.3f}", label="Exact Value f(a)", caption=f"At a = {a_coords_str}"),
-            mo.stat(value=f"[{calc['fx1']:.2f}, {calc['fx2']:.2f}]", label="Derivative Df(a)", caption=f"‖∇f‖ = {calc['grad_mag']:.2f}"),
-            mo.stat(value=f"c = {cfg['c']:.2f}", label="Level Set f = c", caption=f"|f(a)-c| = {calc['level_diff']:.2f}"),
-            mo.stat(value=f"D = {calc['hessian_det']:.2f}", label="Hessian Det(H)", caption=f"λ: {calc['eigenvalues_str']}"),
-        ],
-        widths="equal",
-        gap=0.6,
-    )
+    if calc["mode"] in ("vector_2d", "vector_3d"):
+        li = calc.get("line_integral", {})
+        curl_v = calc.get("curl_val", 0.0)
+        div_v = calc.get("div_val", 0.0)
+        is_cons = calc.get("is_conservative", False)
+        spin_lbl = "CCW Spin" if curl_v > 0.02 else ("CW Spin" if curl_v < -0.02 else "Irrotational")
+        flux_lbl = "Source (Expand)" if div_v > 0.02 else ("Sink (Compress)" if div_v < -0.02 else "Incompressible")
+
+        kpi_row = mo.hstack(
+            [
+                mo.stat(value=f"{calc['fa']:.2f}", label="‖F(a)‖ Magnitude", caption=f"F = [{calc['fx1']:.2f}, {calc['fx2']:.2f}]"),
+                mo.stat(value=f"{curl_v:+.2f}", label="Curl (Vorticity)", caption=f"{spin_lbl} (ω ≈ {abs(curl_v)/2:.2f})"),
+                mo.stat(value=f"{div_v:+.2f}", label="Divergence (Flux)", caption=f"{flux_lbl}"),
+                mo.stat(value=f"{'Conservative' if is_cons else 'Non-Conserv.'}", label="Field Potential", caption=f"Loop Work = {li.get('work', 0.0):.2f}"),
+            ],
+            widths="equal",
+            gap=0.6,
+        )
+    else:
+        kpi_row = mo.hstack(
+            [
+                mo.stat(value=f"{calc['fa']:.3f}", label="Exact Value f(a)", caption=f"At a = {a_coords_str}"),
+                mo.stat(value=f"[{calc['fx1']:.2f}, {calc['fx2']:.2f}]", label="Derivative Df(a)", caption=f"‖∇f‖ = {calc['grad_mag']:.2f}"),
+                mo.stat(value=f"c = {cfg['c']:.2f}", label="Level Set f = c", caption=f"|f(a)-c| = {calc['level_diff']:.2f}"),
+                mo.stat(value=f"D = {calc['hessian_det']:.2f}", label="Hessian Det(H)", caption=f"λ: {calc['eigenvalues_str']}"),
+            ],
+            widths="equal",
+            gap=0.6,
+        )
 
     right_panel = mo.vstack(
         [

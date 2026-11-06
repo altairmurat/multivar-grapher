@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Calculus Visual Laboratory (2D & 3D Interactive)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+    .pulse-bubble {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    input[type=range] {
+      accent-color: #8b5cf6;
+    }
+    .tab-active {
+      background: rgba(139, 92, 246, 0.25);
+      color: #c4b5fd;
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-purple-600 selection:text-white">
+
+  <!-- Header & Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/30 text-xl font-bold">
+        ∇
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          Vector Calculus 2D & 3D Visual Lab
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">60 FPS 3D Engine</span>
+        </h1>
+        <p class="text-xs text-slate-400">Наглядная геометрия: Векторные поля в 2D и 3D, Ротор (Curl) и правило буравчика, Дивергенция, 3D Ландшафт Потенциала φ</p>
+      </div>
+    </div>
+
+    <!-- View Mode Switcher (2D vs 3D) & Quick Presets -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- 2D / 3D Mode Toggle -->
+      <div class="bg-slate-900 p-1 rounded-xl border border-slate-700 flex items-center gap-1 shadow-inner">
+        <button id="btnView2D" onclick="setViewMode('2d')" class="px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">
+          🗺️ 2D Плоскость
+        </button>
+        <button id="btnView3D" onclick="setViewMode('3d')" class="px-3 py-1 rounded-lg text-xs font-bold transition bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+          🧊 3D Пространство
+        </button>
+      </div>
+
+      <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+
+      <!-- Presets -->
+      <div class="flex flex-wrap items-center gap-1.5" id="presetsBar">
+        <button onclick="loadPreset('tornado3d')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-cyan-900/60 hover:text-cyan-300 border border-slate-700 transition">🌪️ 3D Торнадо</button>
+        <button onclick="loadPreset('vortex')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-purple-900/60 hover:text-purple-300 border border-slate-700 transition">🌀 Вихрь (Curl=2)</button>
+        <button onclick="loadPreset('irrotational')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-blue-900/60 hover:text-blue-300 border border-slate-700 transition">⚪ Swirl (Curl=0!)</button>
+        <button onclick="loadPreset('conservative')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-emerald-900/60 hover:text-emerald-300 border border-slate-700 transition">⚡ 3D Рельеф ∇φ</button>
+        <button onclick="loadPreset('source')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-amber-900/60 hover:text-amber-300 border border-slate-700 transition">🌋 3D Источник</button>
+        <button onclick="loadPreset('saddle')" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-pink-900/60 hover:text-pink-300 border border-slate-700 transition">🪑 Седло</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left / Center: Interactive Canvas Simulation -->
+    <div class="lg:col-span-8 flex flex-col gap-4">
+      
+      <!-- Canvas Card -->
+      <div class="relative glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80">
+        
+        <!-- Live HUD Overlay (Top-Left) -->
+        <div class="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
+          <div class="bg-slate-900/85 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-700/60 shadow-lg text-xs flex items-center gap-3">
+            <span class="flex items-center gap-1.5 font-mono text-purple-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              Точка <b>a</b>: (<span id="hudX">1.50</span>, <span id="hudY">1.00</span>, <span id="hudZ">0.00</span>)
+            </span>
+            <span class="text-slate-500">|</span>
+            <span class="text-cyan-300 font-mono"><b>F(a)</b> = ⟨<span id="hudFx">0.00</span>, <span id="hudFy">0.00</span>, <span id="hudFz">0.00</span>⟩</span>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <!-- Curl Badge -->
+            <div id="hudCurlCard" class="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-amber-500/30 text-xs font-mono text-amber-200">
+              ∇×<b>F</b> (Curl) = <span id="hudCurlVal" class="font-bold text-amber-300">0.00</span>
+              <span id="hudCurlDirection" class="ml-1 text-[11px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">Вектор по оси Z</span>
+            </div>
+            <!-- Div Badge -->
+            <div id="hudDivCard" class="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/30 text-xs font-mono text-cyan-200">
+              div <b>F</b> = <span id="hudDivVal" class="font-bold text-cyan-300">0.00</span>
+              <span id="hudDivType" class="ml-1 text-[11px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300">Solenoidal</span>
+            </div>
+            <!-- Conservative Badge -->
+            <div id="hudConsCard" class="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-500/30 text-xs font-mono text-purple-200">
+              <span id="hudConsText">Non-conservative</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Controls Bar (Top-Right) -->
+        <div class="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <button id="toggleParticlesBtn" onclick="toggleParticles()" class="px-3 py-1.5 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 transition flex items-center gap-1.5 shadow-md">
+            <span>✨ Частицы</span>
+            <span id="particlesStatus" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          </button>
+          <button id="toggleWheelBtn" onclick="toggleWheel()" class="px-3 py-1.5 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 transition flex items-center gap-1.5 shadow-md">
+            <span>⚙️ 3D Вертушка</span>
+            <span id="wheelStatus" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          </button>
+          <button id="toggleSurfaceBtn" onclick="toggleSurface()" class="px-3 py-1.5 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 transition flex items-center gap-1.5 shadow-md">
+            <span>⛰️ 3D Рельеф φ</span>
+            <span id="surfaceStatus" class="w-2 h-2 rounded-full bg-purple-400"></span>
+          </button>
+          <button id="toggleLoopBtn" onclick="toggleLoop()" class="px-3 py-1.5 rounded-lg bg-slate-900/85 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 transition flex items-center gap-1.5 shadow-md">
+            <span>∮ Контур</span>
+            <span id="loopStatus" class="w-2 h-2 rounded-full bg-pink-400"></span>
+          </button>
+        </div>
+
+        <!-- HTML5 Canvas -->
+        <canvas id="simCanvas" class="w-full h-[620px] bg-slate-950 block cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- Canvas Bottom Instructions & Controls -->
+        <div class="p-3 bg-slate-900/70 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+          <div class="flex items-center gap-4">
+            <span id="controlHint" class="flex items-center gap-1">🖱️ <b>Вращение 3D</b>: зажми и тяни мышь • <b>Колесо мыши</b>: приближение/зум • <b>Shift+Клик</b>: перемещение зонда <b>a</b></span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 text-amber-400"><span class="w-3 h-0.5 bg-amber-400"></span> Вектор Ротора ∇×F (ось Z)</span>
+            <span class="inline-flex items-center gap-1 text-emerald-400"><span class="w-3 h-0.5 bg-emerald-400"></span> F·dr > 0</span>
+            <span class="inline-flex items-center gap-1 text-pink-400"><span class="w-3 h-0.5 bg-pink-400"></span> F·dr < 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Line Integral & Green's Theorem Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800/80 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">∮</span>
+            <div>
+              <h3 class="text-sm font-bold text-white">Теорема Грина и Криволинейный Интеграл (Line Integral)</h3>
+              <p class="text-xs text-slate-400">Работа векторного поля по замкнутому контуру C в сравнении с суммой роторов внутри контура</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">Радиус C: <b id="loopRadiusVal">1.5</b></span>
+            <button onclick="centerLoopAtProbe()" class="px-2.5 py-1 rounded bg-purple-900/50 hover:bg-purple-800 text-purple-300 border border-purple-700 transition">Центрировать в точку a</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+          <!-- Work Box -->
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-purple-500/20">
+            <div class="text-slate-400 mb-1">1. Циркуляция (Line Integral):</div>
+            <div class="text-base font-bold text-purple-300 mb-1">
+              W = ∮<sub>C</sub> <b>F</b> · d<b>r</b> = <span id="valWork">0.0000</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-sans">
+              Сумма элементарной работы поля: зеленые участки ускоряют частицу, розовые сопротивляются движению.
+            </div>
+          </div>
+
+          <!-- Green's Box -->
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-amber-500/20">
+            <div class="text-slate-400 mb-1">2. Теорема Грина (Двойной интеграл):</div>
+            <div class="text-base font-bold text-amber-300 mb-1">
+              ∬<sub>D</sub> (curl <b>F</b>) dA = <span id="valGreens">0.0000</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-sans">
+              Сумма всех микроскопических вращений вертушек (роторов) внутри контура в точности равна внешней циркуляции!
+            </div>
+          </div>
+
+          <!-- Verdict Box -->
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-emerald-500/20">
+            <div class="text-slate-400 mb-1">3. Разность |W - ∬ curl|:</div>
+            <div class="text-base font-bold text-emerald-300 mb-1">
+              Δ = <span id="valDiff">0.0000</span>
+            </div>
+            <div id="greensVerdict" class="text-[11px] text-slate-300 font-sans">
+              ✓ Полное совпадение! Теорема Грина подтверждена численно.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar: Formula Input, Mathematical Breakdowns & Conceptual Tutor -->
+    <div class="lg:col-span-4 flex flex-col gap-4">
+
+      <!-- Vector Field Formula Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col gap-3">
+        <h3 class="text-sm font-bold text-white flex items-center justify-between">
+          <span>Векторное Поле F(x, y, z)</span>
+          <span class="text-xs font-normal text-purple-400 font-mono">⟨P, Q, R⟩</span>
+        </h3>
+
+        <!-- P(x, y, z) Component -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Компонента X: <b>P(x, y, z)</b></label>
+          <input type="text" id="inputP" value="-y" onchange="applyCustomField()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-cyan-300 font-mono focus:outline-none focus:border-purple-500 transition">
+        </div>
+
+        <!-- Q(x, y, z) Component -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Компонента Y: <b>Q(x, y, z)</b></label>
+          <input type="text" id="inputQ" value="x" onchange="applyCustomField()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-cyan-300 font-mono focus:outline-none focus:border-purple-500 transition">
+        </div>
+
+        <!-- R(x, y, z) Component (3D) -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Компонента Z: <b>R(x, y, z)</b> (для 3D)</label>
+          <input type="text" id="inputR" value="0.8" onchange="applyCustomField()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500 transition">
+        </div>
+
+        <button onclick="applyCustomField()" class="w-full py-2 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs shadow-lg shadow-purple-600/30 transition">
+          Обновить поле и анализ
+        </button>
+      </div>
+
+      <!-- Conceptual Tutor Tabs (3D Intuition) -->
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col gap-4">
+        
+        <!-- Tab Buttons -->
+        <div class="flex border-b border-slate-800 text-xs font-medium pb-2 gap-2">
+          <button onclick="setTab('curl')" id="tabBtnCurl" class="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">🌀 Ротор в 3D</button>
+          <button onclick="setTab('pot')" id="tabBtnPot" class="px-3 py-1 rounded-lg text-slate-400 hover:text-emerald-300 transition">⛰️ 3D Рельеф φ</button>
+          <button onclick="setTab('div')" id="tabBtnDiv" class="px-3 py-1 rounded-lg text-slate-400 hover:text-cyan-300 transition">🌋 Дивергенция</button>
+        </div>
+
+        <!-- TAB 1: 3D CURL & RIGHT-HAND RULE -->
+        <div id="tabContentCurl" class="flex flex-col gap-3 text-xs leading-relaxed">
+          <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-600/30 text-amber-200">
+            <b>Как видеть Ротор (Curl) в 3D:</b><br>
+            В 3D ротор — это не число, а <b>целый вектор</b> $\nabla \times \mathbf{F}$!  
+            Он указывает <b>ось вращения</b> микроскопической вертушки, а его длина равна интенсивности вращения (завихренности).
+          </div>
+
+          <div class="space-y-2 text-slate-300">
+            <p>
+              • <b>Правило буравчика (Правой руки):</b> Отставь большой палец правой руки вдоль вектора ротора $\nabla \times \mathbf{F}$ (янтарная стрелка вверх). Согнутые пальцы покажут, <b>куда именно крутится 3D вертушка</b> в плоскости, перпендикулярной этой стрелке!
+            </p>
+            <p>
+              • <b>Связь 2D и 3D:</b> Ротор обычного 2D поля — это просто $Z$-компонента 3D ротора: $\nabla \times \mathbf{F} = \langle 0, 0, \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y} \rangle$. Вектор торчит строго перпендикулярно плоскости рисунка!
+            </p>
+          </div>
+
+          <!-- 3D Tornado explanation -->
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
+            <span class="text-cyan-400 font-bold">🌪️ 3D Торнадо:</span>
+            <p class="mt-1 text-[11px] text-slate-400">
+              Поле $\mathbf{F} = \langle -y, x, 0.8 \rangle$ закручивает частицы в плоскости XY и поднимает их вверх по оси Z. Вектор ротора $\nabla \times \mathbf{F} = \langle 0, 0, 2 \rangle$ направлен вертикально вверх — это стержень смерча!
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 2: 3D POTENTIAL LANDSCAPE -->
+        <div id="tabContentPot" class="hidden flex flex-col gap-3 text-xs leading-relaxed">
+          <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-600/30 text-emerald-200">
+            <b>Как видеть Потенциал в 3D (Горы и Впадины):</b><br>
+            Если поле консервативно ($\operatorname{curl}\mathbf{F} = 0$), оно порождается скалярной функцией высоты: $\mathbf{F} = \nabla \phi$. 
+            Представь 3D гористую местность с холмами и оврагами!
+          </div>
+
+          <div class="space-y-2 text-slate-300">
+            <p>
+              • <b>Векторы силы скатываются с гор:</b> В каждой точке вектор силы $\mathbf{F}$ направлен <b>вдоль самого крутого подъема/спуска</b> 3D рельефа $\phi(x, y)$, строго перпендикулярно линиям уровня (горизонталям)!
+            </p>
+            <p>
+              • <b>Независимость от пути:</b> Высота, на которую ты поднялся из точки $A$ в точку $B$, равна $\phi(B) - \phi(A)$. Неважно, петлял ли ты по склонам или шел по прямой — итоговая разность высот одна и та же!
+            </p>
+            <p>
+              • <b>Замкнутый контур:</b> Если ты обошел гору по замкнутой тропинке и вернулся в исходную точку, итоговое изменение высоты строго равно 0 ($\oint_C \mathbf{F}\cdot d\mathbf{r} = 0$).
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 3: 3D DIVERGENCE -->
+        <div id="tabContentDiv" class="hidden flex flex-col gap-3 text-xs leading-relaxed">
+          <div class="p-3 rounded-xl bg-cyan-950/30 border border-cyan-600/30 text-cyan-200">
+            <b>Дивергенция в 3D (Сфера потока):</b><br>
+            Дивергенция $\nabla \cdot \mathbf{F}$ измеряет плотность источников. Окружи точку $\mathbf{a}$ трехмерной сферой.
+          </div>
+
+          <div class="space-y-2 text-slate-300">
+            <p>
+              • <b>div > 0 (Источник):</b> Векторы поля вылетают из сферы во все стороны, как лучи солнца или вода из рассеивателя душа. Сфера надувается!
+            </p>
+            <p>
+              • <b>div < 0 (Сток):</b> Поле всасывает пространство внутрь к точке, как гравитация черной дыры.
+            </p>
+            <p>
+              • <b>div = 0 (Несжимаемый поток):</b> Сколько потока вошло в сферу с одной стороны, столько же вышло с другой.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mathematical Derivations Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col gap-2">
+        <h4 class="text-xs font-bold text-slate-300 flex items-center justify-between">
+          <span>Символьные значения в точке a:</span>
+          <span class="text-purple-400">J<sub>F</sub> (Якобиан)</span>
+        </h4>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1.5 text-slate-300">
+          <div class="flex justify-between">
+            <span class="text-slate-500">∂P/∂x =</span>
+            <span id="mathDpx" class="text-cyan-300">0</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">∂P/∂y =</span>
+            <span id="mathDpy" class="text-cyan-300">-1</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">∂Q/∂x =</span>
+            <span id="mathDqx" class="text-cyan-300">1</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">∂Q/∂y =</span>
+            <span id="mathDqy" class="text-cyan-300">0</span>
+          </div>
+          <div class="border-t border-slate-800 pt-1.5 mt-1.5 flex justify-between font-bold">
+            <span class="text-amber-400">curl<sub>z</sub> = ∂Q/∂x - ∂P/∂y =</span>
+            <span id="mathCurlFormula" class="text-amber-300">2.00</span>
+          </div>
+          <div class="flex justify-between font-bold">
+            <span class="text-cyan-400">div = ∂P/∂x + ∂Q/∂y =</span>
+            <span id="mathDivFormula" class="text-cyan-300">0.00</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Interactive JavaScript 2D & 3D Engine -->
+  <script>
+    // State variables
+    let viewMode = "3d"; // "2d" or "3d"
+    let probe = { x: 1.5, y: 1.0, z: 0.0 };
+    let greenLoop = { cx: 0.0, cy: 0.0, r: 1.5 };
+    
+    // 3D Orbit Camera angles
+    let camera3D = {
+      yaw: -0.65,    // horizontal rotation
+      pitch: 0.52,   // vertical elevation
+      distance: 12.0,
+      zoom: 1.0
+    };
+
+    let field = {
+      P_str: "-y",
+      Q_str: "x",
+      R_str: "0.8",
+      P_fn: (x, y, z) => -y,
+      Q_fn: (x, y, z) => x,
+      R_fn: (x, y, z) => 0.8,
+      is_conservative: false,
+      is_3d_native: true,
+      phi_fn: null,
+      phi_formula: ""
+    };
+
+    let flags = {
+      particles: true,
+      wheel: true,
+      loop: true,
+      surface: true
+    };
+
+    let wheelAngle = 0;
+    let particles = [];
+    const NUM_PARTICLES = 600;
+    const DOMAIN = { xMin: -4.5, xMax: 4.5, yMin: -4.5, yMax: 4.5, zMin: -3.0, zMax: 4.0 };
+
+    // Canvas & Context
+    const canvas = document.getElementById("simCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      initParticles();
+    });
+
+    // 2D Screen Conversion
+    function toScreen2D(wx, wy) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = ((wx - DOMAIN.xMin) / (DOMAIN.xMax - DOMAIN.xMin)) * rect.width;
+      const sy = ((DOMAIN.yMax - wy) / (DOMAIN.yMax - DOMAIN.yMin)) * rect.height;
+      return { x: sx, y: sy };
+    }
+
+    function toWorld2D(sx, sy) {
+      const rect = canvas.getBoundingClientRect();
+      const wx = DOMAIN.xMin + (sx / rect.width) * (DOMAIN.xMax - DOMAIN.xMin);
+      const wy = DOMAIN.yMax - (sy / rect.height) * (DOMAIN.yMax - DOMAIN.yMin);
+      return { x: wx, y: wy };
+    }
+
+    // 3D Perspective Projection Engine (Software 3D, zero dependencies)
+    function project3D(x, y, z) {
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      // Rotate Yaw around Z axis
+      const cosY = Math.cos(camera3D.yaw);
+      const sinY = Math.sin(camera3D.yaw);
+      const x1 = x * cosY - y * sinY;
+      const y1 = x * sinY + y * cosY;
+      const z1 = z;
+
+      // Rotate Pitch around X axis
+      const cosP = Math.cos(camera3D.pitch);
+      const sinP = Math.sin(camera3D.pitch);
+      const y2 = y1 * cosP - z1 * sinP;
+      const z2 = y1 * sinP + z1 * cosP;
+      const x2 = x1;
+
+      // Perspective projection
+      const dist = camera3D.distance / camera3D.zoom;
+      const depth = dist + y2;
+      const fov = 420;
+      const scale = fov / Math.max(1.0, depth);
+
+      const sx = W / 2 + x2 * scale;
+      const sy = H / 2 - z2 * scale; // invert Z for screen Y
+
+      return { x: sx, y: sy, depth: depth, scale: scale };
+    }
+
+    // Derivatives for Curl & Divergence
+    function calcDerivatives(x, y, z = 0) {
+      const h = 0.001;
+      const p = field.P_fn(x, y, z);
+      const q = field.Q_fn(x, y, z);
+      const r = field.R_fn ? field.R_fn(x, y, z) : 0;
+      
+      const dP_dx = (field.P_fn(x + h, y, z) - field.P_fn(x - h, y, z)) / (2 * h);
+      const dP_dy = (field.P_fn(x, y + h, z) - field.P_fn(x, y - h, z)) / (2 * h);
+      const dP_dz = (field.P_fn(x, y, z + h) - field.P_fn(x, y, z - h)) / (2 * h);
+
+      const dQ_dx = (field.Q_fn(x + h, y, z) - field.Q_fn(x - h, y, z)) / (2 * h);
+      const dQ_dy = (field.Q_fn(x, y + h, z) - field.Q_fn(x, y - h, z)) / (2 * h);
+      const dQ_dz = (field.Q_fn(x, y, z + h) - field.Q_fn(x, y, z - h)) / (2 * h);
+
+      const dR_dx = field.R_fn ? (field.R_fn(x + h, y, z) - field.R_fn(x - h, y, z)) / (2 * h) : 0;
+      const dR_dy = field.R_fn ? (field.R_fn(x, y + h, z) - field.R_fn(x, y - h, z)) / (2 * h) : 0;
+      const dR_dz = field.R_fn ? (field.R_fn(x, y, z + h) - field.R_fn(x, y, z - h)) / (2 * h) : 0;
+
+      const curlX = dR_dy - dQ_dz;
+      const curlY = dP_dz - dR_dx;
+      const curlZ = dQ_dx - dP_dy;
+      const curlMag = Math.sqrt(curlX * curlX + curlY * curlY + curlZ * curlZ);
+
+      const div = dP_dx + dQ_dy + dR_dz;
+
+      return { p, q, r, dP_dx, dP_dy, dQ_dx, dQ_dy, curlX, curlY, curlZ, curlMag, div };
+    }
+
+    // Initialize 3D Flow Particles
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < NUM_PARTICLES; i++) {
+        particles.push({
+          x: DOMAIN.xMin + Math.random() * (DOMAIN.xMax - DOMAIN.xMin),
+          y: DOMAIN.yMin + Math.random() * (DOMAIN.yMax - DOMAIN.yMin),
+          z: (Math.random() - 0.5) * 4.0,
+          age: Math.random() * 120,
+          maxAge: 70 + Math.random() * 90,
+          speed: 0.8 + Math.random() * 0.7
+        });
+      }
+    }
+
+    // Preset Definitions
+    const PRESET_DEFS = {
+      tornado3d: {
+        P: "-y",
+        Q: "x",
+        R: "0.8",
+        p_fn: (x, y, z) => -y,
+        q_fn: (x, y, z) => x,
+        R_fn: (x, y, z) => 0.8,
+        is_cons: false,
+        phi_fn: null,
+        mode: "3d",
+        desc: "3D Торнадо: вихрь в плоскости XY и подъем по Z! Ротор = ⟨0, 0, 2⟩"
+      },
+      vortex: {
+        P: "-y",
+        Q: "x",
+        R: "0",
+        p_fn: (x, y, z) => -y,
+        q_fn: (x, y, z) => x,
+        R_fn: (x, y, z) => 0,
+        is_cons: false,
+        phi_fn: null,
+        mode: "3d",
+        desc: "Твердотельный вихрь: curl = 2 всюду!"
+      },
+      irrotational: {
+        P: "-y / (x*x + y*y + 0.12)",
+        Q: "x / (x*x + y*y + 0.12)",
+        R: "0",
+        p_fn: (x, y, z) => -y / (x*x + y*y + 0.12),
+        q_fn: (x, y, z) => x / (x*x + y*y + 0.12),
+        R_fn: (x, y, z) => 0,
+        is_cons: false,
+        phi_fn: null,
+        mode: "3d",
+        desc: "Ирротационный вихрь: curl ≈ 0 вне центра! Вертушка не крутится!"
+      },
+      conservative: {
+        P: "2 * x * y",
+        Q: "x * x",
+        R: "0",
+        p_fn: (x, y, z) => 2 * x * y,
+        q_fn: (x, y, z) => x * x,
+        R_fn: (x, y, z) => 0,
+        is_cons: true,
+        phi_fn: (x, y) => Math.max(-3.5, Math.min(3.5, 0.45 * x * x * y)),
+        phi_formula: "φ(x, y) = x² y",
+        mode: "3d",
+        desc: "Консервативное поле F = ∇(x² y): 3D рельеф ландшафта, curl = 0!"
+      },
+      source: {
+        P: "x",
+        Q: "y",
+        R: "z",
+        p_fn: (x, y, z) => x,
+        q_fn: (x, y, z) => y,
+        R_fn: (x, y, z) => z,
+        is_cons: true,
+        phi_fn: (x, y) => 0.25 * (x*x + y*y),
+        phi_formula: "φ(x, y, z) = ½(x² + y² + z²)",
+        mode: "3d",
+        desc: "3D Источник: div = 3, объем расширяется во всех 3 измерениях!"
+      },
+      saddle: {
+        P: "x",
+        Q: "-y",
+        R: "0",
+        p_fn: (x, y, z) => x,
+        q_fn: (x, y, z) => -y,
+        R_fn: (x, y, z) => 0,
+        is_cons: true,
+        phi_fn: (x, y) => 0.35 * (x*x - y*y),
+        phi_formula: "φ(x, y) = ½(x² - y²)",
+        mode: "3d",
+        desc: "Гиперболическое седло: сжатие по Y, растяжение по X!"
+      }
+    };
+
+    function loadPreset(key) {
+      const p = PRESET_DEFS[key];
+      if (!p) return;
+      document.getElementById("inputP").value = p.P;
+      document.getElementById("inputQ").value = p.Q;
+      document.getElementById("inputR").value = p.R;
+      field.P_str = p.P;
+      field.Q_str = p.Q;
+      field.R_str = p.R;
+      field.P_fn = p.p_fn;
+      field.Q_fn = p.q_fn;
+      field.R_fn = p.R_fn;
+      field.is_conservative = p.is_cons;
+      field.phi_fn = p.phi_fn;
+      field.phi_formula = p.phi_formula || "";
+      if (p.mode) setViewMode(p.mode);
+      initParticles();
+      updateHUD();
+    }
+
+    function applyCustomField() {
+      const pStr = document.getElementById("inputP").value;
+      const qStr = document.getElementById("inputQ").value;
+      const rStr = document.getElementById("inputR").value;
+
+      try {
+        const cleanP = pStr.replace(/\^/g, "**");
+        const cleanQ = qStr.replace(/\^/g, "**");
+        const cleanR = rStr.replace(/\^/g, "**");
+        field.P_fn = new Function("x", "y", "z", `with(Math) { return ${cleanP}; }`);
+        field.Q_fn = new Function("x", "y", "z", `with(Math) { return ${cleanQ}; }`);
+        field.R_fn = new Function("x", "y", "z", `with(Math) { return ${cleanR}; }`);
+        field.P_fn(1, 1, 0);
+        field.Q_fn(1, 1, 0);
+        field.R_fn(1, 1, 0);
+      } catch (e) {
+        alert("Ошибка в математической формуле: " + e.message);
+        return;
+      }
+
+      // Check conservative
+      let isCons = true;
+      for (let tx = -2; tx <= 2; tx += 1) {
+        for (let ty = -2; ty <= 2; ty += 1) {
+          const d = calcDerivatives(tx, ty, 0);
+          if (d.curlMag > 0.05) {
+            isCons = false;
+            break;
+          }
+        }
+      }
+      field.is_conservative = isCons;
+      initParticles();
+      updateHUD();
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      const btn2D = document.getElementById("btnView2D");
+      const btn3D = document.getElementById("btnView3D");
+      const hint = document.getElementById("controlHint");
+      if (mode === "3d") {
+        btn3D.className = "px-3 py-1 rounded-lg text-xs font-bold transition bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md";
+        btn2D.className = "px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+        hint.innerHTML = "🖱️ <b>Вращение 3D</b>: зажми и тяни мышь • <b>Колесо мыши</b>: зум • <b>Shift+Клик</b>: перемещение точки <b>a</b>";
+      } else {
+        btn2D.className = "px-3 py-1 rounded-lg text-xs font-bold transition bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md";
+        btn3D.className = "px-3 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+        hint.innerHTML = "🖱️ <b>Клик/Перетаскивание</b>: перемещение зонда <b>a</b> • <b>Колесо мыши</b>: радиус контура C";
+      }
+    }
+
+    // Toggle button functions
+    function toggleParticles() {
+      flags.particles = !flags.particles;
+      document.getElementById("particlesStatus").className = flags.particles ? "w-2 h-2 rounded-full bg-emerald-400" : "w-2 h-2 rounded-full bg-slate-600";
+    }
+    function toggleWheel() {
+      flags.wheel = !flags.wheel;
+      document.getElementById("wheelStatus").className = flags.wheel ? "w-2 h-2 rounded-full bg-amber-400" : "w-2 h-2 rounded-full bg-slate-600";
+    }
+    function toggleSurface() {
+      flags.surface = !flags.surface;
+      document.getElementById("surfaceStatus").className = flags.surface ? "w-2 h-2 rounded-full bg-purple-400" : "w-2 h-2 rounded-full bg-slate-600";
+    }
+    function toggleLoop() {
+      flags.loop = !flags.loop;
+      document.getElementById("loopStatus").className = flags.loop ? "w-2 h-2 rounded-full bg-pink-400" : "w-2 h-2 rounded-full bg-slate-600";
+    }
+    function centerLoopAtProbe() {
+      greenLoop.cx = probe.x;
+      greenLoop.cy = probe.y;
+      updateHUD();
+    }
+
+    // Tab switching for tutor
+    function setTab(name) {
+      const tabs = ["curl", "pot", "div"];
+      tabs.forEach(t => {
+        const content = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (t === name) {
+          content.classList.remove("hidden");
+          btn.className = "px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30";
+        } else {
+          content.classList.add("hidden");
+          btn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition";
+        }
+      });
+    }
+
+    // Mouse Interaction
+    let isDragging = false;
+    let lastMouse = { x: 0, y: 0 };
+
+    canvas.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      lastMouse = { x: e.clientX, y: e.clientY };
+
+      if (viewMode === "2d" || e.shiftKey) {
+        const rect = canvas.getBoundingClientRect();
+        const world = toWorld2D(e.clientX - rect.left, e.clientY - rect.top);
+        probe.x = Math.max(DOMAIN.xMin + 0.2, Math.min(DOMAIN.xMax - 0.2, world.x));
+        probe.y = Math.max(DOMAIN.yMin + 0.2, Math.min(DOMAIN.yMax - 0.2, world.y));
+        if (field.is_conservative && field.phi_fn) {
+          probe.z = field.phi_fn(probe.x, probe.y);
+        }
+        updateHUD();
+      }
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouse.x;
+      const dy = e.clientY - lastMouse.y;
+      lastMouse = { x: e.clientX, y: e.clientY };
+
+      if (viewMode === "3d" && !e.shiftKey) {
+        // Orbit 3D Camera
+        camera3D.yaw += dx * 0.008;
+        camera3D.pitch = Math.max(0.08, Math.min(1.45, camera3D.pitch + dy * 0.008));
+      } else {
+        // 2D or Shift-Drag Probe
+        const rect = canvas.getBoundingClientRect();
+        const world = toWorld2D(e.clientX - rect.left, e.clientY - rect.top);
+        probe.x = Math.max(DOMAIN.xMin + 0.2, Math.min(DOMAIN.xMax - 0.2, world.x));
+        probe.y = Math.max(DOMAIN.yMin + 0.2, Math.min(DOMAIN.yMax - 0.2, world.y));
+        if (field.is_conservative && field.phi_fn) {
+          probe.z = field.phi_fn(probe.x, probe.y);
+        }
+        updateHUD();
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (viewMode === "3d") {
+        camera3D.zoom = Math.max(0.5, Math.min(2.5, camera3D.zoom + (e.deltaY > 0 ? -0.1 : 0.1)));
+      } else {
+        greenLoop.r = Math.max(0.5, Math.min(3.0, greenLoop.r + (e.deltaY > 0 ? -0.1 : 0.1)));
+        document.getElementById("loopRadiusVal").textContent = greenLoop.r.toFixed(1);
+        updateHUD();
+      }
+    }, { passive: false });
+
+    // Numerical Line Integral & Green's comparison
+    function computeGreenLoop() {
+      const N = 200;
+      let work = 0;
+      let curlSum = 0;
+      const r = greenLoop.r;
+      const dt = (2 * Math.PI) / N;
+
+      for (let i = 0; i < N; i++) {
+        const t = i * dt;
+        const x = greenLoop.cx + r * Math.cos(t);
+        const y = greenLoop.cy + r * Math.sin(t);
+        
+        const dx = -r * Math.sin(t) * dt;
+        const dy = r * Math.cos(t) * dt;
+
+        let fx = 0, fy = 0;
+        try {
+          fx = field.P_fn(x, y, 0);
+          fy = field.Q_fn(x, y, 0);
+        } catch (e) {}
+
+        work += (fx * dx + fy * dy);
+      }
+
+      // 2D Numerical integration of curl over disk
+      const numRings = 15;
+      const numAngles = 24;
+      for (let i = 1; i <= numRings; i++) {
+        const curR = (i / numRings) * r;
+        const dr = r / numRings;
+        const ringArea = 2 * Math.PI * curR * dr;
+        let ringCurlAvg = 0;
+        for (let j = 0; j < numAngles; j++) {
+          const ang = (j / numAngles) * 2 * Math.PI;
+          const sx = greenLoop.cx + curR * Math.cos(ang);
+          const sy = greenLoop.cy + curR * Math.sin(ang);
+          const d = calcDerivatives(sx, sy, 0);
+          ringCurlAvg += d.curlZ;
+        }
+        ringCurlAvg /= numAngles;
+        curlSum += ringCurlAvg * ringArea;
+      }
+
+      return { work, greensIntegral: curlSum };
+    }
+
+    // Update HUD & Breakdown cards
+    function updateHUD() {
+      const pz = (field.is_conservative && field.phi_fn) ? field.phi_fn(probe.x, probe.y) : probe.z;
+      const d = calcDerivatives(probe.x, probe.y, pz);
+      document.getElementById("hudX").textContent = probe.x.toFixed(2);
+      document.getElementById("hudY").textContent = probe.y.toFixed(2);
+      document.getElementById("hudZ").textContent = pz.toFixed(2);
+      document.getElementById("hudFx").textContent = d.p.toFixed(2);
+      document.getElementById("hudFy").textContent = d.q.toFixed(2);
+      document.getElementById("hudFz").textContent = d.r.toFixed(2);
+
+      document.getElementById("hudCurlVal").textContent = d.curlMag.toFixed(3);
+      const curlDirBadge = document.getElementById("hudCurlDirection");
+      if (Math.abs(d.curlZ) > 0.05) {
+        curlDirBadge.textContent = d.curlZ > 0 ? "Вверх (+Z, CCW) ↺" : "Вниз (-Z, CW) ↻";
+        curlDirBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300";
+      } else if (d.curlMag > 0.05) {
+        curlDirBadge.textContent = `3D ось ⟨${d.curlX.toFixed(1)}, ${d.curlY.toFixed(1)}, ${d.curlZ.toFixed(1)}⟩`;
+        curlDirBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300";
+      } else {
+        curlDirBadge.textContent = "Безвихревое (Curl=0)";
+        curlDirBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-slate-700 text-slate-300";
+      }
+
+      document.getElementById("hudDivVal").textContent = d.div.toFixed(3);
+      const divTypeBadge = document.getElementById("hudDivType");
+      if (d.div > 0.05) {
+        divTypeBadge.textContent = "Источник (Source) 🌋";
+        divTypeBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300";
+      } else if (d.div < -0.05) {
+        divTypeBadge.textContent = "Сток (Sink) 🕳️";
+        divTypeBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-red-500/20 text-red-300";
+      } else {
+        divTypeBadge.textContent = "Несжимаемое (Solenoidal) 🌊";
+        divTypeBadge.className = "ml-1 text-[11px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300";
+      }
+
+      const consBadge = document.getElementById("hudConsText");
+      if (field.is_conservative || d.curlMag < 0.02) {
+        consBadge.innerHTML = "⚡ <b>Conservative</b> (F = ∇φ)";
+        consBadge.parentElement.className = "bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/50 text-xs font-mono text-emerald-300";
+      } else {
+        consBadge.innerHTML = "🚫 <b>Non-conservative</b> (curl ≠ 0)";
+        consBadge.parentElement.className = "bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-500/30 text-xs font-mono text-purple-200";
+      }
+
+      // Mathematical derivation card
+      document.getElementById("mathDpx").textContent = d.dP_dx.toFixed(2);
+      document.getElementById("mathDpy").textContent = d.dP_dy.toFixed(2);
+      document.getElementById("mathDqx").textContent = d.dQ_dx.toFixed(2);
+      document.getElementById("mathDqy").textContent = d.dQ_dy.toFixed(2);
+      document.getElementById("mathCurlFormula").textContent = `${d.dQ_dx.toFixed(2)} - (${d.dP_dy.toFixed(2)}) = ${d.curlZ.toFixed(2)}`;
+      document.getElementById("mathDivFormula").textContent = `${d.dP_dx.toFixed(2)} + (${d.dQ_dy.toFixed(2)}) = ${d.div.toFixed(2)}`;
+
+      // Line Integral update
+      const loopRes = computeGreenLoop();
+      document.getElementById("valWork").textContent = loopRes.work.toFixed(4);
+      document.getElementById("valGreens").textContent = loopRes.greensIntegral.toFixed(4);
+      const diff = Math.abs(loopRes.work - loopRes.greensIntegral);
+      document.getElementById("valDiff").textContent = diff.toFixed(4);
+      const verdict = document.getElementById("greensVerdict");
+      if (diff < 0.08) {
+        verdict.textContent = "✓ Полное совпадение! Теорема Грина подтверждена численно.";
+        verdict.className = "text-[11px] text-emerald-400 font-sans";
+      } else {
+        verdict.textContent = "Погрешность дискретизации или особенность в центре.";
+        verdict.className = "text-[11px] text-amber-400 font-sans";
+      }
+    }
+
+    // Main 60-FPS Render Loop
+    let lastTime = performance.now();
+    function render(currentTime) {
+      const dt = Math.min(0.04, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
+
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      // Clear Canvas
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, W, H);
+
+      const probeZ = (field.is_conservative && field.phi_fn) ? field.phi_fn(probe.x, probe.y) : probe.z;
+      const d = calcDerivatives(probe.x, probe.y, probeZ);
+
+      // =========================================================================
+      // RENDERING MODE: 3D PERSPECTIVE VIEW
+      // =========================================================================
+      if (viewMode === "3d") {
+        
+        // 1. Draw 3D Coordinate Grid Floor (XY Plane at z = 0)
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.12)";
+        ctx.lineWidth = 1;
+        const gridRange = 4.0;
+        const gridStep = 1.0;
+        for (let gx = -gridRange; gx <= gridRange; gx += gridStep) {
+          const p1 = project3D(gx, -gridRange, 0);
+          const p2 = project3D(gx, gridRange, 0);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        for (let gy = -gridRange; gy <= gridRange; gy += gridStep) {
+          const p1 = project3D(-gridRange, gy, 0);
+          const p2 = project3D(gridRange, gy, 0);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+
+        // 2. Draw 3D Axes (X red, Y green, Z purple)
+        const o3d = project3D(0, 0, 0);
+        const xAx = project3D(3.5, 0, 0);
+        const yAx = project3D(0, 3.5, 0);
+        const zAx = project3D(0, 0, 3.5);
+
+        // X axis
+        ctx.strokeStyle = "rgba(244, 63, 94, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(o3d.x, o3d.y); ctx.lineTo(xAx.x, xAx.y); ctx.stroke();
+        ctx.fillStyle = "#f43f5e"; ctx.font = "bold 11px monospace"; ctx.fillText("+X", xAx.x + 4, xAx.y);
+
+        // Y axis
+        ctx.strokeStyle = "rgba(52, 211, 153, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(o3d.x, o3d.y); ctx.lineTo(yAx.x, yAx.y); ctx.stroke();
+        ctx.fillStyle = "#34d399"; ctx.fillText("+Y", yAx.x + 4, yAx.y);
+
+        // Z axis
+        ctx.strokeStyle = "rgba(168, 85, 247, 0.8)";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(o3d.x, o3d.y); ctx.lineTo(zAx.x, zAx.y); ctx.stroke();
+        ctx.fillStyle = "#c084fc"; ctx.fillText("+Z (Curl Axis)", zAx.x + 4, zAx.y - 4);
+
+        // 3. Draw 3D Wireframe Potential Landscape Surface z = phi(x, y) if Conservative
+        if (field.is_conservative && field.phi_fn && flags.surface) {
+          ctx.strokeStyle = "rgba(139, 92, 246, 0.28)";
+          ctx.lineWidth = 1.2;
+          const sStep = 0.5;
+          const sMin = -3.5, sMax = 3.5;
+          for (let sx = sMin; sx <= sMax; sx += sStep) {
+            ctx.beginPath();
+            let first = true;
+            for (let sy = sMin; sy <= sMax; sy += 0.25) {
+              const sz = field.phi_fn(sx, sy);
+              const sp = project3D(sx, sy, sz);
+              if (first) { ctx.moveTo(sp.x, sp.y); first = false; }
+              else ctx.lineTo(sp.x, sp.y);
+            }
+            ctx.stroke();
+          }
+          for (let sy = sMin; sy <= sMax; sy += sStep) {
+            ctx.beginPath();
+            let first = true;
+            for (let sx = sMin; sx <= sMax; sx += 0.25) {
+              const sz = field.phi_fn(sx, sy);
+              const sp = project3D(sx, sy, sz);
+              if (first) { ctx.moveTo(sp.x, sp.y); first = false; }
+              else ctx.lineTo(sp.x, sp.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // 4. Update & Draw 3D Streamline Flow Particles
+        if (flags.particles) {
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            let fx = 0, fy = 0, fz = 0;
+            try {
+              fx = field.P_fn(p.x, p.y, p.z);
+              fy = field.Q_fn(p.x, p.y, p.z);
+              fz = field.R_fn ? field.R_fn(p.x, p.y, p.z) : 0;
+            } catch (e) {}
+
+            p.x += fx * dt * p.speed * 1.5;
+            p.y += fy * dt * p.speed * 1.5;
+            p.z += fz * dt * p.speed * 1.5;
+            p.age += 1;
+
+            if (p.age > p.maxAge || p.x < DOMAIN.xMin || p.x > DOMAIN.xMax || p.y < DOMAIN.yMin || p.y > DOMAIN.yMax || p.z < DOMAIN.zMin || p.z > DOMAIN.zMax || isNaN(p.x)) {
+              p.x = DOMAIN.xMin + Math.random() * (DOMAIN.xMax - DOMAIN.xMin);
+              p.y = DOMAIN.yMin + Math.random() * (DOMAIN.yMax - DOMAIN.yMin);
+              p.z = (Math.random() - 0.5) * 3.5;
+              p.age = 0;
+            }
+
+            const sp = project3D(p.x, p.y, p.z);
+            const alpha = Math.sin((p.age / p.maxAge) * Math.PI) * 0.8;
+            ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`;
+            const sz = Math.max(1.5, Math.min(4.0, sp.scale * 0.08));
+            ctx.fillRect(sp.x - sz/2, sp.y - sz/2, sz, sz);
+          }
+        }
+
+        // 5. Draw 3D Closed Loop Curve C
+        if (flags.loop) {
+          const numSegments = 48;
+          const dTheta = (2 * Math.PI) / numSegments;
+          for (let i = 0; i < numSegments; i++) {
+            const th1 = i * dTheta;
+            const th2 = (i + 1) * dTheta;
+            const wx1 = greenLoop.cx + greenLoop.r * Math.cos(th1);
+            const wy1 = greenLoop.cy + greenLoop.r * Math.sin(th1);
+            const wx2 = greenLoop.cx + greenLoop.r * Math.cos(th2);
+            const wy2 = greenLoop.cy + greenLoop.r * Math.sin(th2);
+
+            const wz1 = (field.is_conservative && field.phi_fn) ? field.phi_fn(wx1, wy1) + 0.08 : 0.05;
+            const wz2 = (field.is_conservative && field.phi_fn) ? field.phi_fn(wx2, wy2) + 0.08 : 0.05;
+
+            const midX = (wx1 + wx2) / 2;
+            const midY = (wy1 + wy2) / 2;
+            const fx = field.P_fn(midX, midY, 0);
+            const fy = field.Q_fn(midX, midY, 0);
+            const dotWork = fx * (wx2 - wx1) + fy * (wy2 - wy1);
+
+            const p1 = project3D(wx1, wy1, wz1);
+            const p2 = project3D(wx2, wy2, wz2);
+
+            ctx.strokeStyle = dotWork >= 0 ? "#10b981" : "#f43f5e";
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        // 6. Draw 3D Probe Point a & Vertical Ground Stem
+        const probeStemGround = project3D(probe.x, probe.y, 0);
+        const probeSp = project3D(probe.x, probe.y, probeZ);
+
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.4)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(probeStemGround.x, probeStemGround.y);
+        ctx.lineTo(probeSp.x, probeSp.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 7. Draw 3D Divergence Bubble (Wireframe Sphere)
+        if (Math.abs(d.div) > 0.05) {
+          const bubRad = 0.55 + Math.sin(currentTime * 0.005) * 0.12;
+          const bubCol = d.div > 0 ? "rgba(16, 185, 129, 0.5)" : "rgba(239, 68, 68, 0.5)";
+          ctx.strokeStyle = bubCol;
+          ctx.lineWidth = 1.8;
+          // Draw 3 orthogonal rings in 3D
+          const nR = 24;
+          for (let plane = 0; plane < 3; plane++) {
+            ctx.beginPath();
+            for (let i = 0; i <= nR; i++) {
+              const th = (i / nR) * 2 * Math.PI;
+              let rx = 0, ry = 0, rz = 0;
+              if (plane === 0) { rx = bubRad * Math.cos(th); ry = bubRad * Math.sin(th); }
+              else if (plane === 1) { rx = bubRad * Math.cos(th); rz = bubRad * Math.sin(th); }
+              else { ry = bubRad * Math.cos(th); rz = bubRad * Math.sin(th); }
+              const rp = project3D(probe.x + rx, probe.y + ry, probeZ + rz);
+              if (i === 0) ctx.moveTo(rp.x, rp.y); else ctx.lineTo(rp.x, rp.y);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // 8. Draw 3D Vertical Curl Vector ∇ × F & Rotating 3D Paddle Wheel
+        if (flags.wheel) {
+          const curlVal = Math.abs(d.curlZ) > 0.01 ? d.curlZ : d.curlMag;
+          wheelAngle += curlVal * 0.8 * dt;
+
+          if (d.curlMag > 0.05) {
+            // Draw 3D Curl Vector Arrow pointing along axis of rotation
+            const curlLen = Math.min(2.5, Math.max(0.8, d.curlMag * 0.7));
+            const cAxis = d.curlMag > 0.01 ? { x: d.curlX / d.curlMag, y: d.curlY / d.curlMag, z: d.curlZ / d.curlMag } : { x: 0, y: 0, 1 };
+            const curlTip = project3D(probe.x + cAxis.x * curlLen, probe.y + cAxis.y * curlLen, probeZ + cAxis.z * curlLen);
+
+            ctx.strokeStyle = "#f59e0b";
+            ctx.lineWidth = 4.0;
+            ctx.beginPath();
+            ctx.moveTo(probeSp.x, probeSp.y);
+            ctx.lineTo(curlTip.x, curlTip.y);
+            ctx.stroke();
+
+            // Diamond marker at tip
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.arc(curlTip.x, curlTip.y, 5.5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 3D Paddle Wheel in plane perpendicular to curl axis
+            const wheelRadius = 0.85;
+            const numBlades = 4;
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 2.5;
+
+            // Draw wheel rim
+            ctx.beginPath();
+            for (let i = 0; i <= 32; i++) {
+              const th = (i / 32) * 2 * Math.PI;
+              const wx = wheelRadius * Math.cos(th);
+              const wy = wheelRadius * Math.sin(th);
+              const wp = project3D(probe.x + wx, probe.y + wy, probeZ);
+              if (i === 0) ctx.moveTo(wp.x, wp.y); else ctx.lineTo(wp.x, wp.y);
+            }
+            ctx.stroke();
+
+            // Draw rotating blades
+            for (let b = 0; b < numBlades; b++) {
+              const bang = wheelAngle + (b * Math.PI) / 2;
+              const bx = wheelRadius * Math.cos(bang);
+              const by = wheelRadius * Math.sin(bang);
+              const bp = project3D(probe.x + bx, probe.y + by, probeZ);
+              ctx.beginPath();
+              ctx.moveTo(probeSp.x, probeSp.y);
+              ctx.lineTo(bp.x, bp.y);
+              ctx.stroke();
+            }
+
+            // Curl Vector Label
+            ctx.fillStyle = "#fde68a";
+            ctx.font = "bold 12px monospace";
+            ctx.fillText(`∇×F (Curl = ${d.curlMag.toFixed(2)})`, curlTip.x + 8, curlTip.y - 4);
+          }
+        }
+
+        // 9. Draw Evaluation Force Vector F(a)
+        const fMag = Math.sqrt(d.p * d.p + d.q * d.q + d.r * d.r);
+        if (fMag > 1e-4) {
+          const fLen = Math.min(2.0, Math.max(0.6, fMag * 0.5));
+          const fTip = project3D(probe.x + (d.p / fMag) * fLen, probe.y + (d.q / fMag) * fLen, probeZ + (d.r / fMag) * fLen);
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(probeSp.x, probeSp.y);
+          ctx.lineTo(fTip.x, fTip.y);
+          ctx.stroke();
+
+          ctx.fillStyle = "#38bdf8";
+          ctx.beginPath();
+          ctx.arc(fTip.x, fTip.y, 4.5, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+
+        // 10. Draw Probe Marker
+        ctx.fillStyle = "#ec4899";
+        ctx.beginPath();
+        ctx.arc(probeSp.x, probeSp.y, 6.5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(`a (${probe.x.toFixed(2)}, ${probe.y.toFixed(2)}, ${probeZ.toFixed(2)})`, probeSp.x + 10, probeSp.y + 4);
+
+      // =========================================================================
+      // RENDERING MODE: 2D FLAT VIEW
+      // =========================================================================
+      } else {
+        // Draw 2D Grid & Axes
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.08)";
+        ctx.lineWidth = 1;
+        for (let x = Math.ceil(DOMAIN.xMin); x <= Math.floor(DOMAIN.xMax); x++) {
+          const s = toScreen2D(x, 0);
+          ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, H); ctx.stroke();
+        }
+        for (let y = Math.ceil(DOMAIN.yMin); y <= Math.floor(DOMAIN.yMax); y++) {
+          const s = toScreen2D(0, y);
+          ctx.beginPath(); ctx.moveTo(0, s.y); ctx.lineTo(W, s.y); ctx.stroke();
+        }
+
+        const origin = toScreen2D(0, 0);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, origin.y); ctx.lineTo(W, origin.y);
+        ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, H);
+        ctx.stroke();
+
+        // 2D Streamline Particles
+        if (flags.particles) {
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            let fx = field.P_fn(p.x, p.y, 0);
+            let fy = field.Q_fn(p.x, p.y, 0);
+            p.x += fx * dt * p.speed * 1.5;
+            p.y += fy * dt * p.speed * 1.5;
+            p.age += 1;
+
+            if (p.age > p.maxAge || p.x < DOMAIN.xMin || p.x > DOMAIN.xMax || p.y < DOMAIN.yMin || p.y > DOMAIN.yMax) {
+              p.x = DOMAIN.xMin + Math.random() * (DOMAIN.xMax - DOMAIN.xMin);
+              p.y = DOMAIN.yMin + Math.random() * (DOMAIN.yMax - DOMAIN.yMin);
+              p.age = 0;
+            }
+
+            const sp = toScreen2D(p.x, p.y);
+            const alpha = Math.sin((p.age / p.maxAge) * Math.PI) * 0.75;
+            ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`;
+            ctx.fillRect(sp.x - 1, sp.y - 1, 2.5, 2.5);
+          }
+        }
+
+        // 2D Closed Loop C
+        if (flags.loop) {
+          const loopCenter = toScreen2D(greenLoop.cx, greenLoop.cy);
+          const radiusScreen = (greenLoop.r / (DOMAIN.xMax - DOMAIN.xMin)) * W;
+          ctx.fillStyle = "rgba(168, 85, 247, 0.06)";
+          ctx.beginPath();
+          ctx.arc(loopCenter.x, loopCenter.y, radiusScreen, 0, 2 * Math.PI);
+          ctx.fill();
+
+          const numSegments = 60;
+          const dTheta = (2 * Math.PI) / numSegments;
+          for (let i = 0; i < numSegments; i++) {
+            const th1 = i * dTheta;
+            const th2 = (i + 1) * dTheta;
+            const wx1 = greenLoop.cx + greenLoop.r * Math.cos(th1);
+            const wy1 = greenLoop.cy + greenLoop.r * Math.sin(th1);
+            const wx2 = greenLoop.cx + greenLoop.r * Math.cos(th2);
+            const wy2 = greenLoop.cy + greenLoop.r * Math.sin(th2);
+
+            const midX = (wx1 + wx2) / 2;
+            const midY = (wy1 + wy2) / 2;
+            const fx = field.P_fn(midX, midY, 0);
+            const fy = field.Q_fn(midX, midY, 0);
+            const dotWork = fx * (wx2 - wx1) + fy * (wy2 - wy1);
+
+            const p1 = toScreen2D(wx1, wy1);
+            const p2 = toScreen2D(wx2, wy2);
+
+            ctx.strokeStyle = dotWork >= 0 ? "#10b981" : "#f43f5e";
+            ctx.lineWidth = 3.2;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        // 2D Divergence Bubble
+        const probeScreen = toScreen2D(probe.x, probe.y);
+        if (Math.abs(d.div) > 0.05) {
+          const bubbleRad = 28 + Math.sin(currentTime * 0.005) * 6;
+          ctx.strokeStyle = d.div > 0 ? "rgba(16, 185, 129, 0.65)" : "rgba(239, 68, 68, 0.65)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(probeScreen.x, probeScreen.y, bubbleRad, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+
+        // 2D Paddle Wheel
+        if (flags.wheel) {
+          wheelAngle += d.curlZ * 0.8 * dt;
+          const wheelRadius = 38;
+          ctx.strokeStyle = Math.abs(d.curlZ) < 0.05 ? "#94a3b8" : (d.curlZ > 0 ? "#f59e0b" : "#ec4899");
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(probeScreen.x, probeScreen.y, wheelRadius, 0, 2 * Math.PI);
+          ctx.stroke();
+
+          for (let b = 0; b < 4; b++) {
+            const bladeAng = wheelAngle + (b * Math.PI) / 2;
+            const bx = probeScreen.x + wheelRadius * Math.cos(bladeAng);
+            const by = probeScreen.y + wheelRadius * Math.sin(bladeAng);
+            ctx.beginPath();
+            ctx.moveTo(probeScreen.x, probeScreen.y);
+            ctx.lineTo(bx, by);
+            ctx.stroke();
+          }
+        }
+
+        // 2D Probe Marker
+        ctx.fillStyle = "#ec4899";
+        ctx.beginPath();
+        ctx.arc(probeScreen.x, probeScreen.y, 6.5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(`a (${probe.x.toFixed(2)}, ${probe.y.toFixed(2)})`, probeScreen.x + 12, probeScreen.y + 4);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // Startup Initialization
+    resizeCanvas();
+    loadPreset("tornado3d");
+    requestAnimationFrame(render);
+  </script>
+
+</body>
+</html>
