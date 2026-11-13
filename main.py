@@ -10,6 +10,8 @@ def _():
     import math
     import os
     import re
+    import warnings
+    warnings.filterwarnings("ignore", category=SyntaxWarning)
     import anywidget
     from google import genai
     from google.genai import types
@@ -2451,4 +2453,35 @@ def _(anywidget, genai, json, math, mo, np, os, re, traitlets, types):
 
 
 if __name__ == "__main__":
-    app.run()
+    import argparse
+    import os
+    import subprocess
+    import sys
+
+    parser = argparse.ArgumentParser(description="Vector Field & Flow 3D/2D Studio")
+    parser.add_argument("--host", default="127.0.0.1", help="Host interface")
+    parser.add_argument("--port", type=int, default=8000, help="Port number")
+    parser.add_argument("--no-browser", action="store_true", help="Do not open browser")
+    parser.add_argument("--marimo-edit", action="store_true", help="Open in Marimo edit mode")
+    args, _ = parser.parse_known_args()
+
+    actual_port = int(os.environ.get("PORT", args.port))
+    mode = "edit" if args.marimo_edit else "run"
+    cmd = [
+        sys.executable,
+        "-m",
+        "marimo",
+        mode,
+        os.path.abspath(__file__),
+        "--host",
+        args.host,
+        "--port",
+        str(actual_port),
+    ]
+    if args.no_browser or os.environ.get("PORT"):
+        cmd.append("--headless")
+    if not args.marimo_edit:
+        cmd.append("--no-token")
+
+    raise SystemExit(subprocess.call(cmd))
+
