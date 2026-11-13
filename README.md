@@ -1,55 +1,57 @@
-# 🌌 MultivarGrapher 3D — 100% Marimo Reactive Calculus & Linear Algebra Suite
+# 🧭 Desmos 3D Multivariable Calculus — AI Sandbox (Marimo)
 
-An interactive multivariable calculus, linear algebra, and constrained 3D surface visualizer powered natively by **[marimo](https://github.com/marimo-team/marimo)** (`app.py` + `calculus_engine.py` + `custom.css`).
-
-- ⚡ **Launch Reactive Marimo App**: `python main.py` or `marimo run app.py`
-- ✏️ **Open Marimo Reactive Editor**: `python main.py --marimo-edit` or `marimo edit app.py`
-- 🌐 **Render Web Service** (Auto Gemini AI with `GEMINI_API_KEY`): Ready to deploy with `render.yaml`!
-- 📦 **Legacy HTML/JS/CSS Backup**: Preserved safely in [`legacy_backup/`](legacy_backup/) (`index.html`, `styles.css`, `app.js`).
+Минималистичный интерактивный визуализатор и AI-калькулятор для курса **Multivariable Calculus** (в духе **Desmos 3D** и интерактивных иллюстраций [BS101 Lecture 14](https://cscarinci.github.io/bs101-fall26/Lecture_14/)), построенный на реактивном фреймворке **Marimo**, **Plotly WebGL** и **Google Gemini API (`google-genai`)**.
 
 ---
 
-## ✨ Architecture & Features
+## 📦 Установка зависимостей
 
-### 1. ⚡ 100% Reactive Marimo Application (`app.py` + `calculus_engine.py`)
-- **Pure Reactive Dataflow DAG**: Every slider, preset selector, constraint chip, and AI Tutor action automatically updates the underlying reactive state (`mo.state` + `mo.query_params`) and re-renders the 2D/3D Plotly figures and symbolic LaTeX derivations in real time.
-- **5 Dedicated Interactive Tabs + Global Sidebar**:
-  1. **🏛️ Function & Constraints**: 17 built-in presets, custom formulas, matrices in $\mathbb{R}^2/\mathbb{R}^3$, vector fields, and 1-click free-variable cylinder chips.
-  2. **🎯 Level Set & Point $\mathbf{a}$**: Level constant $c$ & radius $r = \sqrt{c}$ sync, **Snap Point $\mathbf{a}$ to Level Curve**, **Snap to Critical Point ($\nabla f = \mathbf{0}$)**, and Total Derivative row matrix $\mathbf{D}f(\mathbf{a})$.
-  3. **📐 Affine Plane & Normal**: Best first-order linear approximation $g(\mathbf{x}) = f(\mathbf{a}) + \mathbf{D}f(\mathbf{a})(\mathbf{x} - \mathbf{a})$, 2D/3D orthogonal normal vectors ($90^\circ$ right-angle marker), and Taylor linearization error calculator at $\mathbf{x}_{\text{test}}$.
-  4. **🔍 Hessian & Extrema**: Symbolic and numeric Hessian matrix $\mathbf{H}_f(\mathbf{a})$, eigenvalues $\lambda_i$, trace, discriminant $D = f_{11}f_{22} - f_{12}^2$, and Second Derivative Test classification.
-  5. **🤖 AI Calculus Tutor**: Powered by `gemini-3.5-flash-lite` (with automatic Offline Calculus Engine fallback). Supports 1-click and natural-language **Auto Graph Actions** that configure functions, constraints, and 3D views automatically (with raw JSON code blocks cleanly hidden from chat).
-
-### 2. 🏛️ Optional Requirements & Free-Variable 3D Cylinders
-- Enter any equality or inequality requirement in the **Optional Requirement / Domain Constraint** box:
-  - Example: `F(x1, x2, x3) = [x1; x2; x3]` with requirement `x1^2/4 + x2 = 1` or `x1^2/4 + x2^2/9 = 1`.
-  - Because $x_3$ is a free variable ($x_3 \in (-\infty, \infty)$), the engine automatically extrudes the 2D Marching-Squares curve along the vertical $x_3$-axis to render a **3D Parabolic or Elliptic Cylinder**!
-
-### 3. 🧊 Matrices & Vector Fields in $\mathbb{R}^2$ and $\mathbb{R}^3$
-- Enter $2 \times 2$ matrices (e.g. `[2, 1; 1, 2]`) or $3 \times 3$ matrices (e.g. `[1, 2, 3; 4, 5, 6; 7, 8, 9]`) to visualize transformed basis arrows $\mathbf{A}\mathbf{e}_i$, evaluation vector $\mathbf{a} \mapsto \mathbf{A}\mathbf{a}$, unit sphere/circle deformation, determinant $\det(\mathbf{A})$, trace, and eigenvalues.
-
-### 4. 🎬 Interactive 3D Animations
-- **360° Camera Orbit**, **Animated Level Slice $c(t)$**, and **Gliding Point $\mathbf{a}(t)$** with dynamic tangent planes built directly into the Plotly WebGL viewport.
-
----
-
-## 💻 Run Locally
+Требуется **Python 3.11+**. Установите пакеты одной командой:
 
 ```bash
-# 1. Install dependencies
 pip install -r requirements.txt
-
-# 2. Launch the reactive Marimo web app (default)
-python main.py
-
-# Or run directly with the marimo CLI:
-marimo run app.py
 ```
+*(или напрямую: `pip install marimo plotly numpy sympy google-genai`)*
 
-### Additional CLI Commands
+---
+
+## 🚀 Запуск приложения
+
+1. **Запуск в режиме чистого веб-приложения (Desmos-стиль, без кода):**
+   ```bash
+   marimo run main.py
+   ```
+2. **Запуск в режиме интерактивного редактора ячеек Marimo:**
+   ```bash
+   marimo edit main.py
+   ```
+
+*(Опционально)* Вы можете задать переменную окружения `GEMINI_API_KEY` перед запуском или ввести ключ прямо в компактное поле `🔑 Gemini API Key` в правом верхнем углу интерфейса:
 ```bash
-python main.py --marimo-edit     # Open Marimo notebook editor
-python main.py --export-marimo   # Export standalone HTML snapshots (index.html & marimo_app.html)
-python main.py --legacy-server   # Serve the backed-up vanilla HTML/JS/CSS version from legacy_backup/
-python test_grapher.py           # Run the full verification test suite
+# Windows PowerShell
+$env:GEMINI_API_KEY="ваш_ключ"
+marimo run main.py
 ```
+
+---
+
+## ✨ Архитектура и возможности
+
+1. **Минималистичный UI (Lecture 14 / Desmos 3D):**
+   - Никаких перегруженных панелей: сверху строка естественного/формульного запроса и селектор пресетов, по центру — светлое реактивное 3D-полотно (`plotly_white`, матовая голубая поверхность с координатной сеткой на многообразии, оси $x^1, x^2, y = f(\vec{x})$ и контрастные линии сечений), снизу — динамические слайдеры параметра ($c$, $t$, $N$, $r$) и точки $a_1$.
+2. **Двухуровневая система (Локальный парсер + Gemini AI):**
+   - **Уровень 1 (Мгновенный локальный парсер):** выражения вида `x1^2 - x2^2`, `sin(x1)*cos(x2)` и типовые команды на русском/английском строятся мгновенно без сетевых задержек и работают даже без API-ключа.
+   - **Уровень 2 (Gemini AI Agent):** при наличии `GEMINI_API_KEY` нетривиальные запросы на естественном языке транслируются через `google-genai` (`gemini-3.8-flash`) в строгую JSON-спецификацию сцены с безопасным фоллбэком.
+3. **Встроенные темы курса (Out-of-the-Box пресеты):**
+   - **Lecture 14 Level Sets ($y = f(\vec{x}) = c$):** Горизонтальная секущая плоскость $y = c$, линия уровня на поверхности и проекция точки $\vec{a} \mapsto \vec{b}$.
+   - **Slices & Traces ($x_2 = \text{const}$):** Фиксация переменной и след поверхности (trace curve).
+   - **Tangent Plane & Gradient ($\nabla f$):** Касательная плоскость в точке $(a_1, a_2)$ и вектор градиента.
+   - **Vector Fields & Flow ($\mathbf{r}(t)$):** Поле скоростей $\mathbf{F}(x_1, x_2)$ и численно проинтегрированная (RK4) линия тока $\mathbf{r}(t)$.
+   - **Double Integrals (3D Riemann Prisms):** Аппроксимация объема $N \times N$ трехмерными призмами Римана со сравнением с точным интегралом.
+   - **Open Balls & Boundaries ($B_r(\mathbf{a})$):** Открытая окрестность радиуса $r$ с пунктирной границей $\partial B_r(\mathbf{a})$ и ее образом на поверхности.
+
+---
+
+## 🗄️ Резервные копии предыдущих версий
+- `studio_backup/` — полная резервная копия предыдущей многопанельной версии (`app.py`, `calculus_engine.py`, `custom.css` и др.).
+- `legacy_backup/` — резервная копия классической HTML/JS/CSS версии.
